@@ -53,12 +53,12 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   return (
     <aside className="flex h-full flex-col border-r bg-sidebar-background">
       <div className="flex h-14 items-center border-b px-4">
-        <span className="text-lg font-bold text-white">Atlas</span>
+        <span className="text-lg font-bold text-primary">Atlas</span>
       </div>
       <nav className="flex-1 overflow-auto p-3">
         {navGroups.map((group) => (
           <div key={group.title} className="mb-4">
-            <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+            <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {group.title}
             </p>
             <div className="space-y-1">
