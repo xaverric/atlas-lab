@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import {
   Upload, FolderPlus, RefreshCw, Info, Pencil, Globe, Lock, Trash2, Folder,
 } from 'lucide-react';
@@ -22,6 +21,7 @@ import { MoveDialog } from '@/components/files/move-dialog';
 import { FolderInfoPanel } from '@/components/files/folder-info-panel';
 import { SearchBar } from '@/components/files/search-bar';
 import { BreadcrumbNav } from '@/components/files/breadcrumb-nav';
+import { UploadModal } from '@/components/files/upload-modal';
 
 interface FolderItem {
   id: string;
@@ -71,6 +71,7 @@ export default function FilesPage() {
   const [renamingFolder, setRenamingFolder] = useState<string | null>(null);
   const [renameFolderName, setRenameFolderName] = useState('');
   const [breadcrumb, setBreadcrumb] = useState<{ id: string; name: string }[]>([]);
+  const [showUpload, setShowUpload] = useState(false);
 
   const [filters, setFilters] = useState({
     search: '',
@@ -439,13 +440,13 @@ export default function FilesPage() {
                 <FolderPlus className="h-4 w-4" />
                 <span className="hidden sm:inline">New Folder</span>
               </button>
-              <Link
-                href={`/files/upload${folderId ? `?folderId=${folderId}` : ''}`}
+              <button
+                onClick={() => setShowUpload(true)}
                 className="flex items-center gap-2 rounded-md bg-primary px-3 sm:px-4 py-2 text-sm font-medium text-primary-foreground active:bg-primary/90"
               >
                 <Upload className="h-4 w-4" />
                 <span className="hidden sm:inline">Upload</span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -633,6 +634,17 @@ export default function FilesPage() {
         <FolderInfoPanel
           folderId={infoFolderId}
           onClose={() => setInfoFolderId(null)}
+        />
+      )}
+
+      {showUpload && (
+        <UploadModal
+          folderId={folderId}
+          onClose={() => setShowUpload(false)}
+          onComplete={() => {
+            setShowUpload(false);
+            refreshAll();
+          }}
         />
       )}
     </div>
