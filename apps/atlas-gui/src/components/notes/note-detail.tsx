@@ -229,31 +229,16 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
               </div>
             </div>
 
-            <div className="rounded-md border p-6">
-              <NoteViewer html={html} />
-            </div>
-
-            <AttachmentPanel
-              noteId={noteId}
-              editable={false}
-              onAttach={() => {}}
-              refreshKey={attachmentRefreshKey}
-            />
-
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            {/* Metadata bar — above content */}
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               {note && note.tags.length > 0 && (
-                <div className="flex items-center gap-2">
-                  <span>Tags:</span>
-                  <div className="flex gap-1">
-                    {note.tags.map((tag) => (
-                      <span key={tag} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex items-center gap-1.5">
+                  {note.tags.map((tag) => (
+                    <span key={tag} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium">{tag}</span>
+                  ))}
                 </div>
               )}
-              <span>Folder: {folderName}</span>
+              <span className="text-xs">{folderName}</span>
               {note?.isPublic && (
                 <>
                   <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">Public</span>
@@ -265,12 +250,23 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
                     }}
                     className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <Link className="h-3 w-3" /> Copy public link
+                    <Link className="h-3 w-3" /> Copy link
                   </button>
                 </>
               )}
-              {note && <span>Updated: {formatDate(note.updatedAt)}</span>}
+              {note && <span className="text-xs">Updated {formatDate(note.updatedAt)}</span>}
             </div>
+
+            <div className="rounded-md border p-6">
+              <NoteViewer html={html} />
+            </div>
+
+            <AttachmentPanel
+              noteId={noteId}
+              editable={false}
+              onAttach={() => {}}
+              refreshKey={attachmentRefreshKey}
+            />
 
             {showFilePicker && note && (
               <FilePickerDialog
