@@ -88,8 +88,10 @@ export function CodeMirrorViewer({
         viewRef.current = null;
       }
 
+      const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
       const extensions = [
-        oneDark,
+        ...(isDark ? [oneDark] : []),
         lineNumbers(),
         EditorState.readOnly.of(true),
         EditorView.theme({

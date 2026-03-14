@@ -1,6 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { useEffect } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import LinkExt from '@tiptap/extension-link';
@@ -43,6 +44,15 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
       },
     },
   });
+
+  useEffect(() => {
+    if (editor && !editor.isDestroyed) {
+      const currentHtml = editor.getHTML();
+      if (currentHtml !== content) {
+        editor.commands.setContent(content, false);
+      }
+    }
+  }, [editor, content]);
 
   return (
     <div className="overflow-hidden rounded-md border bg-background">

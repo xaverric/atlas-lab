@@ -94,8 +94,10 @@ export function CodeMirrorEditor({
         viewRef.current = null;
       }
 
+      const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
       const extensions = [
-        oneDark,
+        ...(isDark ? [oneDark] : []),
         lineNumbers(),
         keymap.of([...defaultKeymap, indentWithTab]),
         EditorView.theme({
