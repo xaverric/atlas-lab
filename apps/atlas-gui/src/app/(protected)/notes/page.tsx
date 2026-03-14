@@ -13,6 +13,8 @@ import { formatSize, formatDate } from '@/lib/utils';
 import { VisibilityBadge } from '@/components/shared/visibility-badge';
 import { SearchBar } from '@/components/notes/search-bar';
 import { NoteDetail } from '@/components/notes/note-detail';
+import { NoteContextMenu } from '@/components/notes/context-menu';
+import { Link as LinkIcon, FolderInput, Info } from 'lucide-react';
 
 interface FolderItem {
   id: string;
@@ -77,6 +79,7 @@ export default function NotesPage() {
   const [showFolderSettings, setShowFolderSettings] = useState(false);
   const [editingFolderName, setEditingFolderName] = useState(false);
   const [folderNameDraft, setFolderNameDraft] = useState('');
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: { icon: any; label: string; action: () => void; destructive?: boolean }[] } | null>(null);
 
   const loadFolderDetail = useCallback(async () => {
     if (!folderId) { setCurrentFolder(null); return; }
@@ -229,6 +232,40 @@ export default function NotesPage() {
       setSelectedIds(new Set());
       loadNotes(page);
     } catch { toast.error('Failed to delete some notes'); }
+  };
+
+  const openFolderMenu = (e: React.MouseEvent, folder: FolderItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isPublic = folder.visibility === 'public';
+    setCtxMenu({
+      x: e.clientX, y: e.clientY,
+      items: [
+        { icon: Eye, label: 'Open', action: () => navigateToFolder(folder.id) },
+        { icon: Pencil, label: 'Rename', action: () => { const name = prompt('Rename folder:', folder.name); if (name?.trim()) handleRenameFolder(folder.id, name.trim()); } },
+        { icon: isPublic ? Lock : Globe, label: isPublic ? 'Make Private' : 'Make Public', action: () => handleTogglePublic(folder.id, !isPublic) },
+        ...(isPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => { navigator.clipboard.writeText(`${window.location.origin}/public/notes/folders/${folder.id}`); toast.success('Public link copied'); } }] : []),
+        { icon: Bot, label: folder.aiAccessible ? 'Disable AI' : 'Enable AI', action: () => handleToggleAi(folder.id, folder.aiAccessible) },
+        { icon: FolderInput, label: 'Move to...', action: () => { const target = prompt('Move to folder ID (or empty for root):'); if (target !== null) { api(`/api/v1/notes/folders/${folder.id}`, { method: 'PATCH', body: JSON.stringify({ parentId: target || null }) }).then(() => { toast.success('Moved'); loadFolders(); }).catch(() => toast.error('Failed to move')); } } },
+        { icon: Trash2, label: 'Delete', action: () => handleDeleteFolder(folder.id), destructive: true },
+      ],
+    });
+  };
+
+  const openNoteMenu = (e: React.MouseEvent, note: NoteItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCtxMenu({
+      x: e.clientX, y: e.clientY,
+      items: [
+        { icon: Eye, label: 'Open', action: () => navigateToNote(note.id) },
+        { icon: Pencil, label: 'Rename', action: () => { const title = prompt('Rename note:', note.title); if (title?.trim()) { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ title: title.trim() }) }).then(() => { toast.success('Renamed'); loadNotes(page); }).catch(() => toast.error('Failed to rename')); } } },
+        { icon: note.isPublic ? Lock : Globe, label: note.isPublic ? 'Make Private' : 'Make Public', action: () => { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ isPublic: !note.isPublic }) }).then(() => { toast.success(note.isPublic ? 'Now private' : 'Now public'); loadNotes(page); }).catch(() => toast.error('Failed')); } },
+        ...(note.isPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => { navigator.clipboard.writeText(`${window.location.origin}/public/notes/${note.id}`); toast.success('Public link copied'); } }] : []),
+        { icon: FolderInput, label: 'Move to...', action: () => { const target = prompt('Move to folder ID (or empty for root):'); if (target !== null) { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ folderId: target || null }) }).then(() => { toast.success('Moved'); loadNotes(page); }).catch(() => toast.error('Failed to move')); } } },
+        { icon: Trash2, label: 'Delete', action: () => { if (confirm('Delete this note?')) { api(`/api/v1/notes/${note.id}`, { method: 'DELETE' }).then(() => { toast.success('Deleted'); loadNotes(page); }).catch(() => toast.error('Failed')); } }, destructive: true },
+      ],
+    });
   };
 
   const totalPages = Math.ceil(total / 20);
@@ -418,6 +455,7 @@ export default function NotesPage() {
                     key={`folder-${folder.id}`}
                     className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
                     onClick={() => navigateToFolder(folder.id)}
+                    onContextMenu={(e) => openFolderMenu(e, folder)}
                   >
                     <td className="px-4 py-2" />
                     <td className="px-4 py-2">
@@ -455,6 +493,7 @@ export default function NotesPage() {
                     key={`note-${note.id}`}
                     className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
                     onClick={() => navigateToNote(note.id)}
+                    onContextMenu={(e) => openNoteMenu(e, note)}
                   >
                     <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
                       <input type="checkbox" checked={selectedIds.has(note.id)} onChange={() => handleSelect(note.id)} className="rounded border-input" />
@@ -512,6 +551,10 @@ export default function NotesPage() {
           </div>
         )}
       </div>
+
+      {ctxMenu && (
+        <NoteContextMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />
+      )}
     </div>
   );
 }
