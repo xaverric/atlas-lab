@@ -237,6 +237,8 @@ export default function NotesPage() {
 
   // If noteId is set, show detail view
   if (noteId) {
+    // breadcrumb includes current folder as last element
+    const bc = currentFolder?.breadcrumb || [];
     return (
       <div className="flex h-[calc(100vh-4rem)] flex-col">
         {/* Breadcrumb for note detail */}
@@ -245,18 +247,12 @@ export default function NotesPage() {
             <button onClick={() => navigateToFolder(null)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
               <Home className="h-3.5 w-3.5" /> Notes
             </button>
-            {currentFolder?.breadcrumb?.map((b) => (
+            {bc.map((b) => (
               <span key={b.id} className="flex items-center gap-1">
                 <ChevronRight className="h-3 w-3 text-muted-foreground" />
                 <button onClick={() => navigateToFolder(b.id)} className="text-muted-foreground hover:text-foreground">{b.name}</button>
               </span>
             ))}
-            {folderId && currentFolder && (
-              <span className="flex items-center gap-1">
-                <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                <button onClick={() => navigateToFolder(folderId)} className="text-muted-foreground hover:text-foreground">{currentFolder.name}</button>
-              </span>
-            )}
           </nav>
         </div>
         <NoteDetail
@@ -269,6 +265,11 @@ export default function NotesPage() {
   }
 
   // Folder/list view
+  // breadcrumb from backend includes current folder as last element
+  const bc = currentFolder?.breadcrumb || [];
+  const parentCrumbs = bc.slice(0, -1);
+  const currentCrumb = bc.length > 0 ? bc[bc.length - 1] : null;
+
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
       {/* Breadcrumb */}
@@ -277,16 +278,16 @@ export default function NotesPage() {
           <button onClick={() => navigateToFolder(null)} className={`flex items-center gap-1 ${folderId ? 'text-muted-foreground hover:text-foreground' : 'font-medium text-foreground'}`}>
             <Home className="h-3.5 w-3.5" /> Notes
           </button>
-          {currentFolder?.breadcrumb?.map((b) => (
+          {parentCrumbs.map((b) => (
             <span key={b.id} className="flex items-center gap-1">
               <ChevronRight className="h-3 w-3 text-muted-foreground" />
               <button onClick={() => navigateToFolder(b.id)} className="text-muted-foreground hover:text-foreground">{b.name}</button>
             </span>
           ))}
-          {folderId && currentFolder && (
+          {currentCrumb && (
             <span className="flex items-center gap-1">
               <ChevronRight className="h-3 w-3 text-muted-foreground" />
-              <span className="font-medium">{currentFolder.name}</span>
+              <span className="font-medium">{currentCrumb.name}</span>
             </span>
           )}
         </nav>
