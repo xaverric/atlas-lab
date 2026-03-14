@@ -43,7 +43,7 @@ export const getById: RequestHandler = async (req, res, next) => {
 export const getMetadata: RequestHandler = async (req, res, next) => {
   try {
     const { ownerId, isAdmin } = resolveOwner(req);
-    const meta = await noteFolderService.getMetadata(req.params.id, ownerId, isAdmin);
+    const meta = await noteFolderService.getMetadata(req.params.id as string, ownerId, isAdmin);
     res.json({ data: meta });
   } catch (err) { next(err); }
 };
