@@ -139,20 +139,21 @@ export const getByIdPublic = async (id: string) => {
   const note = await noteDao.findById(id);
   if (!note) throw new ApiError(404, 'Note not found');
 
-  if (!note.folderId) throw new ApiError(404, 'Note not found');
-  const isPublic = await noteFolderService.isFolderPublic(note.folderId.toString());
-  if (!isPublic) throw new ApiError(404, 'Note not found');
-
-  return note;
+  // Note is public if: (a) isPublic flag is true on the note itself, or (b) it's in a public folder
+  if (note.isPublic) return note;
+  if (note.folderId) {
+    const folderPublic = await noteFolderService.isFolderPublic(note.folderId.toString());
+    if (folderPublic) return note;
+  }
+  throw new ApiError(404, 'Note not found');
 };
 
 export const updatePublic = async (id: string, data: { title?: string; content?: string; tags?: string[] }) => {
   const note = await noteDao.findById(id);
   if (!note) throw new ApiError(404, 'Note not found');
 
-  if (!note.folderId) throw new ApiError(403, 'Note is not in a public folder');
-  const isPublic = await noteFolderService.isFolderPublic(note.folderId.toString());
-  if (!isPublic) throw new ApiError(403, 'Note is not in a public folder');
+  const noteIsPublic = note.isPublic || (note.folderId && await noteFolderService.isFolderPublic(note.folderId.toString()));
+  if (!noteIsPublic) throw new ApiError(403, 'Note is not public');
 
   const updateData: Record<string, unknown> = { ...data };
   if (data.content !== undefined) {
