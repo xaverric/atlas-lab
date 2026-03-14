@@ -13,6 +13,7 @@ import { formatSize, formatDate } from '@/lib/utils';
 import { TreeSidebar, type TreeItem } from '@/components/shared/tree-sidebar';
 import { VisibilityBadge } from '@/components/shared/visibility-badge';
 import { SearchBar } from '@/components/notes/search-bar';
+import { NoteDetail } from '@/components/notes/note-detail';
 
 interface FolderItem {
   id: string;
@@ -62,6 +63,7 @@ export default function NotesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const folderId = searchParams.get('folderId') || null;
+  const noteId = searchParams.get('noteId') || null;
 
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -244,7 +246,10 @@ export default function NotesPage() {
   };
 
   const handleSelectItem = (id: string) => {
-    router.push(`/notes/${id}`);
+    const params = new URLSearchParams();
+    if (folderId) params.set('folderId', folderId);
+    params.set('noteId', id);
+    router.push(`/notes?${params}`);
   };
 
   const handleSelect = (id: string) => {
@@ -281,6 +286,7 @@ export default function NotesPage() {
         key={treeKey}
         storageKey="notes"
         selectedFolderId={folderId}
+        selectedItemId={noteId}
         onSelectFolder={handleSelectFolder}
         onSelectItem={handleSelectItem}
         loadChildren={loadTreeChildren}
@@ -419,6 +425,13 @@ export default function NotesPage() {
           </div>
         )}
 
+        {noteId ? (
+          <NoteDetail
+            noteId={noteId}
+            onBack={() => router.push(folderId ? `/notes?folderId=${folderId}` : '/notes')}
+            onNoteUpdate={() => { refreshTree(); loadNotes(page); }}
+          />
+        ) : (<>
         {/* Content area */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           <SearchBar onSearch={handleSearch} />
@@ -472,7 +485,7 @@ export default function NotesPage() {
                     <tr
                       key={note.id}
                       className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
-                      onClick={() => router.push(`/notes/${note.id}`)}
+                      onClick={() => handleSelectItem(note.id)}
                     >
                       <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
                         <input type="checkbox" checked={selectedIds.has(note.id)} onChange={() => handleSelect(note.id)} className="rounded border-input" />
@@ -513,7 +526,7 @@ export default function NotesPage() {
                       <td className="px-4 py-2">
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
-                            onClick={(e) => { e.stopPropagation(); router.push(`/notes/${note.id}`); }}
+                            onClick={(e) => { e.stopPropagation(); handleSelectItem(note.id); }}
                             className="rounded p-1 hover:bg-accent"
                             title="View"
                           >
@@ -564,6 +577,7 @@ export default function NotesPage() {
             </div>
           )}
         </div>
+        </>)}
       </div>
     </div>
   );
