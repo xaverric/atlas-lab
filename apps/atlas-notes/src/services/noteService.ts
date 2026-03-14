@@ -63,7 +63,14 @@ export const create = async (input: CreateInput) => {
   return note;
 };
 
-export const list = (opts: ListInput) => noteDao.list(opts);
+export const list = async (opts: ListInput & { ownerName?: string }) => {
+  const result = await noteDao.list(opts);
+  const ownerName = opts.ownerName || 'Unknown';
+  return {
+    ...result,
+    data: result.data.map((n: any) => ({ ...n.toJSON(), ownerName })),
+  };
+};
 
 export const getById = async (id: string, ownerId: string, isAdmin = false) => {
   const note = await noteDao.findById(id, ownerId, isAdmin);

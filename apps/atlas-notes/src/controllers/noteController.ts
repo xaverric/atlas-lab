@@ -22,9 +22,11 @@ export const create: RequestHandler = async (req, res, next) => {
 export const list: RequestHandler = async (req, res, next) => {
   try {
     const { ownerId, isAdmin } = resolveOwner(req);
+    const ownerName = (req as any).auth?.name || (req as any).auth?.preferred_username || 'Unknown';
     const result = await noteService.list({
       ownerId,
       isAdmin,
+      ownerName,
       folderId: req.query.folderId as string | undefined,
       tags: req.query.tags ? String(req.query.tags).split(',') : undefined,
       search: req.query.search as string | undefined,
