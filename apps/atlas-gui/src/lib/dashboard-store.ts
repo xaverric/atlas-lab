@@ -37,7 +37,7 @@ function migrateOldPins(): DashboardWidget[] | null {
       title: pin.jobName,
       config: { jobId: pin.jobId },
       order: i,
-      size: 'md' as const,
+      size: 'sm' as const,
     }));
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets));
@@ -52,7 +52,17 @@ function read(): DashboardWidget[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const widgets: DashboardWidget[] = JSON.parse(raw);
+      // Fix migrated job widgets that defaulted to 'md'
+      let changed = false;
+      const fixed = widgets.map((w) => {
+        if (w.type === 'job' && w.size === 'md') { changed = true; return { ...w, size: 'sm' as const }; }
+        return w;
+      });
+      if (changed) write(fixed);
+      return fixed;
+    }
     const migrated = migrateOldPins();
     return migrated || [];
   } catch {
