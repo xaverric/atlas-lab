@@ -1,14 +1,17 @@
 'use client';
 
 import type { Editor } from '@tiptap/react';
-import { Bold, Italic, Strikethrough, Code, Heading1, Heading2, Heading3, List, ListOrdered, ListChecks, CodeSquare, Link } from 'lucide-react';
+import { Bold, Italic, Strikethrough, Code, Heading1, Heading2, Heading3, List, ListOrdered, ListChecks, CodeSquare, Link, Image as ImageIcon, Minus, Quote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface EditorToolbarProps {
   editor: Editor | null;
+  isMarkdown?: boolean;
+  onToggleMarkdown?: () => void;
+  onInsertImage?: () => void;
 }
 
-export function EditorToolbar({ editor }: EditorToolbarProps) {
+export function EditorToolbar({ editor, isMarkdown, onToggleMarkdown, onInsertImage }: EditorToolbarProps) {
   if (!editor) return null;
 
   const setLink = () => {
@@ -32,6 +35,10 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
     { icon: ListChecks, action: () => editor.chain().focus().toggleTaskList().run(), active: editor.isActive('taskList'), title: 'Task list' },
     null,
     { icon: CodeSquare, action: () => editor.chain().focus().toggleCodeBlock().run(), active: editor.isActive('codeBlock'), title: 'Code block' },
+    { icon: ImageIcon, action: () => onInsertImage?.(), label: 'Image', title: 'Image' },
+    { icon: Minus, action: () => editor.chain().focus().setHorizontalRule().run(), label: 'Divider', title: 'Divider' },
+    { icon: Quote, action: () => editor.chain().focus().toggleBlockquote().run(), active: editor.isActive('blockquote'), label: 'Quote', title: 'Quote' },
+    null,
     { icon: Link, action: setLink, active: editor.isActive('link'), title: 'Link' },
   ];
 
@@ -55,6 +62,14 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           </button>
         );
       })}
+      {onToggleMarkdown && (
+        <button
+          onClick={onToggleMarkdown}
+          className={cn('ml-auto rounded-md px-3 py-1 text-xs font-medium transition-colors', isMarkdown ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent')}
+        >
+          {isMarkdown ? 'WYSIWYG' : 'Markdown'}
+        </button>
+      )}
     </div>
   );
 }
