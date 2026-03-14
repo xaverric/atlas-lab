@@ -34,7 +34,7 @@ export function TreeNode({ node, onToggle, onClick }: TreeNodeProps) {
   return (
     <div
       className={cn(
-        'group flex items-center gap-2 py-1.5 px-2 text-sm cursor-pointer hover:bg-accent/50 transition-colors',
+        'group flex items-center gap-2.5 py-2 px-3 text-sm cursor-pointer hover:bg-accent/50 transition-colors',
         node.isSelected && 'bg-accent',
         isFolder && (node.isPublic ? 'border-l-2 border-info' : 'border-l-2 border-muted-foreground/30'),
         !isFolder && 'border-l-2 border-transparent',

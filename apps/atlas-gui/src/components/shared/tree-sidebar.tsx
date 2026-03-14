@@ -270,7 +270,7 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
       <div className="flex-1 overflow-y-auto py-1">
         <div
           className={cn(
-            'flex items-center gap-2 px-3 py-2 text-sm font-medium cursor-pointer hover:bg-accent/50 transition-colors',
+            'flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium cursor-pointer hover:bg-accent/50 transition-colors',
             selectedFolderId === null && 'bg-accent',
           )}
           onClick={() => onSelectFolder(null)}
