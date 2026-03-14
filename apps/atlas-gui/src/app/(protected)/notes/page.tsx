@@ -319,50 +319,43 @@ export default function NotesPage() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
-      {/* Breadcrumb */}
-      <div className="shrink-0 border-b px-6 py-2">
-        <nav className="flex items-center gap-1 text-sm">
-          <button onClick={() => navigateToFolder(null)} className={`flex items-center gap-1 ${folderId ? 'text-muted-foreground hover:text-foreground' : 'font-medium text-foreground'}`}>
-            <Home className="h-3.5 w-3.5" /> Notes
-          </button>
-          {parentCrumbs.map((b) => (
-            <span key={b.id} className="flex items-center gap-1">
-              <ChevronRight className="h-3 w-3 text-muted-foreground" />
-              <button onClick={() => navigateToFolder(b.id)} className="text-muted-foreground hover:text-foreground">{b.name}</button>
-            </span>
-          ))}
-          {currentCrumb && (
-            <span className="flex items-center gap-1">
-              <ChevronRight className="h-3 w-3 text-muted-foreground" />
-              <span className="font-medium">{currentCrumb.name}</span>
-            </span>
-          )}
-        </nav>
-      </div>
-
-      {/* Header */}
-      <div className="shrink-0 flex items-center justify-between border-b px-6 py-3">
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg font-semibold tracking-tight">
-            {currentFolder ? currentFolder.name : 'Notes'}
-          </h1>
+      {/* Toolbar: breadcrumb + actions in one row */}
+      <div className="shrink-0 flex items-center justify-between gap-4 px-6 py-2.5 border-b">
+        <div className="flex items-center gap-2 min-w-0">
+          <nav className="flex items-center gap-1 text-sm min-w-0">
+            <button onClick={() => navigateToFolder(null)} className={`flex items-center gap-1 shrink-0 ${folderId ? 'text-muted-foreground hover:text-foreground' : 'font-medium text-foreground'}`}>
+              <Home className="h-3.5 w-3.5" />
+            </button>
+            {parentCrumbs.map((b) => (
+              <span key={b.id} className="flex items-center gap-1 shrink-0">
+                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                <button onClick={() => navigateToFolder(b.id)} className="text-muted-foreground hover:text-foreground">{b.name}</button>
+              </span>
+            ))}
+            {currentCrumb && (
+              <span className="flex items-center gap-1 shrink-0">
+                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                <span className="font-medium">{currentCrumb.name}</span>
+              </span>
+            )}
+          </nav>
           {currentFolder && (
-            <>
+            <div className="flex items-center gap-2 shrink-0">
               <VisibilityBadge isPublic={folderIsPublic} permission={currentFolder.publicPermission} />
               {currentFolder.aiAccessible && (
                 <span className="inline-flex items-center gap-1 text-xs text-purple-500">
                   <Bot className="h-3 w-3" /> AI
                 </span>
               )}
-            </>
+            </div>
           )}
           {folderMeta && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground shrink-0">
               {folderMeta.noteCount} notes · {folderMeta.subfolderCount} folders · {formatSize(folderMeta.totalSize)}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {folderId && currentFolder && (
             <button onClick={() => setShowFolderSettings((v) => !v)} className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground" title="Folder settings">
               <Settings className="h-4 w-4" />
