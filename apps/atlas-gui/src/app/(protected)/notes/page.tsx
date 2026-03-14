@@ -71,6 +71,8 @@ export default function NotesPage() {
   const [newFolderName, setNewFolderName] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null);
   const [treeKey, setTreeKey] = useState(0);
+  const [folderMeta, setFolderMeta] = useState<{ noteCount: number; subfolderCount: number; totalSize: number } | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const refreshTree = () => setTreeKey((k) => k + 1);
 
@@ -82,6 +84,14 @@ export default function NotesPage() {
     } catch {
       setCurrentFolder(null);
     }
+  }, [folderId]);
+
+  const loadFolderMeta = useCallback(async () => {
+    if (!folderId) { setFolderMeta(null); return; }
+    try {
+      const res = await api<{ data: { noteCount: number; subfolderCount: number; totalSize: number } }>(`/api/v1/notes/folders/${folderId}/metadata`);
+      setFolderMeta(res.data);
+    } catch { setFolderMeta(null); }
   }, [folderId]);
 
   const loadNotes = useCallback(async (p: number) => {
@@ -132,7 +142,7 @@ export default function NotesPage() {
     return [...folderItems, ...noteItems];
   }, []);
 
-  useEffect(() => { loadFolderDetail(); }, [loadFolderDetail]);
+  useEffect(() => { loadFolderDetail(); loadFolderMeta(); }, [loadFolderDetail, loadFolderMeta]);
 
   useEffect(() => {
     setSearchResults(null);
@@ -233,6 +243,30 @@ export default function NotesPage() {
     router.push(`/notes/${id}`);
   };
 
+  const handleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (displayNotes.every((n) => selectedIds.has(n.id))) setSelectedIds(new Set());
+    else setSelectedIds(new Set(displayNotes.map((n) => n.id)));
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Delete ${selectedIds.size} note(s)?`)) return;
+    try {
+      await Promise.all([...selectedIds].map((id) => api(`/api/v1/notes/${id}`, { method: 'DELETE' })));
+      toast.success(`${selectedIds.size} note(s) deleted`);
+      setSelectedIds(new Set());
+      loadNotes(page);
+      refreshTree();
+    } catch { toast.error('Failed to delete some notes'); }
+  };
+
   const totalPages = Math.ceil(total / 20);
   const displayNotes = searchResults ? searchResults.map((r) => r.note) : notes;
   const folderIsPublic = currentFolder?.visibility === 'public';
@@ -266,10 +300,15 @@ export default function NotesPage() {
                 )}
               </>
             )}
+            {folderMeta && (
+              <span className="text-xs text-muted-foreground">
+                {folderMeta.noteCount} notes · {folderMeta.subfolderCount} folders · {formatSize(folderMeta.totalSize)}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => { refreshTree(); loadNotes(page); if (folderId) loadFolderDetail(); }}
+              onClick={() => { refreshTree(); loadNotes(page); if (folderId) { loadFolderDetail(); loadFolderMeta(); } }}
               className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
               title="Refresh"
             >
@@ -313,11 +352,22 @@ export default function NotesPage() {
             <p className="text-sm text-muted-foreground">{searchResults.length} semantic result{searchResults.length !== 1 ? 's' : ''}</p>
           )}
 
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+              <span>{selectedIds.size} selected</span>
+              <button onClick={handleBulkDelete} className="rounded-md bg-destructive px-3 py-1.5 text-xs text-destructive-foreground">Delete</button>
+              <button onClick={() => setSelectedIds(new Set())} className="rounded-md border px-3 py-1.5 text-xs">Clear</button>
+            </div>
+          )}
+
           {displayNotes.length > 0 ? (
             <div className="overflow-x-auto rounded-md border">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+                    <th className="px-4 py-2 w-10">
+                      <input type="checkbox" checked={displayNotes.length > 0 && displayNotes.every((n) => selectedIds.has(n.id))} onChange={handleSelectAll} className="rounded border-input" />
+                    </th>
                     <th className="px-4 py-2">Name</th>
                     <th className="px-4 py-2 w-20">Size</th>
                     <th className="px-4 py-2 w-28">Attachments</th>
@@ -334,6 +384,9 @@ export default function NotesPage() {
                       className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
                       onClick={() => router.push(`/notes/${note.id}`)}
                     >
+                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                        <input type="checkbox" checked={selectedIds.has(note.id)} onChange={() => handleSelect(note.id)} className="rounded border-input" />
+                      </td>
                       <td className="px-4 py-2">
                         <div className="flex items-center gap-2">
                           <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -375,6 +428,13 @@ export default function NotesPage() {
                             title="View"
                           >
                             <Eye className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); if (confirm('Delete this note?')) { api(`/api/v1/notes/${note.id}`, { method: 'DELETE' }).then(() => { toast.success('Note deleted'); loadNotes(page); refreshTree(); }).catch(() => toast.error('Failed to delete')); } }}
+                            className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-destructive"
+                            title="Delete"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </td>
