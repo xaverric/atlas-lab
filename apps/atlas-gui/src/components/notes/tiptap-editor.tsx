@@ -7,9 +7,9 @@ import LinkExt from '@tiptap/extension-link';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import Image from '@tiptap/extension-image';
 import { common, createLowlight } from 'lowlight';
 import { EditorToolbar } from './editor-toolbar';
+import { AttachmentImage } from './attachment-image-node';
 
 const lowlight = createLowlight(common);
 
@@ -29,7 +29,7 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
       TaskList,
       TaskItem.configure({ nested: true }),
       CodeBlockLowlight.configure({ lowlight }),
-      Image.configure({ inline: true, allowBase64: false }),
+      AttachmentImage,
     ],
     content,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
