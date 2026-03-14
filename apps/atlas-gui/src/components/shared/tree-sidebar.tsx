@@ -24,6 +24,8 @@ interface TreeSidebarProps {
   loadChildren: (parentId: string | null) => Promise<TreeItem[]>;
   title: string;
   expandPath?: string[];
+  selectedItemId?: string | null;
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 interface TreeState {
@@ -38,19 +40,24 @@ interface TreeState {
 
 const STORAGE_PREFIX = 'tree-expanded-';
 
-export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSelectItem, loadChildren, title, expandPath }: TreeSidebarProps) {
+export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSelectItem, loadChildren, title, expandPath, selectedItemId, onOpenChange }: TreeSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [tree, setTree] = useState<TreeState>({});
 
   useEffect(() => {
     const stored = localStorage.getItem(`${storageKey}-sidebar-open`);
-    if (stored !== null) setIsOpen(stored === 'true');
+    if (stored !== null) {
+      const val = stored === 'true';
+      setIsOpen(val);
+      onOpenChange?.(val);
+    }
   }, [storageKey]);
 
   const toggleOpen = () => {
     const next = !isOpen;
     setIsOpen(next);
     localStorage.setItem(`${storageKey}-sidebar-open`, String(next));
+    onOpenChange?.(next);
   };
 
   useEffect(() => {
@@ -232,7 +239,7 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
             ...item,
             depth: depth + 1,
             isExpanded: false,
-            isSelected: false,
+            isSelected: item.id === selectedItemId,
             isLoading: false,
           };
           return (
@@ -268,15 +275,6 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
         </button>
       </div>
       <div className="flex-1 overflow-y-auto py-1">
-        <div
-          className={cn(
-            'flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium cursor-pointer hover:bg-accent/50 transition-colors',
-            selectedFolderId === null && 'bg-accent',
-          )}
-          onClick={() => onSelectFolder(null)}
-        >
-          All {title === 'Explorer' ? 'Items' : title}
-        </div>
         {renderChildren('root', -1)}
       </div>
     </div>
