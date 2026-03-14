@@ -55,9 +55,7 @@ export const update = async (id: string, ownerId: string, data: UpdateInput, isA
     throw new ApiError(400, 'Cannot move folder into itself');
   }
 
-  if (data.visibility === 'public' && !folder.parentId) {
-    throw new ApiError(400, 'Root folder cannot be made public');
-  }
+  // Root folders can be made public too — no restriction
 
   const updated = await noteFolderDao.updateById(id, data);
   if (!updated) throw new ApiError(404, 'Folder not found');
