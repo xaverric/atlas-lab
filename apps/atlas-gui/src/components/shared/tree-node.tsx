@@ -34,7 +34,7 @@ export function TreeNode({ node, onToggle, onClick }: TreeNodeProps) {
   return (
     <div
       className={cn(
-        'group flex items-center gap-1 py-1 px-2 text-xs cursor-pointer hover:bg-accent/50 transition-colors',
+        'group flex items-center gap-2 py-1.5 px-2 text-sm cursor-pointer hover:bg-accent/50 transition-colors',
         node.isSelected && 'bg-accent',
         isFolder && (node.isPublic ? 'border-l-2 border-info' : 'border-l-2 border-muted-foreground/30'),
         !isFolder && 'border-l-2 border-transparent',
@@ -48,20 +48,20 @@ export function TreeNode({ node, onToggle, onClick }: TreeNodeProps) {
           className="shrink-0 p-0.5 text-muted-foreground hover:text-foreground"
         >
           {node.isLoading ? (
-            <span className="inline-block h-3 w-3 animate-spin rounded-full border border-muted-foreground border-t-transparent" />
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border border-muted-foreground border-t-transparent" />
           ) : node.isExpanded ? (
-            <ChevronDown className="h-3 w-3" />
+            <ChevronDown className="h-4 w-4" />
           ) : (
-            <ChevronRight className="h-3 w-3" />
+            <ChevronRight className="h-4 w-4" />
           )}
         </button>
       )}
-      {!isFolder && <span className="w-4 shrink-0" />}
+      {!isFolder && <span className="w-5 shrink-0" />}
 
       {isFolder ? (
-        <Folder className="h-3.5 w-3.5 shrink-0 text-warning" />
+        <Folder className="h-4 w-4 shrink-0 text-warning" />
       ) : (
-        <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
       )}
 
       <span className="truncate flex-1 min-w-0">{node.name}</span>
@@ -70,7 +70,7 @@ export function TreeNode({ node, onToggle, onClick }: TreeNodeProps) {
         <VisibilityBadge isPublic permission={node.publicPermission} size="sm" showLabel={false} />
       )}
 
-      <span className="shrink-0 text-[11px] text-muted-foreground ml-auto pl-2">
+      <span className="shrink-0 text-xs text-muted-foreground ml-auto pl-2">
         {isFolder
           ? `${node.itemCount ?? 0} · ${formatSize(node.totalSize ?? 0)}`
           : formatSize(node.size ?? 0)

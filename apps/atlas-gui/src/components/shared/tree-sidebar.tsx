@@ -185,7 +185,7 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
 
     if (entry.loading) {
       return (
-        <div style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }} className="py-1 text-xs text-muted-foreground animate-pulse">
+        <div style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }} className="py-1.5 text-sm text-muted-foreground animate-pulse">
           Loading...
         </div>
       );
@@ -193,7 +193,7 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
 
     if (entry.error) {
       return (
-        <div style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }} className="py-1 text-xs text-destructive flex items-center gap-1">
+        <div style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }} className="py-1.5 text-sm text-destructive flex items-center gap-1">
           Failed to load
           <button onClick={() => retryLoad(parentKey === 'root' ? null : parentKey)} className="underline hover:no-underline">
             retry
@@ -260,8 +260,8 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
   }
 
   return (
-    <div className="shrink-0 w-60 border-r flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b">
+    <div className="shrink-0 w-72 border-r flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</span>
         <button onClick={toggleOpen} className="p-1 text-muted-foreground hover:text-foreground rounded">
           <PanelLeftClose className="h-4 w-4" />
@@ -270,8 +270,8 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
       <div className="flex-1 overflow-y-auto py-1">
         <div
           className={cn(
-            'flex items-center gap-2 px-3 py-1.5 text-xs cursor-pointer hover:bg-accent/50 transition-colors',
-            selectedFolderId === null && 'bg-accent font-medium',
+            'flex items-center gap-2 px-3 py-2 text-sm font-medium cursor-pointer hover:bg-accent/50 transition-colors',
+            selectedFolderId === null && 'bg-accent',
           )}
           onClick={() => onSelectFolder(null)}
         >
