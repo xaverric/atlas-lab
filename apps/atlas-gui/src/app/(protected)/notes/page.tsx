@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {
   Plus, FolderPlus, Folder, FileText, RefreshCw,
   Eye, Pencil, Trash2, Bot, Globe, Lock, ChevronRight, Home, Settings,
+  ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
@@ -79,6 +80,7 @@ export default function NotesPage() {
   const [showFolderSettings, setShowFolderSettings] = useState(false);
   const [editingFolderName, setEditingFolderName] = useState(false);
   const [folderNameDraft, setFolderNameDraft] = useState('');
+  const [sort, setSort] = useState({ field: 'updatedAt', order: 'desc' as 'asc' | 'desc' });
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: { icon: any; label: string; action: () => void; destructive?: boolean }[] } | null>(null);
 
   const loadFolderDetail = useCallback(async () => {
@@ -112,14 +114,22 @@ export default function NotesPage() {
       params.set('limit', '20');
       if (folderId) params.set('folderId', folderId);
       else params.set('folderId', '');
-      params.set('sortBy', 'updatedAt');
-      params.set('sortOrder', 'desc');
+      params.set('sortBy', sort.field);
+      params.set('sortOrder', sort.order);
       const res = await api<ListResponse>(`/api/v1/notes?${params}`);
       setNotes(res.data);
       setTotal(res.total);
       setPage(res.page);
     } catch { toast.error('Failed to load notes'); }
-  }, [folderId]);
+  }, [folderId, sort]);
+
+  const handleSort = (field: string) => {
+    setSort((prev) =>
+      prev.field === field
+        ? { field, order: prev.order === 'asc' ? 'desc' : 'asc' }
+        : { field, order: 'asc' },
+    );
+  };
 
   useEffect(() => {
     loadFolderDetail();
@@ -440,11 +450,17 @@ export default function NotesPage() {
                   <th className="px-4 py-2 w-10">
                     <input type="checkbox" checked={displayNotes.length > 0 && displayNotes.every((n) => selectedIds.has(n.id))} onChange={handleSelectAll} className="rounded border-input" />
                   </th>
-                  <th className="px-4 py-2">Name</th>
-                  <th className="px-4 py-2 w-20">Size</th>
+                  <th className="px-4 py-2 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('title')}>
+                    Name {sort.field === 'title' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
+                  </th>
+                  <th className="px-4 py-2 w-20 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('contentSize')}>
+                    Size {sort.field === 'contentSize' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
+                  </th>
                   <th className="px-4 py-2 w-28">Attachments</th>
                   <th className="px-4 py-2 w-24">Visibility</th>
-                  <th className="px-4 py-2 w-28">Updated</th>
+                  <th className="px-4 py-2 w-28 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('updatedAt')}>
+                    Updated {sort.field === 'updatedAt' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
+                  </th>
                   <th className="px-4 py-2 w-16" />
                 </tr>
               </thead>
