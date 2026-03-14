@@ -37,6 +37,15 @@ export default function DashboardPage() {
     setWidgets(dashboardStore.getWidgets());
   }, []);
 
+  const handleResize = useCallback((id: string) => {
+    const sizes: Record<string, string> = { sm: 'md', md: 'lg', lg: 'sm' };
+    const widget = widgets.find((w) => w.id === id);
+    if (!widget) return;
+    const newSize = sizes[widget.size] as 'sm' | 'md' | 'lg';
+    dashboardStore.updateWidget(id, { size: newSize });
+    setWidgets(dashboardStore.getWidgets());
+  }, [widgets]);
+
   const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   const handleDrop = useCallback((targetId: string, e: React.DragEvent) => {
@@ -125,6 +134,7 @@ export default function DashboardPage() {
               title={widget.title}
               size={widget.size}
               onRemove={() => handleRemove(widget.id)}
+              onResize={() => handleResize(widget.id)}
               isDragOver={dragOverId === widget.id}
               onDragOver={() => setDragOverId(widget.id)}
               onDragLeave={() => setDragOverId(null)}

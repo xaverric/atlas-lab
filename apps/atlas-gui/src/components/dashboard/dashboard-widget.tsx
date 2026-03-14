@@ -1,6 +1,6 @@
 'use client';
 
-import { X, GripVertical } from 'lucide-react';
+import { X, GripVertical, Maximize2, Minimize2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { WidgetSize } from '@/lib/dashboard-store';
 import { cn } from '@/lib/utils';
@@ -16,6 +16,7 @@ interface WidgetCardProps {
   size: WidgetSize;
   widgetId: string;
   onRemove: () => void;
+  onResize?: () => void;
   isDragOver?: boolean;
   onDragStart?: (e: React.DragEvent) => void;
   onDragOver?: (e: React.DragEvent) => void;
@@ -24,7 +25,9 @@ interface WidgetCardProps {
   children: ReactNode;
 }
 
-export function WidgetCard({ title, size, widgetId, onRemove, isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, children }: WidgetCardProps) {
+const nextSize: Record<WidgetSize, WidgetSize> = { sm: 'md', md: 'lg', lg: 'sm' };
+
+export function WidgetCard({ title, size, widgetId, onRemove, onResize, isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, children }: WidgetCardProps) {
   return (
     <div
       className={cn(
@@ -50,13 +53,25 @@ export function WidgetCard({ title, size, widgetId, onRemove, isDragOver, onDrag
         <div className="flex items-center gap-1.5 min-w-0">
           <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/50 cursor-grab active:cursor-grabbing" />
           <h3 className="font-medium text-sm truncate">{title}</h3>
+          <span className="text-[10px] text-muted-foreground/50 uppercase">{size}</span>
         </div>
-        <button
-          onClick={onRemove}
-          className="ml-2 shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-0.5 ml-2 shrink-0">
+          {onResize && (
+            <button
+              onClick={onResize}
+              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              title={`Resize to ${nextSize[size]}`}
+            >
+              {size === 'lg' ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            </button>
+          )}
+          <button
+            onClick={onRemove}
+            className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       {children}
     </div>
