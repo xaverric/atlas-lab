@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { StatusBadge } from '@/components/scheduler/status-badge';
 import { JobChart } from '@/components/dashboard/job-chart';
+import { CodeBlock } from '@/components/shared/code-block';
 import { dashboardStore } from '@/lib/dashboard-store';
 
 interface Schedule {
@@ -215,9 +216,17 @@ export default function JobDetailPage() {
       {/* Config */}
       <div>
         <h2 className="text-lg font-semibold mb-3">Configuration</h2>
-        <pre className="rounded-lg border bg-muted p-4 text-sm font-mono overflow-auto max-h-64">
-          {JSON.stringify(job.config, null, 2)}
-        </pre>
+        {(job.executionType === 'javascript' || job.executionType === 'shell') && typeof job.config.code === 'string' ? (
+          <CodeBlock
+            code={job.config.code}
+            language={job.executionType === 'shell' ? 'bash' : 'javascript'}
+          />
+        ) : (
+          <CodeBlock
+            code={JSON.stringify(job.config, null, 2)}
+            language="json"
+          />
+        )}
       </div>
 
       {/* Notifications */}
