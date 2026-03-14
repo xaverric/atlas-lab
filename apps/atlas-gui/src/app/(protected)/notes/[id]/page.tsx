@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Trash2, Pencil, X, Copy, Link } from 'lucide-react';
+import { ArrowLeft, Trash2, Pencil, X, Copy, Link, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { TiptapEditor } from '@/components/notes/tiptap-editor';
@@ -10,6 +10,7 @@ import { NoteViewer } from '@/components/notes/note-viewer';
 import { AttachmentPanel } from '@/components/notes/attachment-panel';
 import { FilePickerDialog } from '@/components/notes/file-picker-dialog';
 import { CodeMirrorEditor } from '@/components/shared/codemirror-editor';
+import { HistoryDrawer } from '@/components/notes/history-drawer';
 import { htmlToMarkdown, markdownToHtml, resolveAttachmentUrls } from '@/lib/markdown';
 
 interface Attachment {
@@ -58,6 +59,7 @@ export default function NoteDetailPage() {
   const [attachmentRefreshKey, setAttachmentRefreshKey] = useState(0);
   const [isMarkdown, setIsMarkdown] = useState(false);
   const [markdownContent, setMarkdownContent] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
   const editorRef = useRef<{ insertImage: (url: string, docId: string, alt: string) => void; insertLink: (url: string, docId: string, text: string) => void } | null>(null);
 
   const toggleMarkdown = () => {
@@ -94,6 +96,8 @@ export default function NoteDetailPage() {
   }, [id, router]);
 
   useEffect(() => { loadNote(); }, [loadNote]);
+
+  useEffect(() => { setShowHistory(false); }, [id]);
 
   useEffect(() => {
     api<{ data: FolderOption[] }>('/api/v1/notes/folders')
@@ -191,90 +195,108 @@ export default function NoteDetailPage() {
 
   if (mode === 'view') {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => router.push(note?.folderId ? `/notes?folderId=${note.folderId}` : '/notes')} className="rounded-md p-1 hover:bg-accent">
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-            <h1 className="text-2xl font-semibold tracking-tight">{note?.title}</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={enterEdit}
-              className="flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm hover:bg-accent"
-            >
-              <Pencil className="h-4 w-4" /> Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
-            >
-              <Trash2 className="h-4 w-4" /> Delete
-            </button>
-          </div>
-        </div>
-
-        <div className="rounded-md border p-6">
-          <NoteViewer html={html} />
-        </div>
-
-        <AttachmentPanel
-          noteId={id}
-          editable={false}
-          onAttach={() => {}}
-          refreshKey={attachmentRefreshKey}
-        />
-
-        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-          {note && note.tags.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span>Tags:</span>
-              <div className="flex gap-1">
-                {note.tags.map((tag) => (
-                  <span key={tag} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium">
-                    {tag}
-                  </span>
-                ))}
+      <div className="flex h-[calc(100vh-4rem)]">
+        <div className="flex-1 overflow-y-auto">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button onClick={() => router.push(note?.folderId ? `/notes?folderId=${note.folderId}` : '/notes')} className="rounded-md p-1 hover:bg-accent">
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+                <h1 className="text-2xl font-semibold tracking-tight">{note?.title}</h1>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowHistory(!showHistory)}
+                  className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                >
+                  <Clock className="h-4 w-4" /> History
+                </button>
+                <button
+                  onClick={enterEdit}
+                  className="flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm hover:bg-accent"
+                >
+                  <Pencil className="h-4 w-4" /> Edit
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4" /> Delete
+                </button>
               </div>
             </div>
-          )}
-          <span>Folder: {folderName}</span>
-          {note?.isPublic && (
-            <>
-              <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">Public</span>
-              <button
-                onClick={() => {
-                  const url = `${window.location.origin}/public/notes/${note.id}`;
-                  navigator.clipboard.writeText(url);
-                  toast.success('Public link copied');
-                }}
-                className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Link className="h-3 w-3" /> Copy public link
-              </button>
-            </>
-          )}
-          {note && <span>Updated: {formatDate(note.updatedAt)}</span>}
-        </div>
 
-        {showFilePicker && note && (
-          <FilePickerDialog
-            noteId={id}
-            dmsFolderId={note.dmsFolderId}
-            onClose={() => setShowFilePicker(false)}
-            onAttached={(att) => {
-              handleAttached(att);
-              setShowFilePicker(false);
-            }}
-          />
-        )}
+            <div className="rounded-md border p-6">
+              <NoteViewer html={html} />
+            </div>
+
+            <AttachmentPanel
+              noteId={id}
+              editable={false}
+              onAttach={() => {}}
+              refreshKey={attachmentRefreshKey}
+            />
+
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              {note && note.tags.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span>Tags:</span>
+                  <div className="flex gap-1">
+                    {note.tags.map((tag) => (
+                      <span key={tag} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <span>Folder: {folderName}</span>
+              {note?.isPublic && (
+                <>
+                  <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">Public</span>
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/public/notes/${note.id}`;
+                      navigator.clipboard.writeText(url);
+                      toast.success('Public link copied');
+                    }}
+                    className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Link className="h-3 w-3" /> Copy public link
+                  </button>
+                </>
+              )}
+              {note && <span>Updated: {formatDate(note.updatedAt)}</span>}
+            </div>
+
+            {showFilePicker && note && (
+              <FilePickerDialog
+                noteId={id}
+                dmsFolderId={note.dmsFolderId}
+                onClose={() => setShowFilePicker(false)}
+                onAttached={(att) => {
+                  handleAttached(att);
+                  setShowFilePicker(false);
+                }}
+              />
+            )}
+          </div>
+        </div>
+        <HistoryDrawer
+          noteId={id}
+          isOpen={showHistory}
+          onClose={() => setShowHistory(false)}
+          onRestore={() => { loadNote(); setShowHistory(false); }}
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex h-[calc(100vh-4rem)]">
+      <div className="flex-1 overflow-y-auto">
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={cancelEdit} className="rounded-md p-1 hover:bg-accent">
@@ -282,12 +304,20 @@ export default function NoteDetailPage() {
           </button>
           <h1 className="text-2xl font-semibold tracking-tight">Edit Note</h1>
         </div>
-        <button
-          onClick={handleDelete}
-          className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 className="h-4 w-4" /> Delete
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <Clock className="h-4 w-4" /> History
+          </button>
+          <button
+            onClick={handleDelete}
+            className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4" /> Delete
+          </button>
+        </div>
       </div>
 
       <input
@@ -381,6 +411,14 @@ export default function NoteDetailPage() {
           }}
         />
       )}
+    </div>
+    </div>
+      <HistoryDrawer
+        noteId={id}
+        isOpen={showHistory}
+        onClose={() => setShowHistory(false)}
+        onRestore={() => { loadNote(); setShowHistory(false); }}
+      />
     </div>
   );
 }
