@@ -3,6 +3,7 @@ import * as noteDao from '../daos/noteDao.js';
 import * as embeddingService from './embeddingService.js';
 import * as vectorService from './vectorService.js';
 import * as noteFolderService from './noteFolderService.js';
+import * as revisionService from './revisionService.js';
 
 interface CreateInput {
   title: string;
@@ -78,8 +79,22 @@ export const getById = async (id: string, ownerId: string, isAdmin = false) => {
   return note;
 };
 
-export const update = async (id: string, ownerId: string, data: UpdateInput, isAdmin = false) => {
+export const update = async (
+  id: string,
+  ownerId: string,
+  data: UpdateInput,
+  isAdmin = false,
+  editorId?: string,
+  editorName?: string,
+) => {
   const existing = await getById(id, ownerId, isAdmin);
+  const summary = revisionService.generateSummary(
+    { title: existing.title, content: existing.content || '', tags: existing.tags || [], isPublic: existing.isPublic ?? false },
+    data,
+  );
+  if (summary && editorId) {
+    await revisionService.createRevision(id, editorId, editorName || 'Unknown', summary);
+  }
   const updateData = data.content !== undefined
     ? { ...data, contentSize: Buffer.byteLength(data.content, 'utf8') }
     : data;

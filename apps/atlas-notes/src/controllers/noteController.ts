@@ -54,7 +54,9 @@ export const getById: RequestHandler = async (req, res, next) => {
 export const update: RequestHandler = async (req, res, next) => {
   try {
     const { ownerId, isAdmin } = resolveOwner(req);
-    const note = await noteService.update(req.params.id as string, ownerId, req.body, isAdmin);
+    const editorId = req.auth.sub;
+    const editorName = (req.auth as any).name || 'Unknown';
+    const note = await noteService.update(req.params.id as string, ownerId, req.body, isAdmin, editorId, editorName);
     res.json({ data: note });
   } catch (err) {
     next(err);

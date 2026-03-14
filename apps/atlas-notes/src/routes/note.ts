@@ -4,6 +4,7 @@ import { validate } from '@atlas/server-common';
 import { paginationSchema, objectIdSchema } from '@atlas/core';
 import { auth } from '../middleware/auth.js';
 import * as noteController from '../controllers/noteController.js';
+import revisionRoutes from './revision.js';
 
 const router = Router();
 
@@ -58,5 +59,7 @@ router.delete('/:id', validate(idParamSchema, 'params'), noteController.remove);
 router.get('/:id/attachments', validate(idParamSchema, 'params'), noteController.listAttachments);
 router.post('/:id/attachments', validate(idParamSchema, 'params'), validate(attachmentSchema), noteController.addAttachment);
 router.delete('/:id/attachments/:docId', validate(attachmentParamSchema, 'params'), noteController.removeAttachment);
+
+router.use('/:id/revisions', auth, revisionRoutes);
 
 export default router;
