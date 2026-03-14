@@ -1,4 +1,5 @@
 import { Note } from '../models/Note.js';
+import { Types } from 'mongoose';
 import type { FilterQuery } from 'mongoose';
 
 interface ListOptions {
@@ -70,3 +71,14 @@ export const removeAttachment = (id: string, documentId: string) =>
 
 export const setDmsFolderId = (id: string, dmsFolderId: string) =>
   Note.findByIdAndUpdate(id, { $set: { dmsFolderId } }, { new: true });
+
+export const countByFolder = (ownerId: string, folderId: string | null) =>
+  Note.countDocuments({ ownerId, folderId });
+
+export const totalSizeByFolder = async (ownerId: string, folderId: string | null) => {
+  const result = await Note.aggregate([
+    { $match: { ownerId, folderId: folderId ? new Types.ObjectId(folderId) : null } },
+    { $group: { _id: null, total: { $sum: '$contentSize' } } },
+  ]);
+  return result[0]?.total ?? 0;
+};
