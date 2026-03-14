@@ -26,10 +26,8 @@ interface NoteItem {
   updatedAt: string;
 }
 
-const NOTES_URL = process.env.NEXT_PUBLIC_NOTES_URL || 'http://localhost:4004';
-
 const publicApi = async <T = unknown>(path: string): Promise<T> => {
-  const res = await fetch(`${NOTES_URL}${path}`);
+  const res = await fetch(`/api${path}`);
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(body.error || res.statusText);

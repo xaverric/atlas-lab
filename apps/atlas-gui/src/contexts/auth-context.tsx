@@ -28,18 +28,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const um = getUserManager();
+    const clearUser = () => setUser(null);
 
-    um.getUser().then((u) => {
-      setUser(u && !u.expired ? u : null);
-      setIsLoading(false);
-    });
+    um.getUser()
+      .then((u) => {
+        setUser(u && !u.expired ? u : null);
+      })
+      .catch(() => {
+        setUser(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
 
     um.events.addUserLoaded(setUser);
-    um.events.addUserUnloaded(() => setUser(null));
+    um.events.addUserUnloaded(clearUser);
+    um.events.addSilentRenewError(clearUser);
 
     return () => {
       um.events.removeUserLoaded(setUser);
-      um.events.removeUserUnloaded(() => setUser(null));
+      um.events.removeUserUnloaded(clearUser);
+      um.events.removeSilentRenewError(clearUser);
     };
   }, []);
 

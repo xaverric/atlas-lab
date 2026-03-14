@@ -29,7 +29,12 @@ const getAuthHeaders = async (): Promise<Record<string, string>> => {
 
 export const api = async <T = unknown>(path: string, options: RequestInit = {}): Promise<T> => {
   const um = getUserManager();
-  const user = await um.getUser();
+  let user;
+  try {
+    user = await um.getUser();
+  } catch {
+    user = null;
+  }
   const baseUrl = resolveBaseUrl(path);
 
   const headers: Record<string, string> = {

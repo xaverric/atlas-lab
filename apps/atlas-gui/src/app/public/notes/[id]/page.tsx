@@ -21,14 +21,12 @@ interface PublicNote {
   updatedAt: string;
 }
 
-const NOTES_URL = process.env.NEXT_PUBLIC_NOTES_URL || 'http://localhost:4004';
-
 const publicApi = async <T = unknown>(path: string, options: RequestInit = {}): Promise<T> => {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> || {}),
   };
-  const res = await fetch(`${NOTES_URL}${path}`, { ...options, headers });
+  const res = await fetch(`/api${path}`, { ...options, headers });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(body.error || res.statusText);
@@ -180,7 +178,7 @@ export default function PublicNotePage() {
       </div>
 
       <div className="rounded-md border border-border bg-card p-6 dark:border-border dark:bg-card">
-        <NoteViewer html={html} />
+        <NoteViewer html={html} skipAttachmentResolve />
       </div>
 
       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
