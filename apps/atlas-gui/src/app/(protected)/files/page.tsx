@@ -53,6 +53,7 @@ export default function FilesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const folderId = searchParams.get('folderId') || null;
+  const docId = searchParams.get('docId') || null;
 
   const [treeKey, setTreeKey] = useState(0);
   const [folders, setFolders] = useState<FolderItem[]>([]);
@@ -74,6 +75,7 @@ export default function FilesPage() {
   const [breadcrumb, setBreadcrumb] = useState<{ id: string; name: string }[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [detailDocId, setDetailDocId] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [filters, setFilters] = useState({
     search: '',
@@ -187,6 +189,10 @@ export default function FilesPage() {
     setSelectedIds(new Set());
   }, [loadDocs]);
 
+  useEffect(() => {
+    if (docId && !detailDocId) setDetailDocId(docId);
+  }, [docId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // drag-and-drop upload
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -229,6 +235,15 @@ export default function FilesPage() {
     const params = new URLSearchParams();
     if (id) params.set('folderId', id);
     router.push(`/files${params.toString() ? `?${params}` : ''}`);
+  };
+
+  const closeDetail = () => {
+    setDetailDocId(null);
+    if (docId) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('docId');
+      router.replace(`/files${params.toString() ? `?${params}` : ''}`);
+    }
   };
 
   const handleSort = (field: string) => {
@@ -374,11 +389,17 @@ export default function FilesPage() {
         key={treeKey}
         storageKey="files"
         selectedFolderId={folderId}
+        selectedItemId={docId}
         onSelectFolder={navigateToFolder}
-        onSelectItem={(id) => setDetailDocId(id)}
+        onSelectItem={(id) => {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('docId', id);
+          router.push(`/files?${params}`);
+        }}
         loadChildren={loadTreeChildren}
         title="Files"
         expandPath={breadcrumb.map((b) => b.id)}
+        onOpenChange={setSidebarOpen}
       />
 
       <div
@@ -454,8 +475,8 @@ export default function FilesPage() {
           </div>
         </div>
 
-        {/* Breadcrumb */}
-        {breadcrumb.length > 0 && (
+        {/* Breadcrumb — only when sidebar is collapsed */}
+        {!sidebarOpen && breadcrumb.length > 0 && (
           <div className="shrink-0 border-b px-4 py-1.5">
             <BreadcrumbNav items={breadcrumb} onNavigate={navigateToFolder} />
           </div>
@@ -578,7 +599,11 @@ export default function FilesPage() {
                 onPreview={setPreviewDoc}
                 onRename={setRenameDoc}
                 onMove={setMoveDoc}
-                onDetails={(doc) => setDetailDocId(doc.id)}
+                onDetails={(doc) => {
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set('docId', doc.id);
+                  router.push(`/files?${params}`);
+                }}
                 showPath={showPath}
                 view="list"
               />
@@ -655,7 +680,7 @@ export default function FilesPage() {
       {detailDocId && (
         <DetailModal
           documentId={detailDocId}
-          onClose={() => setDetailDocId(null)}
+          onClose={closeDetail}
           onUpdate={refreshAll}
         />
       )}
