@@ -10,3 +10,15 @@ export const s3 = new S3Client({
   },
   forcePathStyle: true,
 });
+
+export const s3Public = config.minio.publicUrl
+  ? new S3Client({
+      endpoint: config.minio.publicUrl,
+      region: config.minio.region,
+      credentials: {
+        accessKeyId: config.minio.accessKey,
+        secretAccessKey: config.minio.secretKey,
+      },
+      forcePathStyle: true,
+    })
+  : s3;

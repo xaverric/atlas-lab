@@ -5,12 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Development
-npm run dev:core              # Express backend with hot reload (tsx watch, port 4000)
-npm run dev:dms               # DMS backend (port 4001)
-npm run dev:scheduler         # Scheduler backend (port 4002)
-npm run dev:notify            # Notification backend (port 4003)
-npm run dev:gui               # Next.js frontend dev server (port 3000)
+# Development (individual services with hot reload via tsx watch)
+npm run dev:core              # port 4000
+npm run dev:dms               # port 4001
+npm run dev:scheduler         # port 4002
+npm run dev:notify            # port 4003
+npm run dev:notes             # port 4004
+npm run dev:mcp               # port 4005
+npm run dev:gui               # Next.js dev server, port 3000
 
 # Build & check (all workspaces)
 npm run build
@@ -20,78 +22,97 @@ npm run lint
 # Per-workspace
 npm -w @atlas/server run dev
 npm -w @atlas/dms run dev
-npm -w @atlas/scheduler run dev
-npm -w @atlas/notify run dev
+npm -w @atlas/notes run dev
 npm -w @atlas/gui run dev
 
-# Docker (from deployment/)
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up   # Local dev
+# Docker startup modes (from root, wraps deployment/startup.sh)
+npm run start:prod            # Production: all services in Docker behind Traefik
+npm run start:dev             # Dev: all services in Docker with dev compose overrides
+npm run start:local           # Local: infra + backends in Docker, GUI runs locally (hot reload)
+# Add --reset suffix to wipe volumes: npm run start:dev:reset
 
-# Init data loader
+# Init data loader (Keycloak users/roles, MinIO buckets)
 npm run init
 ```
 
 ## Architecture
 
-**Monorepo** with npm workspaces. Packages:
+**Monorepo** with npm workspaces. Node >= 22.
 
-- `packages/core` (`@atlas/core`) — shared TypeScript types, `ApiError` class, Zod validators, constants. No build step; consumed as raw TS via `transpilePackages` (Next.js) and `paths` (backend tsconfig).
-- `packages/server-common` (`@atlas/server-common`) — shared Express middleware (`createAuth`, `validate`, `errorHandler`, `requireRole`), `connectDB`, `createLogger` (pino). Used by all backend services.
-- `apps/atlas-core` (`@atlas/server`) — Express REST API on port 4000 (users, health)
-- `apps/atlas-dms` (`@atlas/dms`) — Document Management Service on port 4001 (MinIO storage, presigned URLs, share tokens)
-- `apps/atlas-scheduler` (`@atlas/scheduler`) — Job Scheduler on port 4002 (BullMQ, cron/interval/once, executors: http/webhook/script/shell/monitor)
-- `apps/atlas-notify` (`@atlas/notify`) — Notification Service on port 4003 (email via nodemailer, Telegram bot, BullMQ delivery workers)
-- `apps/atlas-gui` (`@atlas/gui`) — Next.js 15 frontend on port 3000
-- `deployment/atlas-init` (`@atlas/init`) — Data initialization loader (Keycloak users/roles, realm settings, MinIO buckets)
+### Shared packages (no build step, consumed as raw TS via tsconfig `paths`)
+
+- `packages/core` (`@atlas/core`) — `ApiError`, TypeScript types (`User`, `ApiResponse`, `PaginatedResponse`), Zod validators (`paginationSchema`, `objectIdSchema`), constants (`API_PREFIX = /api/v1`)
+- `packages/server-common` (`@atlas/server-common`) — Express middleware: `createAuth` (Keycloak JWT verification), `validate` (Zod), `errorHandler`, `requireRole`, `connectDB` (Mongoose), `createLogger` (pino)
+
+### Backend services
+
+| Service | Package | Port | Purpose | External deps |
+|---------|---------|------|---------|---------------|
+| atlas-core | `@atlas/server` | 4000 | User management, health | MongoDB |
+| atlas-dms | `@atlas/dms` | 4001 | Document storage, folders, sharing | MongoDB, MinIO (S3) |
+| atlas-scheduler | `@atlas/scheduler` | 4002 | Job scheduling (cron/interval/once), executors (http/webhook/shell/script/monitor) | MongoDB, Redis (BullMQ) |
+| atlas-notify | `@atlas/notify` | 4003 | Multi-channel notifications (email/Telegram), templates, preferences | MongoDB, Redis (BullMQ), SMTP, Telegram API |
+| atlas-notes | `@atlas/notes` | 4004 | Notes knowledge base, semantic search | MongoDB, Qdrant (vector DB), Ollama (embeddings) |
+| atlas-mcp | `@atlas/mcp` | 4005 | MCP server — proxies all backend services for AI tool use | None (HTTP proxy) |
+
+### Frontend
+
+- `apps/atlas-gui` (`@atlas/gui`) — Next.js 15 (App Router), port 3000
+- `lib/api.ts` routes requests by path prefix: `/api/v1/dms/*` → DMS_URL, `/api/v1/scheduler/*` → SCHEDULER_URL, `/api/v1/notes/*` → NOTES_URL, etc.
+- Auth via `oidc-client-ts` → Keycloak. `AuthProvider` context wraps app, `lib/api.ts` attaches JWT and handles silent refresh on 401.
+- Protected routes under `/(protected)/*` layout with auth guard.
 
 ### Infrastructure (Docker)
 
-- **Traefik** — reverse proxy, TLS via Let's Encrypt, path-based routing per service
-- **Keycloak** — OIDC auth (realm: atlas, SSO 8h idle/max, 30min access token)
-- **MongoDB** — primary database (each service uses its own DB)
-- **Redis** — BullMQ job queues (scheduler + notify)
-- **MinIO** — S3-compatible file storage (DMS)
+| Service | Purpose |
+|---------|---------|
+| Traefik | Reverse proxy, TLS (Let's Encrypt), subdomain routing |
+| Keycloak | OIDC auth (realm: atlas, SSO 8h, access token 30min) |
+| MongoDB | Primary DB (each service uses own database) |
+| Redis | BullMQ job queues (scheduler + notify only) |
+| MinIO | S3-compatible file storage (DMS) |
+| Qdrant | Vector DB for semantic search (notes) |
+| Ollama | Local LLM embeddings — nomic-embed-text, 768 dims (notes) |
+
+Production subdomains (`ATLAS_DOMAIN=xaverric.cz`): `xaverric.cz` (gui), `api.` (core), `dms.` (dms), `scheduler.` (scheduler), `notify.` (notify), `notes.` (notes), `mcp.` (mcp), `auth.` (keycloak), `s3.` (minio API), `storage.` (minio console)
 
 ### Backend layering
 
 `Route → Controller → Service → DAO → Model`
 
-- **Routes** mount auth/validation middleware, delegate to controllers
-- **Controllers** extract request data, call services, format responses. No business logic.
+- **Routes** mount auth/validation middleware (Zod schemas inline), delegate to controllers
+- **Controllers** extract request data, call services, format `{ data: T }` responses. No business logic.
 - **Services** contain business logic, throw `ApiError` for error cases
 - **DAOs** wrap Mongoose queries. No business logic.
-- **Models** define Mongoose schemas with `toJSON` virtual transform (`_id` → `id`)
+- **Models** define Mongoose schemas with `toJSON` virtual transform (`_id` → `id`, delete `__v`)
 
-All routes live under `API_PREFIX` (`/api/v1`), except `GET /health`.
+All routes under `API_PREFIX` (`/api/v1`), except `GET /health`.
 
-### Auth flow (OIDC)
+### Auth
 
-No custom auth — Keycloak handles login, token issuance, user management.
+No custom auth — Keycloak handles everything.
 
-1. Frontend `oidc-client-ts` redirects to Keycloak (`/login` → `signinRedirect()`)
-2. Keycloak returns auth code to `/callback` → `signinRedirectCallback()` exchanges for tokens
-3. `lib/api.ts` attaches access token to all API requests, handles 401 with `signinSilent()`
-4. Backend `createAuth()` from `@atlas/server-common` verifies JWT against Keycloak JWKS endpoint
-5. `req.auth` contains decoded token payload (sub, email, name, realm_access.roles)
-6. Inter-service auth (notify): `X-Internal-Key` header
+1. Frontend `oidc-client-ts` redirects to Keycloak → callback exchanges code for tokens
+2. `lib/api.ts` attaches access token, handles 401 with `signinSilent()`
+3. Backend `createAuth()` verifies JWT against Keycloak JWKS endpoint
+4. `req.auth` = decoded token (sub, email, name, realm_access.roles)
+5. Inter-service auth (scheduler → notify): `X-Internal-Key` header
+6. MCP server forwards user's JWT to backend services (no service account)
 
-### Frontend routing
+### Key service interactions
 
-- `/`, `/login`, `/callback` — public pages
-- `/(protected)/*` — auth guard in route group layout, redirects unauthenticated users
-- `/(protected)/dms/*` — Document Management
-- `/(protected)/scheduler/*` — Job Scheduler
-- `/(protected)/notifications/*` — Notifications
-- Auth state via React context (`AuthProvider` wraps app in root layout)
-- `lib/api.ts` routes requests to correct backend service by path prefix
+- **scheduler → notify**: Job success/failure hooks send HTTP POST with `X-Internal-Key` to queue a notification
+- **notes → ollama → qdrant**: On note save, fire-and-forget generates embedding via Ollama, upserts to Qdrant. Search embeds query text → Qdrant vector similarity.
+- **dms → minio**: Two S3 clients — internal (MINIO_ENDPOINT) for uploads, public (MINIO_PUBLIC_URL) for presigned download/preview URLs
+- **mcp → all backends**: HTTP proxy with JWT passthrough. Streamable HTTP transport on `/mcp` endpoint. 62 tools across all services.
 
 ## Key conventions
 
-- All inputs validated with Zod schemas in `validate()` middleware
-- Config from environment variables with local defaults (`config/index.ts`)
-- `@atlas/core` and `@atlas/server-common` have no dist — imported as source TS via tsconfig `paths` aliases
-- Next.js uses `output: 'standalone'` for Docker builds
-- Keycloak realm config exported to `deployment/keycloak/atlas-realm.json` for reproducible dev setup
 - API responses: `{ data: T }` for success, `{ error: string, details?: {} }` for errors
-- Role-based access: `requireRole('admin')` middleware from `@atlas/server-common`
-- Structured logging: `createLogger('service-name')` from `@atlas/server-common` (pino)
+- All inputs validated with Zod in `validate()` middleware
+- Config from env vars with local defaults (`config/index.ts` in each service)
+- `@atlas/core` and `@atlas/server-common` imported as source TS — no dist, no build
+- Next.js uses `output: 'standalone'` for Docker builds
+- Mongoose models use `toJSON` transform: `_id` → `id`, strip `__v`
+- Qdrant point IDs: MongoDB ObjectId converted to UUID format (zero-padded)
+- Notes store markdown in MongoDB, TipTap editor works with HTML, convert on load/save via turndown/showdown

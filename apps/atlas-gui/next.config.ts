@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
     const dmsUrl = process.env.NEXT_PUBLIC_DMS_URL || 'http://localhost:4001';
     return [
       {
+        source: '/api/v1/files/shares/:token',
+        destination: `${dmsUrl}/api/v1/files/shares/:token`,
+      },
+      {
         source: '/api/v1/dms/shares/:token',
         destination: `${dmsUrl}/api/v1/dms/shares/:token`,
       },

@@ -1,6 +1,6 @@
 import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { s3 } from '../config/s3.js';
+import { s3, s3Public } from '../config/s3.js';
 import { config } from '../config/index.js';
 import crypto from 'node:crypto';
 
@@ -26,7 +26,7 @@ export const getPresignedDownloadUrl = async (key: string, filename: string): Pr
     ResponseContentDisposition: `attachment; filename="${filename}"`,
   });
 
-  return getSignedUrl(s3, command, { expiresIn: 300 });
+  return getSignedUrl(s3Public, command, { expiresIn: 300 });
 };
 
 export const getPresignedInlineUrl = async (key: string, filename: string): Promise<string> => {
@@ -36,7 +36,7 @@ export const getPresignedInlineUrl = async (key: string, filename: string): Prom
     ResponseContentDisposition: `inline; filename="${filename}"`,
   });
 
-  return getSignedUrl(s3, command, { expiresIn: 300 });
+  return getSignedUrl(s3Public, command, { expiresIn: 300 });
 };
 
 export const remove = async (key: string): Promise<void> => {

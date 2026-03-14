@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Settings, FileText, Clock, Bell } from 'lucide-react';
+import { LayoutDashboard, Settings, FileText, Clock, Bell, StickyNote, BarChart3, ScrollText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 
@@ -27,14 +27,17 @@ const navGroups: NavGroup[] = [
   {
     title: 'Services',
     items: [
-      { href: '/dms', label: 'Documents', icon: FileText },
+      { href: '/files', label: 'File Storage', icon: FileText },
       { href: '/scheduler', label: 'Scheduler', icon: Clock },
       { href: '/notifications', label: 'Notifications', icon: Bell },
+      { href: '/notes', label: 'Notes', icon: StickyNote },
+      { href: '/tracker', label: 'Data Tracker', icon: BarChart3 },
     ],
   },
   {
     title: 'System',
     items: [
+      { href: '/audit', label: 'Audit Log', icon: ScrollText },
       { href: '/settings', label: 'Settings', icon: Settings },
     ],
   },

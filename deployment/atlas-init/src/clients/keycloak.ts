@@ -161,6 +161,47 @@ async function createClient(
   return { clientId: dtoIn.clientId, status: "created" };
 }
 
+async function getClientUuid(
+  clientId: string,
+  inventory: Inventory
+): Promise<string | null> {
+  const token = await getAdminToken(inventory);
+  const res = await fetch(
+    adminUrl(inventory, `/clients?clientId=${encodeURIComponent(clientId)}`),
+    { headers: headers(token) }
+  );
+
+  if (!res.ok) throw new Error(`getClientUuid failed: ${res.status}`);
+
+  const clients = await res.json();
+  return clients.length ? clients[0].id : null;
+}
+
+async function ensureClient(
+  dtoIn: Record<string, any>,
+  inventory: Inventory
+): Promise<Record<string, any>> {
+  const token = await getAdminToken(inventory);
+  const uuid = await getClientUuid(dtoIn.clientId, inventory);
+
+  if (!uuid) {
+    return createClient(dtoIn, inventory);
+  }
+
+  const res = await fetch(adminUrl(inventory, `/clients/${uuid}`), {
+    method: "PUT",
+    headers: headers(token),
+    body: JSON.stringify({ ...dtoIn, id: uuid }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`ensureClient update failed (${res.status}): ${body}`);
+  }
+
+  return { clientId: dtoIn.clientId, status: "updated" };
+}
+
 async function updateRealmSettings(
   dtoIn: Record<string, any>,
   inventory: Inventory
@@ -186,6 +227,7 @@ const actions: Record<string, (dtoIn: Record<string, any>, inventory: Inventory)
   createUser,
   assignRoles,
   createClient,
+  ensureClient,
   updateRealmSettings,
 };
 

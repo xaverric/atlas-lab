@@ -23,12 +23,19 @@ const listQuerySchema = z.object({
   parentId: objectIdSchema.optional(),
 });
 
+const setPublicSchema = z.object({
+  isPublic: z.boolean(),
+  publicPermission: z.enum(['view', 'edit', 'full']).optional(),
+});
+
 router.use(auth);
 
 router.post('/', validate(createSchema), folderController.create);
 router.get('/', validate(listQuerySchema, 'query'), folderController.list);
 router.get('/:id', validate(idParamSchema, 'params'), folderController.getById);
+router.get('/:id/metadata', validate(idParamSchema, 'params'), folderController.getMetadata);
 router.patch('/:id', validate(idParamSchema, 'params'), validate(updateSchema), folderController.update);
+router.patch('/:id/public', validate(idParamSchema, 'params'), validate(setPublicSchema), folderController.setPublic);
 router.delete('/:id', validate(idParamSchema, 'params'), folderController.remove);
 
 export default router;

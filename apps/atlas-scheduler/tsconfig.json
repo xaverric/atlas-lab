@@ -9,6 +9,7 @@
     "noEmit": true,
     "paths": {
       "@atlas/core": ["../../packages/core/src"],
+      "@atlas/event-bus": ["../../packages/event-bus/src"],
       "@atlas/server-common": ["../../packages/server-common/src"]
     }
   },

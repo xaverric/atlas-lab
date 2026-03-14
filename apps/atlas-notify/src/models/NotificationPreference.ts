@@ -2,17 +2,10 @@ import mongoose from 'mongoose';
 
 const preferenceSchema = new mongoose.Schema(
   {
-    userId: { type: String, required: true, unique: true },
-    channels: {
-      email: {
-        enabled: { type: Boolean, default: false },
-        address: { type: String, default: '' },
-      },
-      telegram: {
-        enabled: { type: Boolean, default: false },
-        chatId: { type: String, default: '' },
-      },
-    },
+    userId: { type: String, required: true },
+    eventPattern: { type: String, required: true },
+    channelIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'NotificationChannel' }],
+    enabled: { type: Boolean, default: true },
   },
   {
     timestamps: true,
@@ -26,5 +19,7 @@ const preferenceSchema = new mongoose.Schema(
     },
   },
 );
+
+preferenceSchema.index({ userId: 1, eventPattern: 1 });
 
 export const NotificationPreference = mongoose.model('NotificationPreference', preferenceSchema);

@@ -13,6 +13,8 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.5.0
     command: start
+    volumes:
+      - ./keycloak/themes/atlas:/opt/keycloak/themes/atlas:ro
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
@@ -51,7 +53,7 @@ services:
       PORT: 4000
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.atlas-core.rule=Host(`${ATLAS_DOMAIN}`) && (PathPrefix(`/api/v1/users`) || Path(`/health`))"
+      - "traefik.http.routers.atlas-core.rule=Host(`api.${ATLAS_DOMAIN}`)"
       - "traefik.http.routers.atlas-core.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-core.loadbalancer.server.port=4000"
     depends_on:
@@ -66,12 +68,13 @@ services:
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
       CORS_ORIGIN: https://${ATLAS_DOMAIN}
       MINIO_ENDPOINT: http://minio:9000
+      MINIO_PUBLIC_URL: https://s3.${ATLAS_DOMAIN}
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       PORT: 4001
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.atlas-dms.rule=Host(`${ATLAS_DOMAIN}`) && PathPrefix(`/api/v1/dms`)"
+      - "traefik.http.routers.atlas-dms.rule=Host(`dms.${ATLAS_DOMAIN}`)"
       - "traefik.http.routers.atlas-dms.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-dms.loadbalancer.server.port=4001"
     depends_on:
@@ -90,13 +93,21 @@ services:
       PORT: 4002
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.atlas-scheduler.rule=Host(`${ATLAS_DOMAIN}`) && PathPrefix(`/api/v1/scheduler`)"
+      - "traefik.http.routers.atlas-scheduler.rule=Host(`scheduler.${ATLAS_DOMAIN}`)"
       - "traefik.http.routers.atlas-scheduler.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-scheduler.loadbalancer.server.port=4002"
     depends_on:
       - mongodb
       - keycloak
       - redis
+    restart: unless-stopped
+
+  signal-cli:
+    image: bbernhard/signal-cli-rest-api:latest
+    environment:
+      - MODE=native
+    volumes:
+      - signal-data:/home/.local/share/signal-cli
     restart: unless-stopped
 
   atlas-notify:
@@ -107,10 +118,19 @@ services:
       CORS_ORIGIN: https://${ATLAS_DOMAIN}
       REDIS_HOST: redis
       INTERNAL_KEY: ${INTERNAL_KEY}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VAPID_SUBJECT: ${VAPID_SUBJECT}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER}
+      TWILIO_WHATSAPP_FROM: ${TWILIO_WHATSAPP_FROM}
+      SIGNAL_CLI_URL: http://signal-cli:8080
+      SIGNAL_FROM_NUMBER: ${SIGNAL_FROM_NUMBER}
       PORT: 4003
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.atlas-notify.rule=Host(`${ATLAS_DOMAIN}`) && PathPrefix(`/api/v1/notifications`)"
+      - "traefik.http.routers.atlas-notify.rule=Host(`notify.${ATLAS_DOMAIN}`)"
       - "traefik.http.routers.atlas-notify.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-notify.loadbalancer.server.port=4003"
     depends_on:
@@ -119,12 +139,72 @@ services:
       - redis
     restart: unless-stopped
 
+  atlas-notes:
+    image: ghcr.io/${GITHUB_REPO}/atlas-notes:latest
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/atlas-notes
+      KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
+      CORS_ORIGIN: https://${ATLAS_DOMAIN}
+      QDRANT_URL: http://qdrant:6333
+      OLLAMA_URL: http://ollama:11434
+      PORT: 4004
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.atlas-notes.rule=Host(`notes.${ATLAS_DOMAIN}`)"
+      - "traefik.http.routers.atlas-notes.tls.certresolver=letsencrypt"
+      - "traefik.http.services.atlas-notes.loadbalancer.server.port=4004"
+    depends_on:
+      - mongodb
+      - keycloak
+      - qdrant
+      - ollama
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant
+    volumes:
+      - qdrant-data:/qdrant/storage
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+  atlas-mcp:
+    image: ghcr.io/${GITHUB_REPO}/atlas-mcp:latest
+    environment:
+      KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
+      CORS_ORIGIN: "*"
+      CORE_URL: http://atlas-core:4000
+      DMS_URL: http://atlas-dms:4001
+      SCHEDULER_URL: http://atlas-scheduler:4002
+      NOTIFY_URL: http://atlas-notify:4003
+      NOTES_URL: http://atlas-notes:4004
+      TRACKER_URL: http://atlas-tracker:4006
+      PORT: 4005
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.atlas-mcp.rule=Host(`mcp.${ATLAS_DOMAIN}`)"
+      - "traefik.http.routers.atlas-mcp.tls.certresolver=letsencrypt"
+      - "traefik.http.services.atlas-mcp.loadbalancer.server.port=4005"
+    depends_on:
+      - keycloak
+      - atlas-core
+    restart: unless-stopped
+
   atlas-gui:
     image: ghcr.io/${GITHUB_REPO}/atlas-gui:latest
     environment:
-      NEXT_PUBLIC_API_URL: https://${ATLAS_DOMAIN}/api
+      NEXT_PUBLIC_API_URL: https://api.${ATLAS_DOMAIN}
+      NEXT_PUBLIC_DMS_URL: https://dms.${ATLAS_DOMAIN}
+      NEXT_PUBLIC_SCHEDULER_URL: https://scheduler.${ATLAS_DOMAIN}
+      NEXT_PUBLIC_NOTIFY_URL: https://notify.${ATLAS_DOMAIN}
+      NEXT_PUBLIC_NOTES_URL: https://notes.${ATLAS_DOMAIN}
       NEXT_PUBLIC_OIDC_AUTHORITY: https://${KC_HOSTNAME}/realms/atlas
       NEXT_PUBLIC_OIDC_CLIENT_ID: atlas-gui
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.atlas-gui.rule=Host(`${ATLAS_DOMAIN}`)"
@@ -132,6 +212,27 @@ services:
       - "traefik.http.services.atlas-gui.loadbalancer.server.port=3000"
     depends_on:
       - atlas-core
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    environment:
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_USER}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD}
+      N8N_HOST: n8n.${ATLAS_DOMAIN}
+      N8N_PROTOCOL: https
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      WEBHOOK_URL: https://n8n.${ATLAS_DOMAIN}/
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`n8n.${ATLAS_DOMAIN}`)"
+      - "traefik.http.routers.n8n.tls.certresolver=letsencrypt"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+    volumes:
+      - n8n-data:/home/node/.n8n
+    depends_on:
+      - redis
     restart: unless-stopped
 
   mongodb:
@@ -154,8 +255,15 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     labels:
       - "traefik.enable=true"
+      # S3 API
+      - "traefik.http.routers.minio-s3.rule=Host(`s3.${ATLAS_DOMAIN}`)"
+      - "traefik.http.routers.minio-s3.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.minio-s3.service=minio-s3"
+      - "traefik.http.services.minio-s3.loadbalancer.server.port=9000"
+      # Console
       - "traefik.http.routers.minio-console.rule=Host(`storage.${ATLAS_DOMAIN}`)"
       - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.minio-console.service=minio-console"
       - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
     volumes:
       - minio-data:/data
@@ -167,3 +275,7 @@ volumes:
   traefik-certs:
   redis-data:
   minio-data:
+  qdrant-data:
+  ollama-data:
+  n8n-data:
+  signal-data:

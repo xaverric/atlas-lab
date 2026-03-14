@@ -8,6 +8,7 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   minio: {
     endpoint: process.env.MINIO_ENDPOINT || 'http://localhost:9000',
+    publicUrl: process.env.MINIO_PUBLIC_URL || '',
     accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
     secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
     bucket: process.env.MINIO_BUCKET || 'atlas-dms',

@@ -1,6 +1,7 @@
 import { ApiError } from '@atlas/core';
 import * as documentDao from '../daos/documentDao.js';
 import * as storageService from './storageService.js';
+import * as folderService from './folderService.js';
 
 interface UploadInput {
   file: Express.Multer.File;
@@ -12,6 +13,7 @@ interface UploadInput {
 
 interface ListInput {
   ownerId: string;
+  isAdmin?: boolean;
   folderId?: string | null;
   tags?: string[];
   search?: string;
@@ -41,25 +43,24 @@ export const upload = async ({ file, name, tags, ownerId, folderId }: UploadInpu
 
 export const list = (opts: ListInput) => documentDao.list(opts);
 
-export const getById = async (id: string, ownerId: string) => {
-  const doc = await documentDao.findById(id);
+export const getById = async (id: string, ownerId: string, isAdmin = false) => {
+  const doc = await documentDao.findById(id, ownerId, isAdmin);
   if (!doc) throw new ApiError(404, 'Document not found');
-  if (doc.ownerId !== ownerId) throw new ApiError(403, 'Access denied');
   return doc;
 };
 
-export const getDownloadUrl = async (id: string, ownerId: string) => {
-  const doc = await getById(id, ownerId);
+export const getDownloadUrl = async (id: string, ownerId: string, isAdmin = false) => {
+  const doc = await getById(id, ownerId, isAdmin);
   return storageService.getPresignedDownloadUrl(doc.storageKey, doc.originalName);
 };
 
-export const getPreviewUrl = async (id: string, ownerId: string) => {
-  const doc = await getById(id, ownerId);
+export const getPreviewUrl = async (id: string, ownerId: string, isAdmin = false) => {
+  const doc = await getById(id, ownerId, isAdmin);
   return storageService.getPresignedInlineUrl(doc.storageKey, doc.originalName);
 };
 
-export const update = async (id: string, ownerId: string, data: { name?: string; tags?: string[]; folderId?: string | null }) => {
-  const doc = await getById(id, ownerId);
+export const update = async (id: string, ownerId: string, data: { name?: string; tags?: string[]; folderId?: string | null }, isAdmin = false) => {
+  const doc = await getById(id, ownerId, isAdmin);
   const updates: Record<string, unknown> = {};
   if (data.name !== undefined) updates.name = data.name;
   if (data.tags !== undefined) updates.tags = data.tags;
@@ -69,8 +70,8 @@ export const update = async (id: string, ownerId: string, data: { name?: string;
   return updated;
 };
 
-export const remove = async (id: string, ownerId: string) => {
-  const doc = await getById(id, ownerId);
+export const remove = async (id: string, ownerId: string, isAdmin = false) => {
+  const doc = await getById(id, ownerId, isAdmin);
   await storageService.remove(doc.storageKey);
   await documentDao.deleteById(id);
 };
@@ -91,4 +92,59 @@ export const bulkMove = async (ids: string[], ownerId: string, folderId: string 
   return { moved: result.modifiedCount };
 };
 
-export const getTags = (ownerId: string) => documentDao.distinctTags(ownerId);
+export const getTags = (ownerId: string, isAdmin = false) => documentDao.distinctTags(ownerId, isAdmin);
+
+const verifyDocPublic = async (doc: any) => {
+  if (!doc.folderId) throw new ApiError(403, 'Document is not in a public folder');
+  const isPublic = await folderService.isPublicFolder(doc.folderId.toString());
+  if (!isPublic) throw new ApiError(403, 'Document is not in a public folder');
+};
+
+export const getPublicDownloadUrl = async (id: string) => {
+  const doc = await documentDao.findById(id);
+  if (!doc) throw new ApiError(404, 'Document not found');
+  await verifyDocPublic(doc);
+  return storageService.getPresignedDownloadUrl(doc.storageKey, doc.originalName);
+};
+
+export const getPublicPreviewUrl = async (id: string) => {
+  const doc = await documentDao.findById(id);
+  if (!doc) throw new ApiError(404, 'Document not found');
+  await verifyDocPublic(doc);
+  return storageService.getPresignedInlineUrl(doc.storageKey, doc.originalName);
+};
+
+export const updatePublic = async (id: string, data: { name?: string; tags?: string[] }) => {
+  const doc = await documentDao.findById(id);
+  if (!doc) throw new ApiError(404, 'Document not found');
+  await verifyDocPublic(doc);
+  const updates: Record<string, unknown> = {};
+  if (data.name !== undefined) updates.name = data.name;
+  if (data.tags !== undefined) updates.tags = data.tags;
+  const updated = await documentDao.updateById(doc.id, updates as Parameters<typeof documentDao.updateById>[1]);
+  if (!updated) throw new ApiError(404, 'Document not found');
+  return updated;
+};
+
+export const uploadPublic = async ({ file, name, tags, folderId }: { file: Express.Multer.File; name: string; tags: string[]; folderId: string }) => {
+  const folder = await folderService.getPublicFolder(folderId);
+  const storageKey = await storageService.upload(file);
+  return documentDao.create({
+    name,
+    originalName: file.originalname,
+    mimeType: file.mimetype,
+    size: file.size,
+    storageKey,
+    tags,
+    ownerId: folder.ownerId,
+    folderId,
+  });
+};
+
+export const removePublic = async (id: string) => {
+  const doc = await documentDao.findById(id);
+  if (!doc) throw new ApiError(404, 'Document not found');
+  await verifyDocPublic(doc);
+  await storageService.remove(doc.storageKey);
+  await documentDao.deleteById(id);
+};

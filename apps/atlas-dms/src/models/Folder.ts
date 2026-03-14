@@ -5,6 +5,8 @@ const folderSchema = new mongoose.Schema(
     name: { type: String, required: true },
     parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', default: null },
     ownerId: { type: String, required: true },
+    isPublic: { type: Boolean, default: false },
+    publicPermission: { type: String, enum: ['view', 'edit', 'full'], default: 'view' },
   },
   {
     timestamps: true,

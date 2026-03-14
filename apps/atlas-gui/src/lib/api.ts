@@ -4,11 +4,16 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 const DMS_URL = process.env.NEXT_PUBLIC_DMS_URL || 'http://localhost:4001';
 const SCHEDULER_URL = process.env.NEXT_PUBLIC_SCHEDULER_URL || 'http://localhost:4002';
 const NOTIFY_URL = process.env.NEXT_PUBLIC_NOTIFY_URL || 'http://localhost:4003';
+const NOTES_URL = process.env.NEXT_PUBLIC_NOTES_URL || 'http://localhost:4004';
+const TRACKER_URL = process.env.NEXT_PUBLIC_TRACKER_URL || 'http://localhost:4006';
 
 const resolveBaseUrl = (path: string): string => {
+  if (path.startsWith('/api/v1/files')) return DMS_URL;
   if (path.startsWith('/api/v1/dms')) return DMS_URL;
   if (path.startsWith('/api/v1/scheduler')) return SCHEDULER_URL;
   if (path.startsWith('/api/v1/notifications')) return NOTIFY_URL;
+  if (path.startsWith('/api/v1/notes')) return NOTES_URL;
+  if (path.startsWith('/api/v1/tracker')) return TRACKER_URL;
   return API_URL;
 };
 

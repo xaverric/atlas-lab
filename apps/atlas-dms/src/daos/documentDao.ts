@@ -1,8 +1,10 @@
+import mongoose from 'mongoose';
 import { Document } from '../models/Document.js';
 import type { FilterQuery } from 'mongoose';
 
 interface ListOptions {
   ownerId: string;
+  isAdmin?: boolean;
   folderId?: string | null;
   tags?: string[];
   search?: string;
@@ -26,11 +28,15 @@ export const create = (data: {
   folderId?: string | null;
 }) => Document.create(data);
 
-export const findById = (id: string) => Document.findById(id);
+export const findById = (id: string, ownerId?: string, isAdmin = false) => {
+  if (!isAdmin && ownerId) return Document.findOne({ _id: id, ownerId });
+  return Document.findById(id);
+};
 
 export const list = async (opts: ListOptions) => {
-  const { ownerId, folderId, tags, search, mimeType, dateFrom, dateTo, sortBy, sortOrder, page, limit } = opts;
-  const filter: FilterQuery<typeof Document> = { ownerId };
+  const { ownerId, isAdmin, folderId, tags, search, mimeType, dateFrom, dateTo, sortBy, sortOrder, page, limit } = opts;
+  const filter: FilterQuery<typeof Document> = {};
+  if (!isAdmin) filter.ownerId = ownerId;
 
   if (folderId !== undefined) filter.folderId = folderId || null;
   if (tags?.length) filter.tags = { $in: tags };
@@ -71,5 +77,19 @@ export const updateManyFolder = (ids: string[], ownerId: string, folderId: strin
 export const findManyByIds = (ids: string[], ownerId: string) =>
   Document.find({ _id: { $in: ids }, ownerId });
 
-export const distinctTags = (ownerId: string): Promise<string[]> =>
-  Document.distinct('tags', { ownerId });
+export const distinctTags = (ownerId: string, isAdmin = false): Promise<string[]> =>
+  Document.distinct('tags', isAdmin ? {} : { ownerId });
+
+export const countByFolder = (folderId: string) =>
+  Document.countDocuments({ folderId });
+
+export const sumSizeByFolder = async (folderId: string): Promise<number> => {
+  const result = await Document.aggregate([
+    { $match: { folderId: new mongoose.Types.ObjectId(folderId) } },
+    { $group: { _id: null, total: { $sum: '$size' } } },
+  ]);
+  return result[0]?.total || 0;
+};
+
+export const listByFolder = (folderId: string | null) =>
+  Document.find({ folderId }).sort({ createdAt: -1 });

@@ -9,6 +9,7 @@ export const dataset: Dataset = [
       ssoSessionIdleTimeout: 28800,
       ssoSessionMaxLifespan: 28800,
       accessTokenLifespan: 1800,
+      loginTheme: "atlas",
     },
     skipOnError: true,
   },
@@ -26,6 +27,59 @@ export const dataset: Dataset = [
     dtoIn: assignment,
     skipOnError: true,
   })),
+
+  {
+    client: "keycloak",
+    action: "ensureClient",
+    dtoIn: {
+      clientId: "atlas-gui",
+      name: "Atlas GUI",
+      enabled: true,
+      publicClient: true,
+      standardFlowEnabled: true,
+      directAccessGrantsEnabled: true,
+      redirectUris: [
+        "http://localhost:3000/*",
+        "https://xaverric.cz/*",
+      ],
+      webOrigins: [
+        "http://localhost:3000",
+        "https://xaverric.cz",
+      ],
+      attributes: {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris":
+          "http://localhost:3000/*##https://xaverric.cz/*",
+      },
+      protocol: "openid-connect",
+    },
+    skipOnError: true,
+  },
+
+  {
+    client: "keycloak",
+    action: "ensureClient",
+    dtoIn: {
+      clientId: "atlas-mcp",
+      name: "Atlas MCP Server",
+      enabled: true,
+      publicClient: true,
+      standardFlowEnabled: true,
+      directAccessGrantsEnabled: true,
+      redirectUris: [
+        "http://localhost:*",
+        "http://127.0.0.1:*",
+        "https://mcp.xaverric.cz/*",
+      ],
+      webOrigins: ["*"],
+      attributes: {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "+",
+      },
+      protocol: "openid-connect",
+    },
+    skipOnError: true,
+  },
 
   {
     client: "minio",

@@ -1,6 +1,7 @@
 export const config = {
   port: Number(process.env.PORT) || 4000,
   mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/atlas',
+  auditMongoUri: process.env.AUDIT_MONGODB_URI || 'mongodb://localhost:27017/atlas-audit',
   keycloak: {
     issuer: process.env.KEYCLOAK_ISSUER || 'http://localhost:8080/realms/atlas',
     publicIssuer: process.env.KEYCLOAK_PUBLIC_ISSUER || process.env.KEYCLOAK_ISSUER || 'http://localhost:8080/realms/atlas',

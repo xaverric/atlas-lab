@@ -2,6 +2,9 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.5.0
     command: start-dev --import-realm
+    volumes:
+      - ./keycloak/atlas-realm.json:/opt/keycloak/data/import/atlas-realm.json:ro
+      - ./keycloak/themes/atlas:/opt/keycloak/themes/atlas:ro
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
@@ -13,8 +16,6 @@ services:
       KC_HEALTH_ENABLED: "true"
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-    volumes:
-      - ./keycloak/atlas-realm.json:/opt/keycloak/data/import/atlas-realm.json:ro
     ports:
       - "8080:8080"
     depends_on:
@@ -35,6 +36,7 @@ services:
     image: node:22-alpine
     working_dir: /app
     command: npm install
+    profiles: [backend, gui]
     volumes:
       - ..:/app
       - app-node-modules:/app/node_modules
@@ -43,6 +45,7 @@ services:
     image: node:22-alpine
     working_dir: /app
     command: npm -w @atlas/server run dev
+    profiles: [backend]
     volumes:
       - ..:/app
       - app-node-modules:/app/node_modules
@@ -51,6 +54,7 @@ services:
       KEYCLOAK_ISSUER: http://keycloak:8080/realms/atlas
       KEYCLOAK_PUBLIC_ISSUER: http://localhost:8080/realms/atlas
       CORS_ORIGIN: http://localhost:3000
+      AUDIT_MONGODB_URI: mongodb://mongodb:27017/atlas-audit
       PORT: 4000
     ports:
       - "4000:4000"
@@ -66,6 +70,7 @@ services:
     image: node:22-alpine
     working_dir: /app
     command: npm -w @atlas/dms run dev
+    profiles: [backend]
     volumes:
       - ..:/app
       - app-node-modules:/app/node_modules
@@ -75,8 +80,10 @@ services:
       KEYCLOAK_PUBLIC_ISSUER: http://localhost:8080/realms/atlas
       CORS_ORIGIN: http://localhost:3000
       MINIO_ENDPOINT: http://minio:9000
+      MINIO_PUBLIC_URL: http://localhost:9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
+      AUDIT_MONGODB_URI: mongodb://mongodb:27017/atlas-audit
       PORT: 4001
     ports:
       - "4001:4001"
@@ -94,6 +101,7 @@ services:
     image: node:22-alpine
     working_dir: /app
     command: npm -w @atlas/scheduler run dev
+    profiles: [backend]
     volumes:
       - ..:/app
       - app-node-modules:/app/node_modules
@@ -103,6 +111,7 @@ services:
       KEYCLOAK_PUBLIC_ISSUER: http://localhost:8080/realms/atlas
       CORS_ORIGIN: http://localhost:3000
       REDIS_HOST: redis
+      AUDIT_MONGODB_URI: mongodb://mongodb:27017/atlas-audit
       PORT: 4002
     ports:
       - "4002:4002"
@@ -120,6 +129,7 @@ services:
     image: node:22-alpine
     working_dir: /app
     command: npm -w @atlas/notify run dev
+    profiles: [backend]
     volumes:
       - ..:/app
       - app-node-modules:/app/node_modules
@@ -129,6 +139,10 @@ services:
       KEYCLOAK_PUBLIC_ISSUER: http://localhost:8080/realms/atlas
       CORS_ORIGIN: http://localhost:3000
       REDIS_HOST: redis
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@xaverric.cz}
+      AUDIT_MONGODB_URI: mongodb://mongodb:27017/atlas-audit
       PORT: 4003
     ports:
       - "4003:4003"
@@ -142,10 +156,108 @@ services:
       redis:
         condition: service_started
 
+  atlas-notes:
+    image: node:22-alpine
+    working_dir: /app
+    command: npm -w @atlas/notes run dev
+    profiles: [backend]
+    volumes:
+      - ..:/app
+      - app-node-modules:/app/node_modules
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/atlas-notes
+      KEYCLOAK_ISSUER: http://keycloak:8080/realms/atlas
+      KEYCLOAK_PUBLIC_ISSUER: http://localhost:8080/realms/atlas
+      CORS_ORIGIN: http://localhost:3000
+      QDRANT_URL: http://qdrant:6333
+      OLLAMA_URL: http://ollama:11434
+      AUDIT_MONGODB_URI: mongodb://mongodb:27017/atlas-audit
+      PORT: 4004
+    ports:
+      - "4004:4004"
+    depends_on:
+      installer:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_started
+      keycloak:
+        condition: service_started
+      qdrant:
+        condition: service_started
+      ollama:
+        condition: service_started
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+  atlas-tracker:
+    image: node:22-alpine
+    working_dir: /app
+    command: npm -w @atlas/tracker run dev
+    profiles: [backend]
+    volumes:
+      - ..:/app
+      - app-node-modules:/app/node_modules
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/atlas-tracker
+      KEYCLOAK_ISSUER: http://keycloak:8080/realms/atlas
+      KEYCLOAK_PUBLIC_ISSUER: http://localhost:8080/realms/atlas
+      CORS_ORIGIN: http://localhost:3000
+      AUDIT_MONGODB_URI: mongodb://mongodb:27017/atlas-audit
+      PORT: 4006
+    ports:
+      - "4006:4006"
+    depends_on:
+      installer:
+        condition: service_completed_successfully
+      mongodb:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
+  atlas-mcp:
+    image: node:22-alpine
+    working_dir: /app
+    command: npm -w @atlas/mcp run dev
+    profiles: [backend]
+    volumes:
+      - ..:/app
+      - app-node-modules:/app/node_modules
+    environment:
+      KEYCLOAK_ISSUER: http://keycloak:8080/realms/atlas
+      KEYCLOAK_PUBLIC_ISSUER: http://localhost:8080/realms/atlas
+      CORS_ORIGIN: "*"
+      CORE_URL: http://atlas-core:4000
+      DMS_URL: http://atlas-dms:4001
+      SCHEDULER_URL: http://atlas-scheduler:4002
+      NOTIFY_URL: http://atlas-notify:4003
+      NOTES_URL: http://atlas-notes:4004
+      TRACKER_URL: http://atlas-tracker:4006
+      PORT: 4005
+    ports:
+      - "4005:4005"
+    depends_on:
+      installer:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_started
+
   atlas-gui:
     image: node:22-alpine
     working_dir: /app
     command: sh -c "npm -w @atlas/gui run dev -- --hostname 0.0.0.0"
+    profiles: [gui]
     volumes:
       - ..:/app
       - app-node-modules:/app/node_modules
@@ -154,8 +266,11 @@ services:
       NEXT_PUBLIC_DMS_URL: http://localhost:4001
       NEXT_PUBLIC_SCHEDULER_URL: http://localhost:4002
       NEXT_PUBLIC_NOTIFY_URL: http://localhost:4003
+      NEXT_PUBLIC_NOTES_URL: http://localhost:4004
+      NEXT_PUBLIC_TRACKER_URL: http://localhost:4006
       NEXT_PUBLIC_OIDC_AUTHORITY: http://localhost:8080/realms/atlas
       NEXT_PUBLIC_OIDC_CLIENT_ID: atlas-gui
+      NEXT_PUBLIC_VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
     ports:
       - "3000:3000"
     depends_on:
@@ -196,3 +311,5 @@ volumes:
   app-node-modules:
   redis-data:
   minio-data:
+  qdrant-data:
+  ollama-data:

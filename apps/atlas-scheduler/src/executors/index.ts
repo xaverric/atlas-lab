@@ -1,16 +1,16 @@
 import type { Executor } from './types.js';
-import { httpExecutor } from './http.js';
 import { webhookExecutor } from './webhook.js';
+import { javascriptExecutor } from './javascript.js';
 import { shellExecutor } from './shell.js';
-import { scriptExecutor } from './script.js';
-import { monitorExecutor } from './monitor.js';
+import { gitExecutor } from './git.js';
+import { n8nExecutor } from './n8n.js';
 
 const executors: Record<string, Executor> = {
-  http: httpExecutor,
   webhook: webhookExecutor,
+  javascript: javascriptExecutor,
   shell: shellExecutor,
-  script: scriptExecutor,
-  monitor: monitorExecutor,
+  git: gitExecutor,
+  n8n: n8nExecutor,
 };
 
 export const getExecutor = (type: string): Executor => {
@@ -19,4 +19,4 @@ export const getExecutor = (type: string): Executor => {
   return executor;
 };
 
-export type { ExecutionResult } from './types.js';
+export type { ExecutionResult, ExecutionContext, RunLogger, StorageAccess } from './types.js';

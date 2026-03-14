@@ -1,6 +1,14 @@
-import type { RequestHandler } from 'express';
+import type { Request, RequestHandler } from 'express';
 import { ApiError } from '@atlas/core';
 import * as documentService from '../services/documentService.js';
+
+const resolveOwner = (req: Request) => {
+  const isAdmin = req.auth.realm_access?.roles?.includes('admin') ?? false;
+  const queryUserId = req.query.userId as string | undefined;
+  if (queryUserId && !isAdmin) throw new ApiError(403, 'Only admins can browse other users data');
+  const ownerId = (isAdmin && queryUserId) ? queryUserId : req.auth.sub;
+  return { ownerId, isAdmin };
+};
 
 export const upload: RequestHandler = async (req, res, next) => {
   try {
@@ -26,8 +34,10 @@ export const upload: RequestHandler = async (req, res, next) => {
 
 export const list: RequestHandler = async (req, res, next) => {
   try {
+    const { ownerId, isAdmin } = resolveOwner(req);
     const result = await documentService.list({
-      ownerId: req.auth.sub,
+      ownerId,
+      isAdmin,
       folderId: req.query.folderId as string | undefined,
       tags: req.query.tags ? String(req.query.tags).split(',') : undefined,
       search: req.query.search as string | undefined,
@@ -47,7 +57,8 @@ export const list: RequestHandler = async (req, res, next) => {
 
 export const getById: RequestHandler = async (req, res, next) => {
   try {
-    const doc = await documentService.getById(req.params.id as string, req.auth.sub);
+    const { ownerId, isAdmin } = resolveOwner(req);
+    const doc = await documentService.getById(req.params.id as string, ownerId, isAdmin);
     res.json({ data: doc });
   } catch (err) {
     next(err);
@@ -56,7 +67,8 @@ export const getById: RequestHandler = async (req, res, next) => {
 
 export const download: RequestHandler = async (req, res, next) => {
   try {
-    const url = await documentService.getDownloadUrl(req.params.id as string, req.auth.sub);
+    const { ownerId, isAdmin } = resolveOwner(req);
+    const url = await documentService.getDownloadUrl(req.params.id as string, ownerId, isAdmin);
     res.json({ data: { url } });
   } catch (err) {
     next(err);
@@ -65,7 +77,8 @@ export const download: RequestHandler = async (req, res, next) => {
 
 export const preview: RequestHandler = async (req, res, next) => {
   try {
-    const url = await documentService.getPreviewUrl(req.params.id as string, req.auth.sub);
+    const { ownerId, isAdmin } = resolveOwner(req);
+    const url = await documentService.getPreviewUrl(req.params.id as string, ownerId, isAdmin);
     res.json({ data: { url } });
   } catch (err) {
     next(err);
@@ -74,7 +87,8 @@ export const preview: RequestHandler = async (req, res, next) => {
 
 export const update: RequestHandler = async (req, res, next) => {
   try {
-    const doc = await documentService.update(req.params.id as string, req.auth.sub, req.body);
+    const { ownerId, isAdmin } = resolveOwner(req);
+    const doc = await documentService.update(req.params.id as string, ownerId, req.body, isAdmin);
     res.json({ data: doc });
   } catch (err) {
     next(err);
@@ -83,7 +97,8 @@ export const update: RequestHandler = async (req, res, next) => {
 
 export const remove: RequestHandler = async (req, res, next) => {
   try {
-    await documentService.remove(req.params.id as string, req.auth.sub);
+    const { ownerId, isAdmin } = resolveOwner(req);
+    await documentService.remove(req.params.id as string, ownerId, isAdmin);
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -110,7 +125,8 @@ export const bulkMove: RequestHandler = async (req, res, next) => {
 
 export const tags: RequestHandler = async (req, res, next) => {
   try {
-    const data = await documentService.getTags(req.auth.sub);
+    const { ownerId, isAdmin } = resolveOwner(req);
+    const data = await documentService.getTags(ownerId, isAdmin);
     res.json({ data });
   } catch (err) {
     next(err);

@@ -1,21 +1,46 @@
 import { execFile } from 'node:child_process';
-import type { Executor, ExecutionResult } from './types.js';
+import { config } from '../config/index.js';
+import type { Executor, ExecutionResult, ExecutionContext } from './types.js';
 
 const MAX_OUTPUT = 50_000;
 
+interface ShellConfig {
+  command: string;
+  args?: string[];
+  cwd?: string;
+  env?: Record<string, string>;
+  timeout?: number;
+}
+
 export const shellExecutor: Executor = {
-  execute(config, timeoutMs): Promise<ExecutionResult> {
-    const { command } = config as { command: string };
+  execute(cfg, timeoutMs, ctx?: ExecutionContext): Promise<ExecutionResult> {
+    if (!config.allowShellExec) {
+      ctx?.logger.error('Shell execution is disabled (ALLOW_SHELL_EXEC)');
+      return Promise.resolve({ exitCode: 1, error: 'Shell execution is disabled. Set ALLOW_SHELL_EXEC=true to enable.' });
+    }
+
+    const { command, args = [], cwd, env = {} } = cfg as unknown as ShellConfig;
+
+    ctx?.logger.info(`Shell: ${command} ${args.join(' ')}`);
 
     return new Promise((resolve) => {
-      const child = execFile('/bin/sh', ['-c', command], {
+      const child = execFile(command, args, {
         timeout: timeoutMs,
-        maxBuffer: MAX_OUTPUT,
+        maxBuffer: MAX_OUTPUT * 2,
+        cwd: cwd || undefined,
+        env: { ...process.env, ...env },
       }, (err, stdout, stderr) => {
+        const exitCode = child.exitCode ?? (err ? 1 : 0);
+        const stdoutStr = stdout.slice(0, MAX_OUTPUT);
+        const stderrStr = stderr.slice(0, MAX_OUTPUT);
+
+        if (stdoutStr) ctx?.logger.info(stdoutStr);
+        if (stderrStr) ctx?.logger.warn(stderrStr);
+
         resolve({
-          exitCode: child.exitCode ?? (err ? 1 : 0),
-          stdout: stdout.slice(0, MAX_OUTPUT),
-          stderr: stderr.slice(0, MAX_OUTPUT),
+          exitCode,
+          stdout: stdoutStr,
+          stderr: stderrStr,
           ...(err ? { error: err.message } : {}),
         });
       });

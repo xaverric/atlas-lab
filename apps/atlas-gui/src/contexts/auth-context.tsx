@@ -2,13 +2,14 @@
 
 import { createContext, useCallback, useEffect, useState, type ReactNode } from 'react';
 import type { User as OidcUser } from 'oidc-client-ts';
-import { getUserManager } from '@/lib/auth';
+import { getUserManager, loginWithCredentials as authLoginWithCredentials } from '@/lib/auth';
 
 interface AuthContextValue {
   user: OidcUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: () => Promise<void>;
+  loginWithCredentials: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -17,6 +18,7 @@ export const AuthContext = createContext<AuthContextValue>({
   isLoading: true,
   isAuthenticated: false,
   login: async () => {},
+  loginWithCredentials: async () => {},
   logout: async () => {},
 });
 
@@ -45,12 +47,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await getUserManager().signinRedirect();
   }, []);
 
+  const loginWithCredentials = useCallback(async (username: string, password: string) => {
+    const u = await authLoginWithCredentials(username, password);
+    setUser(u);
+  }, []);
+
   const logout = useCallback(async () => {
     await getUserManager().signoutRedirect();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user && !user.expired, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user && !user.expired, login, loginWithCredentials, logout }}>
       {children}
     </AuthContext.Provider>
   );

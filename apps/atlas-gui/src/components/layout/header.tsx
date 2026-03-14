@@ -1,7 +1,9 @@
 'use client';
 
-import { LogOut, Settings, User, Menu } from 'lucide-react';
+import { LogOut, Settings, User, Menu, Sun, Moon, Monitor } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/use-auth';
+import { NotificationBell } from './notification-bell';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -9,6 +11,15 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
+
+  const cycleTheme = () => {
+    if (theme === 'light') setTheme('dark');
+    else if (theme === 'dark') setTheme('system');
+    else setTheme('light');
+  };
+
+  const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
 
   return (
     <header className="flex h-14 items-center justify-between border-b px-4 md:px-6">
@@ -27,6 +38,14 @@ export function Header({ onMenuToggle }: HeaderProps) {
           <User className="h-4 w-4" />
           <span className="hidden sm:inline">{user?.profile?.name || user?.profile?.email || 'User'}</span>
         </div>
+        <button
+          onClick={cycleTheme}
+          className="text-muted-foreground hover:text-foreground"
+          title={`Theme: ${theme}`}
+        >
+          <ThemeIcon className="h-4 w-4" />
+        </button>
+        <NotificationBell />
         <a href="/settings" className="text-muted-foreground hover:text-foreground">
           <Settings className="h-4 w-4" />
         </a>

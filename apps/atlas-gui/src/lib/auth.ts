@@ -1,4 +1,4 @@
-import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
+import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 
 const authority = process.env.NEXT_PUBLIC_OIDC_AUTHORITY || 'http://localhost:8080/realms/atlas';
 const clientId = process.env.NEXT_PUBLIC_OIDC_CLIENT_ID || 'atlas-gui';
@@ -23,3 +23,47 @@ export const getUserManager = () => {
   }
   return userManager!;
 };
+
+export async function loginWithCredentials(username: string, password: string): Promise<User> {
+  const tokenUrl = `${authority}/protocol/openid-connect/token`;
+
+  const body = new URLSearchParams({
+    grant_type: 'password',
+    client_id: clientId,
+    username,
+    password,
+    scope: 'openid profile email',
+  });
+
+  const res = await fetch(tokenUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error_description || err.error || 'Authentication failed');
+  }
+
+  const tokens = await res.json();
+
+  const um = getUserManager();
+  const user = new User({
+    access_token: tokens.access_token,
+    token_type: tokens.token_type || 'Bearer',
+    id_token: tokens.id_token,
+    refresh_token: tokens.refresh_token,
+    scope: tokens.scope || 'openid profile email',
+    profile: parseJwtPayload(tokens.id_token),
+    expires_at: Math.floor(Date.now() / 1000) + tokens.expires_in,
+  });
+
+  await um.storeUser(user);
+  return user;
+}
+
+function parseJwtPayload(token: string): Record<string, unknown> {
+  const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(atob(base64));
+}

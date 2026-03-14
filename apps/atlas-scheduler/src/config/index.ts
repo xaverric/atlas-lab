@@ -10,4 +10,8 @@ export const config = {
     host: process.env.REDIS_HOST || 'localhost',
     port: Number(process.env.REDIS_PORT) || 6379,
   },
+  notifyUrl: process.env.NOTIFY_URL || 'http://localhost:4003',
+  internalKey: process.env.INTERNAL_KEY || 'dev-internal-key',
+  maxRunsPerJob: Number(process.env.MAX_RUNS_PER_JOB) || 100,
+  allowShellExec: process.env.ALLOW_SHELL_EXEC === 'true',
 };

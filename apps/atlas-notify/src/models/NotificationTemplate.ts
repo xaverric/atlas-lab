@@ -6,6 +6,7 @@ const templateSchema = new mongoose.Schema(
     name: { type: String, required: true },
     subject: { type: String, required: true },
     body: { type: String, required: true },
+    event: { type: String },
   },
   {
     timestamps: true,
