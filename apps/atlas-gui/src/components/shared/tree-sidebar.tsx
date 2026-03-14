@@ -23,6 +23,7 @@ interface TreeSidebarProps {
   onSelectItem: (id: string) => void;
   loadChildren: (parentId: string | null) => Promise<TreeItem[]>;
   title: string;
+  expandPath?: string[];
 }
 
 interface TreeState {
@@ -37,7 +38,7 @@ interface TreeState {
 
 const STORAGE_PREFIX = 'tree-expanded-';
 
-export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSelectItem, loadChildren, title }: TreeSidebarProps) {
+export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSelectItem, loadChildren, title, expandPath }: TreeSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [tree, setTree] = useState<TreeState>({});
 
@@ -87,6 +88,37 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
     };
     loadRoot();
   }, [loadChildren]);
+
+  useEffect(() => {
+    if (!expandPath || expandPath.length === 0) return;
+
+    const expandSequentially = async () => {
+      for (const id of expandPath) {
+        const alreadyLoaded = tree[id]?.loaded;
+        if (alreadyLoaded) {
+          setTree((prev) => ({ ...prev, [id]: { ...prev[id], expanded: true } }));
+          continue;
+        }
+
+        try {
+          const items = await loadChildren(id);
+          setTree((prev) => {
+            const next = {
+              ...prev,
+              [id]: { children: items, expanded: true, loaded: true, loading: false, error: false },
+            };
+            persistExpanded(next);
+            return next;
+          });
+        } catch {
+          break;
+        }
+      }
+    };
+
+    expandSequentially();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expandPath?.join(',')]);
 
   const toggleFolder = async (folderId: string) => {
     const entry = tree[folderId];

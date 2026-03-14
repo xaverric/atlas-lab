@@ -376,6 +376,7 @@ export default function FilesPage() {
         onSelectItem={(id) => router.push(`/files/${id}`)}
         loadChildren={loadTreeChildren}
         title="Files"
+        expandPath={breadcrumb.map((b) => b.id)}
       />
 
       <div

@@ -285,6 +285,7 @@ export default function NotesPage() {
         onSelectItem={handleSelectItem}
         loadChildren={loadTreeChildren}
         title="Notes"
+        expandPath={currentFolder?.breadcrumb?.map((b) => b.id) || []}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
