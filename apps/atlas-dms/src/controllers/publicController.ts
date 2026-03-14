@@ -9,7 +9,7 @@ const stripPrivate = ({ parentId, ownerId, folderId, ...rest }: Record<string, a
 export const getFolder: RequestHandler = async (req, res, next) => {
   try {
     const folder = await folderService.getPublicFolder(req.params.id as string);
-    const folderId = folder.id ?? req.params.id;
+    const folderId = (folder as any).id ?? req.params.id;
     const subfolders = await folderDao.listByParent(folder.ownerId, folderId);
     const documents = await documentDao.listByFolder(folderId);
     res.json({
