@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Trash2, Pencil, X } from 'lucide-react';
+import { ArrowLeft, Trash2, Pencil, X, Copy, Link } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { TiptapEditor } from '@/components/notes/tiptap-editor';
@@ -224,7 +224,21 @@ export default function NoteDetailPage() {
             </div>
           )}
           <span>Folder: {folderName}</span>
-          {note?.isPublic && <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">Public</span>}
+          {note?.isPublic && (
+            <>
+              <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">Public</span>
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/public/notes/${note.id}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success('Public link copied');
+                }}
+                className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Link className="h-3 w-3" /> Copy public link
+              </button>
+            </>
+          )}
           {note && <span>Updated: {formatDate(note.updatedAt)}</span>}
         </div>
 
