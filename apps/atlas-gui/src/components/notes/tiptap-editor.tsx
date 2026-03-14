@@ -40,7 +40,30 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: 'prose prose-sm dark:prose-invert max-w-none min-h-[300px] p-4 focus:outline-none',
+        class: 'prose prose-sm dark:prose-invert max-w-none min-h-[300px] px-0 py-4 focus:outline-none',
+      },
+      handleKeyDown: (_view, event) => {
+        if (event.key === 'Tab') {
+          if (editor?.can().sinkListItem('listItem')) {
+            editor.chain().focus().sinkListItem('listItem').run();
+            return true;
+          }
+          if (editor?.can().sinkListItem('taskItem')) {
+            editor.chain().focus().sinkListItem('taskItem').run();
+            return true;
+          }
+        }
+        if (event.key === 'Tab' && event.shiftKey) {
+          if (editor?.can().liftListItem('listItem')) {
+            editor.chain().focus().liftListItem('listItem').run();
+            return true;
+          }
+          if (editor?.can().liftListItem('taskItem')) {
+            editor.chain().focus().liftListItem('taskItem').run();
+            return true;
+          }
+        }
+        return false;
       },
     },
   });
@@ -55,13 +78,15 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
   }, [editor, content]);
 
   return (
-    <div className="overflow-hidden rounded-md border bg-background">
-      <EditorToolbar
-        editor={editor}
-        isMarkdown={isMarkdown}
-        onToggleMarkdown={onToggleMarkdown}
-        onInsertImage={onInsertImage}
-      />
+    <div>
+      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+        <EditorToolbar
+          editor={editor}
+          isMarkdown={isMarkdown}
+          onToggleMarkdown={onToggleMarkdown}
+          onInsertImage={onInsertImage}
+        />
+      </div>
       {isMarkdown && children ? children : <EditorContent editor={editor} />}
     </div>
   );

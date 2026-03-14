@@ -199,13 +199,13 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
     return (
       <>
         <div className="flex-1 overflow-y-auto">
-          <div className="space-y-6">
+          <div className="mx-auto max-w-4xl space-y-4 px-6 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <button onClick={onBack} className="rounded-md p-1 hover:bg-accent">
                   <ArrowLeft className="h-5 w-5" />
                 </button>
-                <h1 className="text-2xl font-semibold tracking-tight">{note?.title}</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{note?.title}</h1>
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -257,7 +257,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
               {note && <span className="text-xs">Updated {formatDate(note.updatedAt)}</span>}
             </div>
 
-            <div className="rounded-md border p-6">
+            <div className="prose prose-sm dark:prose-invert max-w-none">
               <NoteViewer html={html} />
             </div>
 
@@ -294,13 +294,13 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
   return (
     <>
       <div className="flex-1 overflow-y-auto">
-        <div className="space-y-6">
+        <div className="mx-auto max-w-4xl space-y-4 px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button onClick={cancelEdit} className="rounded-md p-1 hover:bg-accent">
                 <ArrowLeft className="h-5 w-5" />
               </button>
-              <h1 className="text-2xl font-semibold tracking-tight">Edit Note</h1>
+              <span className="text-sm text-muted-foreground">Editing</span>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -321,8 +321,8 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Note title"
-            className="w-full rounded-md border bg-background px-3 py-2 text-lg font-medium"
+            placeholder="Untitled"
+            className="w-full bg-transparent text-3xl font-bold tracking-tight outline-none placeholder:text-muted-foreground/40"
           />
 
           <TiptapEditor
