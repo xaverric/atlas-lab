@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Plus, FolderPlus, Folder, FileText, RefreshCw,
-  Eye, Pencil, Trash2, Bot, Globe, Lock,
+  Eye, Pencil, Trash2, Bot, Globe, Lock, ChevronRight, Home,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
@@ -328,6 +328,27 @@ export default function NotesPage() {
             </Link>
           </div>
         </div>
+
+        {/* Breadcrumb */}
+        {currentFolder?.breadcrumb && currentFolder.breadcrumb.length > 0 && (
+          <div className="shrink-0 border-b px-6 py-1.5">
+            <nav className="flex items-center gap-1 text-sm">
+              <button onClick={() => handleSelectFolder(null)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
+                <Home className="h-4 w-4" /> Root
+              </button>
+              {currentFolder.breadcrumb.map((b, i) => (
+                <span key={b.id} className="flex items-center gap-1">
+                  <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                  {i === currentFolder.breadcrumb.length - 1 ? (
+                    <span className="font-medium">{b.name}</span>
+                  ) : (
+                    <button onClick={() => handleSelectFolder(b.id)} className="text-muted-foreground hover:text-foreground">{b.name}</button>
+                  )}
+                </span>
+              ))}
+            </nav>
+          </div>
+        )}
 
         {/* Content area */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">

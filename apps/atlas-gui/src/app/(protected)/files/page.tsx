@@ -21,6 +21,7 @@ import { RenameDialog } from '@/components/files/rename-dialog';
 import { MoveDialog } from '@/components/files/move-dialog';
 import { FolderInfoPanel } from '@/components/files/folder-info-panel';
 import { SearchBar } from '@/components/files/search-bar';
+import { BreadcrumbNav } from '@/components/files/breadcrumb-nav';
 
 interface FolderItem {
   id: string;
@@ -69,6 +70,7 @@ export default function FilesPage() {
   const [infoFolderId, setInfoFolderId] = useState<string | null>(null);
   const [renamingFolder, setRenamingFolder] = useState<string | null>(null);
   const [renameFolderName, setRenameFolderName] = useState('');
+  const [breadcrumb, setBreadcrumb] = useState<{ id: string; name: string }[]>([]);
 
   const [filters, setFilters] = useState({
     search: '',
@@ -91,11 +93,15 @@ export default function FilesPage() {
   }, [folderId]);
 
   const loadFolderMeta = useCallback(async () => {
-    if (!folderId) { setFolderMeta(null); return; }
+    if (!folderId) { setFolderMeta(null); setBreadcrumb([]); return; }
     try {
-      const res = await api<{ data: FolderMetadata }>(`/api/v1/files/folders/${folderId}/metadata`);
-      setFolderMeta(res.data);
-    } catch { setFolderMeta(null); }
+      const [metaRes, detailRes] = await Promise.all([
+        api<{ data: FolderMetadata }>(`/api/v1/files/folders/${folderId}/metadata`),
+        api<{ data: { breadcrumb: { id: string; name: string }[] } }>(`/api/v1/files/folders/${folderId}`),
+      ]);
+      setFolderMeta(metaRes.data);
+      setBreadcrumb(detailRes.data.breadcrumb);
+    } catch { setFolderMeta(null); setBreadcrumb([]); }
   }, [folderId]);
 
   const loadDocs = useCallback(async (p: number) => {
@@ -434,6 +440,13 @@ export default function FilesPage() {
             </div>
           </div>
         </div>
+
+        {/* Breadcrumb */}
+        {breadcrumb.length > 0 && (
+          <div className="shrink-0 border-b px-4 py-1.5">
+            <BreadcrumbNav items={breadcrumb} onNavigate={navigateToFolder} />
+          </div>
+        )}
 
         {/* Content area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">

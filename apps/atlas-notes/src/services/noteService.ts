@@ -139,7 +139,11 @@ export const updatePublic = async (id: string, data: { title?: string; content?:
   const isPublic = await noteFolderService.isFolderPublic(note.folderId.toString());
   if (!isPublic) throw new ApiError(403, 'Note is not in a public folder');
 
-  const updated = await noteDao.updateById(id, data);
+  const updateData: Record<string, unknown> = { ...data };
+  if (data.content !== undefined) {
+    updateData.contentSize = Buffer.byteLength(data.content, 'utf8');
+  }
+  const updated = await noteDao.updateById(id, updateData);
   if (!updated) throw new ApiError(404, 'Note not found');
 
   const contentChanged = data.title !== undefined || data.content !== undefined || data.tags !== undefined;
