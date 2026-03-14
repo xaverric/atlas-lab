@@ -7,6 +7,13 @@ export const create = async (name: string, ownerId: string, parentId?: string | 
   if (parentId) {
     const parent = await noteFolderDao.findById(parentId, ownerId, isAdmin);
     if (!parent) throw new ApiError(404, 'Parent folder not found');
+    if (parent.visibility === 'public') {
+      return noteFolderDao.create({
+        name, parentId, ownerId,
+        visibility: 'public',
+        publicPermission: (parent as any).publicPermission || 'view',
+      });
+    }
   }
   return noteFolderDao.create({ name, parentId: parentId || null, ownerId });
 };

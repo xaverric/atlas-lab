@@ -1,6 +1,6 @@
 import { Folder } from '../models/Folder.js';
 
-export const create = (data: { name: string; parentId?: string | null; ownerId: string }) =>
+export const create = (data: { name: string; parentId?: string | null; ownerId: string; isPublic?: boolean; publicPermission?: string }) =>
   Folder.create({ ...data, parentId: data.parentId || null });
 
 export const findById = (id: string, ownerId?: string, isAdmin = false) => {

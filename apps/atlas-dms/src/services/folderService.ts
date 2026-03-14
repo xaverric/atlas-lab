@@ -7,6 +7,13 @@ export const create = async (name: string, ownerId: string, parentId?: string | 
   if (parentId) {
     const parent = await folderDao.findById(parentId, ownerId, isAdmin);
     if (!parent) throw new ApiError(404, 'Parent folder not found');
+    if (parent.isPublic) {
+      return folderDao.create({
+        name, parentId, ownerId,
+        isPublic: true,
+        publicPermission: (parent as any).publicPermission || 'view',
+      });
+    }
   }
   return folderDao.create({ name, parentId: parentId || null, ownerId });
 };
@@ -96,7 +103,11 @@ export const getPublicFolderOwner = async (folderId: string): Promise<string> =>
 export const createPublic = async (name: string, parentId: string) => {
   const parent = await folderDao.findById(parentId);
   if (!parent) throw new ApiError(404, 'Parent folder not found');
-  return folderDao.create({ name, parentId, ownerId: parent.ownerId });
+  return folderDao.create({
+    name, parentId, ownerId: parent.ownerId,
+    isPublic: parent.isPublic || false,
+    publicPermission: parent.isPublic ? ((parent as any).publicPermission || 'view') : undefined,
+  });
 };
 
 export const updatePublic = async (id: string, data: { name?: string }) => {

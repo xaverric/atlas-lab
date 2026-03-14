@@ -1,6 +1,6 @@
 import { NoteFolder } from '../models/NoteFolder.js';
 
-export const create = (data: { name: string; parentId?: string | null; ownerId: string; aiAccessible?: boolean }) =>
+export const create = (data: { name: string; parentId?: string | null; ownerId: string; aiAccessible?: boolean; visibility?: string; publicPermission?: string }) =>
   NoteFolder.create({ ...data, parentId: data.parentId || null });
 
 export const findById = (id: string, ownerId?: string, isAdmin = false) => {
