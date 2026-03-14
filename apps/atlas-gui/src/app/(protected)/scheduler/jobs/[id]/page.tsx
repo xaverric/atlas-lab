@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { StatusBadge } from '@/components/scheduler/status-badge';
 import { JobChart } from '@/components/dashboard/job-chart';
-import { CodeBlock } from '@/components/shared/code-block';
+import { CodeMirrorViewer } from '@/components/shared/codemirror-viewer';
 import { dashboardStore } from '@/lib/dashboard-store';
 
 interface Schedule {
@@ -217,12 +217,12 @@ export default function JobDetailPage() {
       <div>
         <h2 className="text-lg font-semibold mb-3">Configuration</h2>
         {(job.executionType === 'javascript' || job.executionType === 'shell') && typeof job.config.code === 'string' ? (
-          <CodeBlock
+          <CodeMirrorViewer
             code={job.config.code}
             language={job.executionType === 'shell' ? 'bash' : 'javascript'}
           />
         ) : (
-          <CodeBlock
+          <CodeMirrorViewer
             code={JSON.stringify(job.config, null, 2)}
             language="json"
           />
