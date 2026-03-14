@@ -35,11 +35,12 @@ export function TrackerTableWidget({ endpointName, limit = 10 }: TrackerTableWid
 
     Promise.all([
       api<{ data: TrackerEndpoint }>(`/api/v1/tracker/endpoints/${endpointName}`),
-      api<{ data: TrackerDataRow[] }>(`/api/v1/tracker/endpoints/${endpointName}/data?limit=${limit}&sort=-createdAt`),
+      api<{ data: { items: TrackerDataRow[]; total: number } }>(`/api/v1/tracker/endpoints/${endpointName}/data?limit=${limit}&sort=-createdAt`),
     ])
       .then(([epRes, dataRes]) => {
         setEndpoint(epRes.data);
-        setRows(dataRes.data);
+        const items = dataRes.data?.items ?? (Array.isArray(dataRes.data) ? dataRes.data : []);
+        setRows(items);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -77,11 +78,14 @@ export function TrackerTableWidget({ endpointName, limit = 10 }: TrackerTableWid
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id} className="border-b last:border-0">
-                  {columns.slice(0, 4).map((col) => (
-                    <td key={col} className="px-2 py-1.5 truncate max-w-[120px]">
-                      {String(row[col] ?? '-')}
-                    </td>
-                  ))}
+                  {columns.slice(0, 4).map((col) => {
+                    const val = (row as any).data?.[col] ?? (row as any)[col];
+                    return (
+                      <td key={col} className="px-2 py-1.5 truncate max-w-[120px]">
+                        {String(val ?? '-')}
+                      </td>
+                    );
+                  })}
                   <td className="px-2 py-1.5 text-muted-foreground text-xs whitespace-nowrap">
                     {formatDateTime(row.createdAt)}
                   </td>
