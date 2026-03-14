@@ -78,6 +78,7 @@ export default function NotesPage() {
   const [showFolderSettings, setShowFolderSettings] = useState(false);
   const [editingFolderName, setEditingFolderName] = useState(false);
   const [folderNameDraft, setFolderNameDraft] = useState('');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const refreshTree = () => setTreeKey((k) => k + 1);
 
@@ -292,6 +293,7 @@ export default function NotesPage() {
         loadChildren={loadTreeChildren}
         title="Notes"
         expandPath={currentFolder?.breadcrumb?.map((b) => b.id) || []}
+        onOpenChange={setSidebarOpen}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -349,8 +351,8 @@ export default function NotesPage() {
           </div>
         </div>
 
-        {/* Breadcrumb */}
-        {currentFolder?.breadcrumb && currentFolder.breadcrumb.length > 0 && (
+        {/* Breadcrumb — only when sidebar is collapsed */}
+        {!sidebarOpen && currentFolder?.breadcrumb && currentFolder.breadcrumb.length > 0 && (
           <div className="shrink-0 border-b px-6 py-1.5">
             <nav className="flex items-center gap-1 text-sm">
               <button onClick={() => handleSelectFolder(null)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
