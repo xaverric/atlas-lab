@@ -1,6 +1,6 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { X, GripVertical } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { WidgetSize } from '@/lib/dashboard-store';
 import { cn } from '@/lib/utils';
@@ -14,15 +14,43 @@ const sizeClasses: Record<WidgetSize, string> = {
 interface WidgetCardProps {
   title: string;
   size: WidgetSize;
+  widgetId: string;
   onRemove: () => void;
+  isDragOver?: boolean;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDragLeave?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
   children: ReactNode;
 }
 
-export function WidgetCard({ title, size, onRemove, children }: WidgetCardProps) {
+export function WidgetCard({ title, size, widgetId, onRemove, isDragOver, onDragStart, onDragOver, onDragLeave, onDrop, children }: WidgetCardProps) {
   return (
-    <div className={cn('rounded-lg border bg-card p-4', sizeClasses[size])}>
+    <div
+      className={cn(
+        'rounded-lg border bg-card p-4 transition-all',
+        sizeClasses[size],
+        isDragOver && 'ring-2 ring-primary/50 border-primary/50',
+      )}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData('text/plain', widgetId);
+        e.dataTransfer.effectAllowed = 'move';
+        onDragStart?.(e);
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        onDragOver?.(e);
+      }}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-medium text-sm truncate">{title}</h3>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/50 cursor-grab active:cursor-grabbing" />
+          <h3 className="font-medium text-sm truncate">{title}</h3>
+        </div>
         <button
           onClick={onRemove}
           className="ml-2 shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"

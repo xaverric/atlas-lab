@@ -37,6 +37,26 @@ export default function DashboardPage() {
     setWidgets(dashboardStore.getWidgets());
   }, []);
 
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  const handleDrop = useCallback((targetId: string, e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverId(null);
+    const sourceId = e.dataTransfer.getData('text/plain');
+    if (!sourceId || sourceId === targetId) return;
+
+    const current = dashboardStore.getWidgets();
+    const sourceIdx = current.findIndex((w) => w.id === sourceId);
+    const targetIdx = current.findIndex((w) => w.id === targetId);
+    if (sourceIdx === -1 || targetIdx === -1) return;
+
+    const reordered = [...current];
+    const [moved] = reordered.splice(sourceIdx, 1);
+    reordered.splice(targetIdx, 0, moved);
+    dashboardStore.reorderWidgets(reordered.map((w) => w.id));
+    setWidgets(dashboardStore.getWidgets());
+  }, []);
+
   const renderWidgetContent = (widget: DashboardWidget) => {
     switch (widget.type) {
       case 'job':
@@ -101,9 +121,14 @@ export default function DashboardPage() {
           {widgets.map((widget) => (
             <WidgetCard
               key={widget.id}
+              widgetId={widget.id}
               title={widget.title}
               size={widget.size}
               onRemove={() => handleRemove(widget.id)}
+              isDragOver={dragOverId === widget.id}
+              onDragOver={() => setDragOverId(widget.id)}
+              onDragLeave={() => setDragOverId(null)}
+              onDrop={(e) => handleDrop(widget.id, e)}
             >
               {renderWidgetContent(widget)}
             </WidgetCard>
