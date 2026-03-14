@@ -1,11 +1,52 @@
 'use client';
 
-import { Fragment, useEffect, useState, useCallback } from 'react';
+import { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { Plus, Play, Trash2, Search, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { StatusBadge } from '@/components/scheduler/status-badge';
+
+const GROUP_COLORS = [
+  'border-l-blue-500', 'border-l-green-500', 'border-l-purple-500',
+  'border-l-orange-500', 'border-l-pink-500', 'border-l-cyan-500',
+  'border-l-yellow-500', 'border-l-red-500',
+];
+
+const GROUP_BG_COLORS = [
+  'bg-blue-500/8', 'bg-green-500/8', 'bg-purple-500/8',
+  'bg-orange-500/8', 'bg-pink-500/8', 'bg-cyan-500/8',
+  'bg-yellow-500/8', 'bg-red-500/8',
+];
+
+const GROUP_CHIP_COLORS = [
+  'bg-blue-500/15 text-blue-700 dark:text-blue-400',
+  'bg-green-500/15 text-green-700 dark:text-green-400',
+  'bg-purple-500/15 text-purple-700 dark:text-purple-400',
+  'bg-orange-500/15 text-orange-700 dark:text-orange-400',
+  'bg-pink-500/15 text-pink-700 dark:text-pink-400',
+  'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400',
+  'bg-yellow-500/15 text-yellow-700 dark:text-yellow-400',
+  'bg-red-500/15 text-red-700 dark:text-red-400',
+];
+
+function groupHash(name: string): number {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
+  return Math.abs(hash) % GROUP_COLORS.length;
+}
+
+function groupBorderColor(name: string): string {
+  return GROUP_COLORS[groupHash(name)];
+}
+
+function groupBgColor(name: string): string {
+  return GROUP_BG_COLORS[groupHash(name)];
+}
+
+function groupChipColor(name: string): string {
+  return GROUP_CHIP_COLORS[groupHash(name)];
+}
 
 interface Job {
   id: string;
@@ -54,6 +95,7 @@ export default function SchedulerListPage() {
   const [typeFilter, setTypeFilter] = useState('');
   const [enabledFilter, setEnabledFilter] = useState('');
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
 
   const load = useCallback(async (p: number) => {
     try {
@@ -73,18 +115,35 @@ export default function SchedulerListPage() {
 
   useEffect(() => { load(1); }, [load]);
 
-  const groupedJobs = jobs.reduce<Record<string, Job[]>>((acc, job) => {
+  const allGroupedJobs = useMemo(() => jobs.reduce<Record<string, Job[]>>((acc, job) => {
     const group = job.group || 'Ungrouped';
     if (!acc[group]) acc[group] = [];
     acc[group].push(job);
     return acc;
-  }, {});
+  }, {}), [jobs]);
 
-  const sortedGroups = Object.keys(groupedJobs).sort((a, b) => {
+  const allGroups = useMemo(() => Object.keys(allGroupedJobs).sort((a, b) => {
     if (a === 'Ungrouped') return 1;
     if (b === 'Ungrouped') return -1;
     return a.localeCompare(b);
-  });
+  }), [allGroupedJobs]);
+
+  const isFiltering = selectedGroups.size > 0;
+
+  const groupedJobs = isFiltering
+    ? Object.fromEntries(Object.entries(allGroupedJobs).filter(([g]) => selectedGroups.has(g)))
+    : allGroupedJobs;
+
+  const sortedGroups = allGroups.filter((g) => g in groupedJobs);
+
+  const toggleGroupFilter = (group: string) => {
+    setSelectedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group);
+      else next.add(group);
+      return next;
+    });
+  };
 
   const toggleGroup = (group: string) => {
     setCollapsedGroups((prev) => {
@@ -164,6 +223,39 @@ export default function SchedulerListPage() {
         </select>
       </div>
 
+      {/* Group Filter Chips */}
+      {allGroups.length > 1 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground font-medium mr-1">Groups:</span>
+          <button
+            onClick={() => setSelectedGroups(new Set())}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              !isFiltering
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            All
+          </button>
+          {allGroups.map((group) => (
+            <button
+              key={group}
+              onClick={() => toggleGroupFilter(group)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                selectedGroups.has(group)
+                  ? groupChipColor(group)
+                  : isFiltering
+                    ? 'bg-muted/50 text-muted-foreground/60 hover:text-muted-foreground'
+                    : 'bg-muted text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {group}
+              <span className="ml-1.5 opacity-70">{allGroupedJobs[group]?.length}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Table */}
       <div className="rounded-lg border">
         <table className="w-full">
@@ -186,22 +278,24 @@ export default function SchedulerListPage() {
                 <Fragment key={group}>
                   {sortedGroups.length > 1 && (
                     <tr
-                      className="bg-muted/30 cursor-pointer hover:bg-muted/50"
+                      className={`cursor-pointer hover:bg-muted/50 ${groupBgColor(group)}`}
                       onClick={() => toggleGroup(group)}
                     >
-                      <td colSpan={7} className="p-2 px-3">
+                      <td colSpan={7} className={`p-2 px-3 border-l-4 ${groupBorderColor(group)}`}>
                         <div className="flex items-center gap-2 text-sm font-medium">
                           {isCollapsed
                             ? <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                           {group}
-                          <span className="text-xs text-muted-foreground font-normal">({groupJobs.length})</span>
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${groupChipColor(group)}`}>
+                            {groupJobs.length}
+                          </span>
                         </div>
                       </td>
                     </tr>
                   )}
                   {!isCollapsed && groupJobs.map((job) => (
-                    <tr key={job.id} className="border-b last:border-0 hover:bg-muted/50">
+                    <tr key={job.id} className={`border-b last:border-0 hover:bg-muted/50 ${sortedGroups.length > 1 ? `border-l-4 ${groupBorderColor(group)}` : ''}`}>
                       <td className="p-3">
                         <Link href={`/scheduler/jobs/${job.id}`} className="hover:underline font-medium">
                           {job.name}
