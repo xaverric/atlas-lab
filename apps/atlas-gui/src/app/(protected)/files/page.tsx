@@ -22,6 +22,7 @@ import { FolderInfoPanel } from '@/components/files/folder-info-panel';
 import { SearchBar } from '@/components/files/search-bar';
 import { BreadcrumbNav } from '@/components/files/breadcrumb-nav';
 import { UploadModal } from '@/components/files/upload-modal';
+import { DetailModal } from '@/components/files/detail-modal';
 
 interface FolderItem {
   id: string;
@@ -72,6 +73,7 @@ export default function FilesPage() {
   const [renameFolderName, setRenameFolderName] = useState('');
   const [breadcrumb, setBreadcrumb] = useState<{ id: string; name: string }[]>([]);
   const [showUpload, setShowUpload] = useState(false);
+  const [detailDocId, setDetailDocId] = useState<string | null>(null);
 
   const [filters, setFilters] = useState({
     search: '',
@@ -373,7 +375,7 @@ export default function FilesPage() {
         storageKey="files"
         selectedFolderId={folderId}
         onSelectFolder={navigateToFolder}
-        onSelectItem={(id) => router.push(`/files/${id}`)}
+        onSelectItem={(id) => setDetailDocId(id)}
         loadChildren={loadTreeChildren}
         title="Files"
         expandPath={breadcrumb.map((b) => b.id)}
@@ -576,6 +578,7 @@ export default function FilesPage() {
                 onPreview={setPreviewDoc}
                 onRename={setRenameDoc}
                 onMove={setMoveDoc}
+                onDetails={(doc) => setDetailDocId(doc.id)}
                 showPath={showPath}
                 view="list"
               />
@@ -646,6 +649,14 @@ export default function FilesPage() {
             setShowUpload(false);
             refreshAll();
           }}
+        />
+      )}
+
+      {detailDocId && (
+        <DetailModal
+          documentId={detailDocId}
+          onClose={() => setDetailDocId(null)}
+          onUpdate={refreshAll}
         />
       )}
     </div>

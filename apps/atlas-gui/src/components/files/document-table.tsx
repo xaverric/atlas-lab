@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowUp, ArrowDown, Download, Eye, MoreVertical } from 'lucide-react';
 import { FileIcon, canPreview } from './file-icon';
@@ -45,6 +44,7 @@ interface DocumentTableProps {
   onPreview: (doc: DocumentItem) => void;
   onRename: (doc: DocumentItem) => void;
   onMove: (doc: DocumentItem) => void;
+  onDetails?: (doc: DocumentItem) => void;
   showPath?: boolean;
   view?: ViewMode;
 }
@@ -58,7 +58,7 @@ function SortIcon({ field, sort }: { field: string; sort: SortConfig }) {
 
 export function DocumentTable({
   documents, sort, onSort, selectedIds, onSelect, onSelectAll,
-  onDelete, onPreview, onRename, onMove, showPath, view = 'list',
+  onDelete, onPreview, onRename, onMove, onDetails, showPath, view = 'list',
 }: DocumentTableProps) {
   const router = useRouter();
   const allSelected = documents.length > 0 && documents.every((d) => selectedIds.has(d.id));
@@ -133,7 +133,7 @@ export function DocumentTable({
                   onChange={() => onSelect(doc.id)}
                   className="mt-1 rounded border-input shrink-0"
                 />
-                <Link href={`/files/${doc.id}`} className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 cursor-pointer" onClick={() => onDetails ? onDetails(doc) : router.push(`/files/${doc.id}`)}>
                   <div className="flex items-center gap-2 mb-2">
                     <FileIcon mimeType={doc.mimeType} className="text-muted-foreground shrink-0" />
                     <span className="truncate text-sm font-medium">{doc.name}</span>
@@ -150,7 +150,7 @@ export function DocumentTable({
                     </div>
                   )}
                   <p className="mt-2 text-xs text-muted-foreground">{formatDate(doc.createdAt)}</p>
-                </Link>
+                </div>
                 <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                   {canPreview(doc.mimeType) && (
                     <button onClick={() => onPreview(doc)} className="text-muted-foreground hover:text-foreground p-1 transition-colors"><Eye className="h-4 w-4" /></button>
@@ -165,7 +165,7 @@ export function DocumentTable({
           <ContextMenu x={ctxMenu.x} y={ctxMenu.y} mimeType={ctxMenu.doc.mimeType} onClose={() => setCtxMenu(null)}
             onPreview={() => onPreview(ctxMenu.doc)} onDownload={() => handleDownload(ctxMenu.doc)}
             onRename={() => onRename(ctxMenu.doc)} onMove={() => onMove(ctxMenu.doc)}
-            onDetails={() => router.push(`/files/${ctxMenu.doc.id}`)} onDelete={() => onDelete(ctxMenu.doc.id)} />
+            onDetails={() => onDetails ? onDetails(ctxMenu.doc) : router.push(`/files/${ctxMenu.doc.id}`)} onDelete={() => onDelete(ctxMenu.doc.id)} />
         )}
       </>
     );
@@ -215,10 +215,10 @@ export function DocumentTable({
                   />
                 </td>
                 <td className="p-3">
-                  <Link href={`/files/${doc.id}`} className="flex items-center gap-2 hover:underline">
+                  <button onClick={() => onDetails ? onDetails(doc) : router.push(`/files/${doc.id}`)} className="flex items-center gap-2 hover:underline text-left">
                     <FileIcon mimeType={doc.mimeType} className="text-muted-foreground shrink-0" />
                     <span className="truncate max-w-xs">{doc.name}</span>
-                  </Link>
+                  </button>
                 </td>
                 {showPath && (
                   <td className="p-3 text-sm text-muted-foreground">
@@ -299,7 +299,7 @@ export function DocumentTable({
               onChange={() => onSelect(doc.id)}
               className="rounded border-input shrink-0"
             />
-            <Link href={`/files/${doc.id}`} className="flex flex-1 items-center gap-3 min-w-0">
+            <div className="flex flex-1 items-center gap-3 min-w-0 cursor-pointer" onClick={() => onDetails ? onDetails(doc) : router.push(`/files/${doc.id}`)}>
               <FileIcon mimeType={doc.mimeType} className="text-muted-foreground shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{doc.name}</p>
@@ -317,7 +317,7 @@ export function DocumentTable({
                   </div>
                 )}
               </div>
-            </Link>
+            </div>
             <button
               onClick={(e) => {
                 const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -341,7 +341,7 @@ export function DocumentTable({
           onDownload={() => handleDownload(ctxMenu.doc)}
           onRename={() => onRename(ctxMenu.doc)}
           onMove={() => onMove(ctxMenu.doc)}
-          onDetails={() => router.push(`/files/${ctxMenu.doc.id}`)}
+          onDetails={() => onDetails ? onDetails(ctxMenu.doc) : router.push(`/files/${ctxMenu.doc.id}`)}
           onDelete={() => onDelete(ctxMenu.doc.id)}
         />
       )}
