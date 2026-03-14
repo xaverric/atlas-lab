@@ -9,6 +9,7 @@ import { TiptapEditor } from '@/components/notes/tiptap-editor';
 import { NoteViewer } from '@/components/notes/note-viewer';
 import { AttachmentPanel } from '@/components/notes/attachment-panel';
 import { FilePickerDialog } from '@/components/notes/file-picker-dialog';
+import { CodeMirrorEditor } from '@/components/shared/codemirror-editor';
 import { htmlToMarkdown, markdownToHtml, resolveAttachmentUrls } from '@/lib/markdown';
 
 interface Attachment {
@@ -55,7 +56,21 @@ export default function NoteDetailPage() {
   const [mode, setMode] = useState<Mode>('view');
   const [showFilePicker, setShowFilePicker] = useState(false);
   const [attachmentRefreshKey, setAttachmentRefreshKey] = useState(0);
+  const [isMarkdown, setIsMarkdown] = useState(false);
+  const [markdownContent, setMarkdownContent] = useState('');
   const editorRef = useRef<{ insertImage: (url: string, docId: string, alt: string) => void; insertLink: (url: string, docId: string, text: string) => void } | null>(null);
+
+  const toggleMarkdown = () => {
+    if (isMarkdown) {
+      const newHtml = markdownToHtml(markdownContent);
+      setHtml(newHtml);
+      setIsMarkdown(false);
+    } else {
+      const md = htmlToMarkdown(html);
+      setMarkdownContent(md);
+      setIsMarkdown(true);
+    }
+  };
 
   const loadNote = useCallback(async () => {
     try {
@@ -101,6 +116,7 @@ export default function NoteDetailPage() {
 
   const cancelEdit = () => {
     resetToNote();
+    setIsMarkdown(false);
     setMode('view');
   };
 
@@ -108,7 +124,7 @@ export default function NoteDetailPage() {
     if (!title.trim()) { toast.error('Title is required'); return; }
     setSaving(true);
     try {
-      const content = htmlToMarkdown(html);
+      const content = isMarkdown ? markdownContent : htmlToMarkdown(html);
       const tagList = tags.split(',').map((t) => t.trim()).filter(Boolean);
       const body: Record<string, unknown> = {
         title: title.trim(),
@@ -281,7 +297,22 @@ export default function NoteDetailPage() {
         className="w-full rounded-md border bg-background px-3 py-2 text-lg font-medium"
       />
 
-      <TiptapEditor content={html} onChange={setHtml} />
+      <TiptapEditor
+        content={html}
+        onChange={setHtml}
+        isMarkdown={isMarkdown}
+        onToggleMarkdown={toggleMarkdown}
+        onInsertImage={() => setShowFilePicker(true)}
+      >
+        {isMarkdown && (
+          <CodeMirrorEditor
+            value={markdownContent}
+            onChange={setMarkdownContent}
+            language="markdown"
+            minHeight="400px"
+          />
+        )}
+      </TiptapEditor>
 
       <AttachmentPanel
         noteId={id}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Paperclip, Download, Trash2, Plus } from 'lucide-react';
+import { Paperclip, Download, Trash2, Plus, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { FileIcon } from '@/components/files/file-icon';
@@ -107,6 +107,16 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
                 <p className="text-xs text-muted-foreground">{formatSize(att.size)}</p>
               </div>
               <div className="flex shrink-0 items-center gap-1">
+                <a
+                  href={`/files/${att.documentId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded p-1.5 hover:bg-accent"
+                  title="Open in Files"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
                 <button
                   onClick={() => handleDownload(att)}
                   className="rounded p-1.5 hover:bg-accent"

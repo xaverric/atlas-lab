@@ -17,9 +17,13 @@ interface TiptapEditorProps {
   content: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  isMarkdown?: boolean;
+  onToggleMarkdown?: () => void;
+  onInsertImage?: () => void;
+  children?: React.ReactNode;
 }
 
-export function TiptapEditor({ content, onChange, placeholder = 'Start writing...' }: TiptapEditorProps) {
+export function TiptapEditor({ content, onChange, placeholder = 'Start writing...', isMarkdown, onToggleMarkdown, onInsertImage, children }: TiptapEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -42,8 +46,13 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
 
   return (
     <div className="overflow-hidden rounded-md border bg-background">
-      <EditorToolbar editor={editor} />
-      <EditorContent editor={editor} />
+      <EditorToolbar
+        editor={editor}
+        isMarkdown={isMarkdown}
+        onToggleMarkdown={onToggleMarkdown}
+        onInsertImage={onInsertImage}
+      />
+      {isMarkdown && children ? children : <EditorContent editor={editor} />}
     </div>
   );
 }
