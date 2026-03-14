@@ -3,42 +3,43 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Light theme — Alabaster/Slate/Cyan palette */
-  --color-background: hsl(240 2% 92%);          /* #dcdcdd alabaster grey - lightest */
-  --color-foreground: hsl(210 4% 29%);           /* #46494c iron grey - main text */
-  --color-card: hsl(240 2% 95%);                 /* slightly lighter than bg */
-  --color-card-foreground: hsl(210 4% 29%);      /* iron grey */
-  --color-popover: hsl(0 0% 99%);                /* near white for popups */
-  --color-popover-foreground: hsl(210 4% 29%);   /* iron grey */
-  --color-primary: hsl(193 72% 37%);             /* #1985a1 pacific cyan */
-  --color-primary-foreground: hsl(0 0% 100%);    /* white on cyan */
-  --color-secondary: hsl(260 2% 85%);            /* #c5c3c6 pale slate - lighter */
-  --color-secondary-foreground: hsl(210 4% 29%); /* iron grey */
-  --color-muted: hsl(260 2% 85%);                /* #c5c3c6 pale slate */
-  --color-muted-foreground: hsl(207 16% 35%);    /* #4c5c68 blue slate */
-  --color-accent: hsl(260 2% 88%);               /* between alabaster and pale slate */
-  --color-accent-foreground: hsl(210 4% 29%);    /* iron grey */
+  /* Light theme — Pacific Cyan + Slate with depth */
+  --color-background: hsl(180 20% 97%);            /* very light teal-tinted white */
+  --color-foreground: hsl(200 15% 20%);             /* deep blue-grey, warm */
+  --color-card: hsl(0 0% 100%);                     /* pure white cards — elevation over bg */
+  --color-card-foreground: hsl(200 15% 20%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(200 15% 20%);
+  --color-primary: hsl(193 72% 37%);                /* #1985a1 pacific cyan */
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(200 10% 92%);              /* cool light grey */
+  --color-secondary-foreground: hsl(200 15% 25%);
+  --color-muted: hsl(200 10% 94%);                  /* subtle muted bg */
+  --color-muted-foreground: hsl(207 12% 45%);       /* readable muted text */
+  --color-accent: hsl(193 30% 93%);                 /* light cyan tint for hover */
+  --color-accent-foreground: hsl(200 15% 20%);
   --color-destructive: hsl(0 72% 51%);
   --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: hsl(260 2% 80%);               /* slightly darker than pale slate */
-  --color-input: hsl(260 2% 80%);
-  --color-ring: hsl(193 72% 37%);                /* pacific cyan for focus rings */
+  --color-border: hsl(200 15% 88%);                 /* visible but soft border */
+  --color-input: hsl(200 15% 88%);
+  --color-ring: hsl(193 72% 37%);                   /* pacific cyan focus */
   --color-success: hsl(152 60% 40%);
   --color-success-foreground: hsl(0 0% 100%);
   --color-warning: hsl(38 92% 50%);
   --color-warning-foreground: hsl(0 0% 100%);
-  --color-info: hsl(193 72% 37%);                /* pacific cyan */
+  --color-info: hsl(193 72% 37%);                   /* pacific cyan */
   --color-info-foreground: hsl(0 0% 100%);
   --radius: 0.5rem;
 
-  --color-sidebar-background: hsl(207 16% 35%);           /* #4c5c68 blue slate */
-  --color-sidebar-foreground: hsl(240 2% 92%);             /* alabaster - light text on dark sidebar */
-  --color-sidebar-primary: hsl(193 72% 47%);               /* lighter pacific cyan */
+  /* Sidebar: dark blue-slate — creates depth */
+  --color-sidebar-background: hsl(207 16% 22%);     /* darker blue slate */
+  --color-sidebar-foreground: hsl(200 10% 85%);     /* light text */
+  --color-sidebar-primary: hsl(193 72% 50%);        /* brighter cyan on dark */
   --color-sidebar-primary-foreground: hsl(0 0% 100%);
-  --color-sidebar-accent: hsl(207 16% 42%);                /* slightly lighter blue slate */
+  --color-sidebar-accent: hsl(207 16% 28%);         /* hover state */
   --color-sidebar-accent-foreground: hsl(0 0% 100%);
-  --color-sidebar-border: hsl(207 16% 30%);                /* darker blue slate */
-  --color-sidebar-ring: hsl(193 72% 37%);
+  --color-sidebar-border: hsl(207 16% 18%);
+  --color-sidebar-ring: hsl(193 72% 50%);
 }
 
 @layer base {
@@ -52,38 +53,38 @@
 }
 
 .dark {
-  --color-background: hsl(210 5% 12%);            /* dark iron */
-  --color-foreground: hsl(240 2% 92%);             /* alabaster */
-  --color-card: hsl(210 5% 14%);
-  --color-card-foreground: hsl(240 2% 92%);
-  --color-popover: hsl(210 5% 14%);
-  --color-popover-foreground: hsl(240 2% 92%);
-  --color-primary: hsl(193 72% 45%);              /* pacific cyan slightly brighter */
+  --color-background: hsl(210 15% 8%);              /* very dark blue-black */
+  --color-foreground: hsl(200 10% 90%);              /* near white, warm */
+  --color-card: hsl(210 12% 12%);                    /* slightly lighter than bg */
+  --color-card-foreground: hsl(200 10% 90%);
+  --color-popover: hsl(210 12% 14%);
+  --color-popover-foreground: hsl(200 10% 90%);
+  --color-primary: hsl(193 72% 45%);                /* pacific cyan brighter for dark */
   --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(210 5% 20%);
-  --color-secondary-foreground: hsl(240 2% 92%);
-  --color-muted: hsl(210 5% 18%);
-  --color-muted-foreground: hsl(260 2% 70%);       /* pale slate lighter */
-  --color-accent: hsl(210 5% 20%);
-  --color-accent-foreground: hsl(240 2% 92%);
-  --color-destructive: hsl(0 62% 40%);
+  --color-secondary: hsl(210 12% 18%);
+  --color-secondary-foreground: hsl(200 10% 90%);
+  --color-muted: hsl(210 12% 16%);
+  --color-muted-foreground: hsl(200 10% 60%);
+  --color-accent: hsl(210 12% 18%);
+  --color-accent-foreground: hsl(200 10% 90%);
+  --color-destructive: hsl(0 62% 45%);
   --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: hsl(210 5% 22%);
-  --color-input: hsl(210 5% 22%);
+  --color-border: hsl(210 12% 20%);
+  --color-input: hsl(210 12% 20%);
   --color-ring: hsl(193 72% 45%);
-  --color-success: hsl(152 55% 35%);
+  --color-success: hsl(152 55% 38%);
   --color-success-foreground: hsl(0 0% 100%);
-  --color-warning: hsl(38 85% 42%);
+  --color-warning: hsl(38 85% 45%);
   --color-warning-foreground: hsl(0 0% 100%);
   --color-info: hsl(193 72% 45%);
   --color-info-foreground: hsl(0 0% 100%);
 
-  --color-sidebar-background: hsl(210 5% 10%);
-  --color-sidebar-foreground: hsl(240 2% 92%);
+  --color-sidebar-background: hsl(210 15% 6%);
+  --color-sidebar-foreground: hsl(200 10% 85%);
   --color-sidebar-primary: hsl(193 72% 50%);
   --color-sidebar-primary-foreground: hsl(0 0% 100%);
-  --color-sidebar-accent: hsl(210 5% 16%);
-  --color-sidebar-accent-foreground: hsl(240 2% 92%);
-  --color-sidebar-border: hsl(210 5% 16%);
-  --color-sidebar-ring: hsl(193 72% 45%);
+  --color-sidebar-accent: hsl(210 12% 14%);
+  --color-sidebar-accent-foreground: hsl(200 10% 90%);
+  --color-sidebar-border: hsl(210 12% 12%);
+  --color-sidebar-ring: hsl(193 72% 50%);
 }
