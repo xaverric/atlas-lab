@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Plus, FolderPlus, Folder, FileText, RefreshCw,
-  Eye, Pencil, Trash2, Bot, Globe, Lock, ChevronRight, Home,
+  Eye, Pencil, Trash2, Bot, Globe, Lock, ChevronRight, Home, Settings,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
@@ -73,6 +73,9 @@ export default function NotesPage() {
   const [treeKey, setTreeKey] = useState(0);
   const [folderMeta, setFolderMeta] = useState<{ noteCount: number; subfolderCount: number; totalSize: number } | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showFolderSettings, setShowFolderSettings] = useState(false);
+  const [editingFolderName, setEditingFolderName] = useState(false);
+  const [folderNameDraft, setFolderNameDraft] = useState('');
 
   const refreshTree = () => setTreeKey((k) => k + 1);
 
@@ -100,6 +103,7 @@ export default function NotesPage() {
       params.set('page', String(p));
       params.set('limit', '20');
       if (folderId) params.set('folderId', folderId);
+      else params.set('folderId', '');
       params.set('sortBy', 'updatedAt');
       params.set('sortOrder', 'desc');
 
@@ -307,6 +311,15 @@ export default function NotesPage() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            {folderId && currentFolder && (
+              <button
+                onClick={() => setShowFolderSettings((v) => !v)}
+                className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
+                title="Folder settings"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+            )}
             <button
               onClick={() => { refreshTree(); loadNotes(page); if (folderId) { loadFolderDetail(); loadFolderMeta(); } }}
               className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -347,6 +360,61 @@ export default function NotesPage() {
                 </span>
               ))}
             </nav>
+          </div>
+        )}
+
+        {/* Folder settings panel */}
+        {showFolderSettings && folderId && currentFolder && (
+          <div className="shrink-0 border-b px-6 py-3 space-y-2 bg-muted/30">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Folder Settings</span>
+              <button onClick={() => { setShowFolderSettings(false); setEditingFolderName(false); }} className="text-xs text-muted-foreground hover:text-foreground">Close</button>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              {editingFolderName ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    value={folderNameDraft}
+                    onChange={(e) => setFolderNameDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && folderNameDraft.trim()) { handleRenameFolder(folderId, folderNameDraft.trim()); setEditingFolderName(false); }
+                      if (e.key === 'Escape') setEditingFolderName(false);
+                    }}
+                    className="rounded border bg-background px-2 py-1 text-sm"
+                    autoFocus
+                  />
+                  <button onClick={() => { if (folderNameDraft.trim()) { handleRenameFolder(folderId, folderNameDraft.trim()); setEditingFolderName(false); } }} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
+                  <button onClick={() => setEditingFolderName(false)} className="rounded border px-2 py-1 text-xs">Cancel</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setFolderNameDraft(currentFolder.name); setEditingFolderName(true); }}
+                  className="flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-accent"
+                >
+                  <Pencil className="h-3 w-3" /> Rename
+                </button>
+              )}
+              <button
+                onClick={() => handleTogglePublic(folderId, !folderIsPublic)}
+                className="flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-accent"
+              >
+                {folderIsPublic ? <Lock className="h-3 w-3" /> : <Globe className="h-3 w-3" />}
+                {folderIsPublic ? 'Make Private' : 'Make Public'}
+              </button>
+              <button
+                onClick={() => handleToggleAi(folderId, currentFolder.aiAccessible)}
+                className="flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-accent"
+              >
+                <Bot className="h-3 w-3" />
+                {currentFolder.aiAccessible ? 'Disable AI' : 'Enable AI'}
+              </button>
+              <button
+                onClick={() => handleDeleteFolder(folderId)}
+                className="flex items-center gap-1 rounded border px-2 py-1 text-xs text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-3 w-3" /> Delete Folder
+              </button>
+            </div>
           </div>
         )}
 

@@ -416,6 +416,15 @@ export default function FilesPage() {
               )}
             </div>
             <div className="flex gap-2 shrink-0">
+              {folderId && (
+                <button
+                  onClick={() => setInfoFolderId(folderId)}
+                  className="flex items-center gap-1.5 rounded-md border px-2.5 py-2 text-sm active:bg-muted"
+                  title="Folder settings"
+                >
+                  <Info className="h-4 w-4" />
+                </button>
+              )}
               <button
                 onClick={refreshAll}
                 className="flex items-center gap-1.5 rounded-md border px-2.5 py-2 text-sm active:bg-muted"

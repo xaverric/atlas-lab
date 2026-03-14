@@ -34,7 +34,7 @@ export function TreeNode({ node, onToggle, onClick }: TreeNodeProps) {
   return (
     <div
       className={cn(
-        'group flex items-center gap-1 py-1 px-2 text-[11px] cursor-pointer hover:bg-accent/50 transition-colors',
+        'group flex items-center gap-1 py-1 px-2 text-xs cursor-pointer hover:bg-accent/50 transition-colors',
         node.isSelected && 'bg-accent',
         isFolder && (node.isPublic ? 'border-l-2 border-info' : 'border-l-2 border-muted-foreground/30'),
         !isFolder && 'border-l-2 border-transparent',
@@ -70,7 +70,7 @@ export function TreeNode({ node, onToggle, onClick }: TreeNodeProps) {
         <VisibilityBadge isPublic permission={node.publicPermission} size="sm" showLabel={false} />
       )}
 
-      <span className="shrink-0 text-[10px] text-muted-foreground ml-auto pl-2">
+      <span className="shrink-0 text-[11px] text-muted-foreground ml-auto pl-2">
         {isFolder
           ? `${node.itemCount ?? 0} · ${formatSize(node.totalSize ?? 0)}`
           : formatSize(node.size ?? 0)

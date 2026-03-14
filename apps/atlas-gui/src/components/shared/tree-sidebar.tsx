@@ -153,7 +153,7 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
 
     if (entry.loading) {
       return (
-        <div style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }} className="py-1 text-[10px] text-muted-foreground animate-pulse">
+        <div style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }} className="py-1 text-xs text-muted-foreground animate-pulse">
           Loading...
         </div>
       );
@@ -161,7 +161,7 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
 
     if (entry.error) {
       return (
-        <div style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }} className="py-1 text-[10px] text-destructive flex items-center gap-1">
+        <div style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }} className="py-1 text-xs text-destructive flex items-center gap-1">
           Failed to load
           <button onClick={() => retryLoad(parentKey === 'root' ? null : parentKey)} className="underline hover:no-underline">
             retry
@@ -238,7 +238,7 @@ export function TreeSidebar({ storageKey, selectedFolderId, onSelectFolder, onSe
       <div className="flex-1 overflow-y-auto py-1">
         <div
           className={cn(
-            'flex items-center gap-2 px-3 py-1.5 text-[11px] cursor-pointer hover:bg-accent/50 transition-colors',
+            'flex items-center gap-2 px-3 py-1.5 text-xs cursor-pointer hover:bg-accent/50 transition-colors',
             selectedFolderId === null && 'bg-accent font-medium',
           )}
           onClick={() => onSelectFolder(null)}
