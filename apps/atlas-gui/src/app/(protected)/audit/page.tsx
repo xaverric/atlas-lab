@@ -124,7 +124,6 @@ export default function AuditPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Audit Log</h1>
         <label className="flex items-center gap-2 text-sm">
           <RefreshCw className={`h-4 w-4 ${autoRefresh ? 'animate-spin' : ''}`} />
           <input

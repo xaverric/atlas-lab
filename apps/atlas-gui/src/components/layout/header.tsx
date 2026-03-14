@@ -1,9 +1,28 @@
 'use client';
 
 import { LogOut, Settings, User, Menu, Sun, Moon, Monitor } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/use-auth';
 import { NotificationBell } from './notification-bell';
+
+const PAGE_TITLES: Record<string, string> = {
+  '/dashboard': 'Dashboard',
+  '/files': 'File Storage',
+  '/scheduler': 'Scheduler',
+  '/notifications': 'Notifications',
+  '/notes': 'Notes',
+  '/tracker': 'Data Tracker',
+  '/audit': 'Audit Log',
+  '/settings': 'Settings',
+};
+
+function getPageTitle(pathname: string): string {
+  for (const [prefix, title] of Object.entries(PAGE_TITLES)) {
+    if (pathname === prefix || pathname.startsWith(prefix + '/') || pathname.startsWith(prefix + '?')) return title;
+  }
+  return 'Atlas';
+}
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -12,6 +31,8 @@ interface HeaderProps {
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
+  const pageTitle = getPageTitle(pathname);
 
   const cycleTheme = () => {
     if (theme === 'light') setTheme('dark');
@@ -31,7 +52,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
         >
           <Menu className="h-5 w-5" />
         </button>
-        <h2 className="text-lg font-semibold hidden md:block">Atlas</h2>
+        <h2 className="text-lg font-semibold hidden md:block">{pageTitle}</h2>
       </div>
       <div className="flex items-center gap-3 md:gap-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">

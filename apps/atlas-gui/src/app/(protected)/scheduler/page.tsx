@@ -187,7 +187,6 @@ export default function SchedulerListPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Scheduler</h1>
         <Link
           href="/scheduler/jobs/new"
           className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
@@ -276,7 +275,7 @@ export default function SchedulerListPage() {
               const isCollapsed = collapsedGroups.has(group);
               return (
                 <Fragment key={group}>
-                  {sortedGroups.length > 1 && (
+                  {allGroups.length > 1 && (
                     <tr
                       className={`cursor-pointer hover:bg-muted/50 ${groupBgColor(group)}`}
                       onClick={() => toggleGroup(group)}
@@ -295,7 +294,7 @@ export default function SchedulerListPage() {
                     </tr>
                   )}
                   {!isCollapsed && groupJobs.map((job) => (
-                    <tr key={job.id} className={`border-b last:border-0 hover:bg-muted/50 ${sortedGroups.length > 1 ? `border-l-4 ${groupBorderColor(group)}` : ''}`}>
+                    <tr key={job.id} className={`border-b last:border-b-0 hover:bg-muted/50 ${allGroups.length > 1 ? `border-l-4 ${groupBorderColor(group)}` : ''}`}>
                       <td className="p-3">
                         <Link href={`/scheduler/jobs/${job.id}`} className="hover:underline font-medium">
                           {job.name}

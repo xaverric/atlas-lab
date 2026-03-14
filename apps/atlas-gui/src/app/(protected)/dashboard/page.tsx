@@ -29,7 +29,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
       <div className="grid gap-4 md:grid-cols-3">
         <StatsCard
           title="Welcome"

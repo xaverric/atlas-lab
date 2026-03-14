@@ -33,7 +33,6 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-xl space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
       <div className="space-y-4 rounded-lg border p-6">
         <div>
           <label className="text-sm font-medium">Email</label>
