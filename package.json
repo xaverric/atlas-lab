@@ -1,0 +1,24 @@
+{
+  "name": "atlas-lab",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*", "deployment/atlas-init"],
+  "scripts": {
+    "dev:core": "npm -w @atlas/server run dev",
+    "dev:dms": "npm -w @atlas/dms run dev",
+    "dev:scheduler": "npm -w @atlas/scheduler run dev",
+    "dev:notify": "npm -w @atlas/notify run dev",
+    "dev:gui": "npm -w @atlas/gui run dev",
+    "build": "npm run build -ws --if-present",
+    "lint": "npm run lint -ws --if-present",
+    "typecheck": "npm run typecheck -ws --if-present",
+    "init": "npm -w @atlas/init run start",
+    "dev:reset": "bash deployment/dev-reset.sh",
+    "start:dev": "bash deployment/startup.sh dev",
+    "start:dev:reset": "bash deployment/startup.sh dev --reset",
+    "start:prod": "bash deployment/startup.sh prod",
+    "start:prod:reset": "bash deployment/startup.sh prod --reset"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

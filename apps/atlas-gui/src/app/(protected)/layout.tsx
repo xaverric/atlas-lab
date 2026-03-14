@@ -1,0 +1,25 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
+import { AppShell } from '@/components/layout/app-shell';
+
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  if (isLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </main>
+    );
+  }
+
+  if (!isAuthenticated) {
+    router.replace('/login');
+    return null;
+  }
+
+  return <AppShell>{children}</AppShell>;
+}
