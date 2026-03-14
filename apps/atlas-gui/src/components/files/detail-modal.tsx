@@ -162,7 +162,7 @@ export function DetailModal({ documentId, onClose, onUpdate }: DetailModalProps)
   const isVideo = doc.mimeType.startsWith('video/');
   const isText = doc.mimeType.startsWith('text/');
   const isPdf = doc.mimeType.includes('pdf');
-  const previewable = canPreview(doc.mimeType);
+  const previewable = canPreview(doc.mimeType, doc.name);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={onClose}>

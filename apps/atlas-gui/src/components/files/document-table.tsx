@@ -152,7 +152,7 @@ export function DocumentTable({
                   <p className="mt-2 text-xs text-muted-foreground">{formatDate(doc.createdAt)}</p>
                 </div>
                 <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {canPreview(doc.mimeType) && (
+                  {canPreview(doc.mimeType, doc.name) && (
                     <button onClick={() => onPreview(doc)} className="text-muted-foreground hover:text-foreground p-1 transition-colors"><Eye className="h-4 w-4" /></button>
                   )}
                   <button onClick={() => handleDownload(doc)} className="text-muted-foreground hover:text-foreground p-1 transition-colors"><Download className="h-4 w-4" /></button>
@@ -237,7 +237,7 @@ export function DocumentTable({
                 <td className="p-3 text-sm text-muted-foreground whitespace-nowrap">{formatDate(doc.createdAt)}</td>
                 <td className="p-3">
                   <div className="flex gap-1">
-                    {canPreview(doc.mimeType) && (
+                    {canPreview(doc.mimeType, doc.name) && (
                       <button onClick={() => onPreview(doc)} className="text-muted-foreground hover:text-foreground p-1 transition-colors" title="Preview">
                         <Eye className="h-4 w-4" />
                       </button>
