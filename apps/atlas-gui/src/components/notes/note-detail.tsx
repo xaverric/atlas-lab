@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft, Trash2, Pencil, X, Link, Clock } from 'lucide-react';
+import { ArrowLeft, Trash2, Pencil, X, Link, Clock, Info, Globe, Lock } from 'lucide-react';
+import { ItemInfoModal } from './item-info-modal';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { TiptapEditor } from '@/components/notes/tiptap-editor';
@@ -63,6 +64,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
   const [isMarkdown, setIsMarkdown] = useState(false);
   const [markdownContent, setMarkdownContent] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const editorRef = useRef<{ insertImage: (url: string, docId: string, alt: string) => void; insertLink: (url: string, docId: string, text: string) => void } | null>(null);
 
   const toggleMarkdown = () => {
@@ -244,24 +246,27 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
                 </div>
               )}
               <span className="text-xs">{folderName}</span>
+              <button
+                onClick={() => setShowInfo(true)}
+                className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer transition-colors ${
+                  note?.isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-muted text-muted-foreground hover:bg-accent'
+                }`}
+              >
+                {note?.isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                {note?.isPublic ? `Public (${note.publicPermission === 'edit' ? 'editable' : 'view only'})` : 'Private'}
+              </button>
               {note?.isPublic && (
-                <>
-                  <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
-                    Public{note.publicPermission === 'edit' ? ' (editable)' : ' (view only)'}
-                  </span>
-                  <button
-                    onClick={() => {
-                      const url = `${window.location.origin}/public/notes/${note.id}`;
-                      navigator.clipboard.writeText(url);
-                      toast.success('Public link copied');
-                    }}
-                    className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <Link className="h-3 w-3" /> Copy link
-                  </button>
-                </>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/public/notes/${note.id}`); toast.success('Public link copied'); }}
+                  className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Link className="h-3 w-3" /> Copy link
+                </button>
               )}
               {note && <span className="text-xs">Updated {formatDate(note.updatedAt)}</span>}
+              <button onClick={() => setShowInfo(true)} className="rounded p-0.5 text-muted-foreground hover:text-foreground" title="Note info">
+                <Info className="h-3.5 w-3.5" />
+              </button>
             </div>
 
             <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -294,6 +299,9 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
           onClose={() => setShowHistory(false)}
           onRestore={() => { loadNote(); setShowHistory(false); }}
         />
+        {showInfo && (
+          <ItemInfoModal type="note" itemId={noteId} onClose={() => setShowInfo(false)} onUpdate={() => loadNote()} />
+        )}
       </>
     );
   }
@@ -310,6 +318,12 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
               <span className="text-sm text-muted-foreground">Editing</span>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowInfo(true)}
+                className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              >
+                <Info className="h-4 w-4" /> Settings
+              </button>
               <button
                 onClick={() => setShowHistory(!showHistory)}
                 className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
@@ -356,46 +370,6 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
             refreshKey={attachmentRefreshKey}
           />
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium">Tags (comma separated)</label>
-              <input
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder="tag1, tag2"
-                className="w-full rounded-md border bg-background px-3 py-1.5 text-sm"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Folder</label>
-              <select
-                value={folderId}
-                onChange={(e) => setFolderId(e.target.value)}
-                className="w-full rounded-md border bg-background px-3 py-1.5 text-sm"
-              >
-                <option value="">Root</option>
-                {folders.map((f) => (
-                  <option key={f.id} value={f.id}>{f.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">Visibility</label>
-              <select
-                value={isPublic ? publicPermission : 'private'}
-                onChange={(e) => {
-                  if (e.target.value === 'private') { setIsPublic(false); }
-                  else { setIsPublic(true); setPublicPermission(e.target.value as 'view' | 'edit'); }
-                }}
-                className="rounded-md border bg-background px-3 py-2 text-sm"
-              >
-                <option value="private">Private</option>
-                <option value="view">Public (view only)</option>
-                <option value="edit">Public (editable)</option>
-              </select>
-            </div>
-          </div>
-
           <div className="flex justify-end gap-2">
             <button onClick={cancelEdit} className="flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm hover:bg-accent">
               <X className="h-4 w-4" /> Cancel
@@ -428,6 +402,9 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
         onClose={() => setShowHistory(false)}
         onRestore={() => { loadNote(); setShowHistory(false); }}
       />
+      {showInfo && (
+        <ItemInfoModal type="note" itemId={noteId} onClose={() => setShowInfo(false)} onUpdate={() => loadNote()} />
+      )}
     </>
   );
 }
