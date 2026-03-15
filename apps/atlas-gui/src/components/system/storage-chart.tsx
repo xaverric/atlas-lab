@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { api } from '@/lib/api';
+import { StorageDetailModal } from './storage-detail-modal';
 
 interface StorageBreakdown {
   name: string;
@@ -17,10 +18,15 @@ interface StorageStats {
   updatedAt: string;
 }
 
+function toSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
 export function StorageChart() {
   const [stats, setStats] = useState<StorageStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedSection, setSelectedSection] = useState<{ slug: string; name: string; color: string } | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -95,7 +101,11 @@ export function StorageChart() {
         {stats.breakdown.map((item) => {
           const pct = stats.total.bytes > 0 ? (item.bytes / stats.total.bytes) * 100 : 0;
           return (
-            <div key={item.name} className="flex items-center gap-3 rounded-lg border bg-card p-3">
+            <div
+              key={item.name}
+              className="flex items-center gap-3 rounded-lg border bg-card p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+              onClick={() => setSelectedSection({ slug: toSlug(item.name), name: item.name, color: item.color })}
+            >
               <span
                 className="inline-block h-4 w-4 shrink-0 rounded"
                 style={{ backgroundColor: item.color }}
@@ -109,6 +119,15 @@ export function StorageChart() {
           );
         })}
       </div>
+
+      {selectedSection && (
+        <StorageDetailModal
+          section={selectedSection.slug}
+          sectionName={selectedSection.name}
+          color={selectedSection.color}
+          onClose={() => setSelectedSection(null)}
+        />
+      )}
     </div>
   );
 }
