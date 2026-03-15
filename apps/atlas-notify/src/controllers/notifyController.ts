@@ -48,3 +48,27 @@ export const unreadCount: RequestHandler = async (req, res, next) => {
     res.json({ data: { count } });
   } catch (err) { next(err); }
 };
+
+export const sendTest: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.auth.sub;
+    const notification = await notifyService.createDirect(userId, {
+      title: 'Test Notification',
+      body: 'This is a test notification from Atlas. If you see this, notifications are working.',
+      event: 'system.test',
+      priority: 'normal',
+    });
+    res.json({ data: notification });
+  } catch (err) { next(err); }
+};
+
+export const sendDirect: RequestHandler = async (req, res, next) => {
+  try {
+    const { userId, title, body, event, priority, url } = req.body;
+    if (!userId || !title || !body || !event) {
+      throw new ApiError(400, 'Missing required fields: userId, title, body, event');
+    }
+    const notification = await notifyService.createDirect(userId, { title, body, event, priority, url });
+    res.json({ data: notification });
+  } catch (err) { next(err); }
+};

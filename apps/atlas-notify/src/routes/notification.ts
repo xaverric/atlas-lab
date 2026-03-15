@@ -9,8 +9,10 @@ const router = Router();
 
 // internal
 router.post('/send', internalAuth, notifyController.send);
+router.post('/send-direct', internalAuth, notifyController.sendDirect);
 
 // notifications
+router.post('/test', auth, notifyController.sendTest);
 router.get('/', auth, notifyController.history);
 router.patch('/:id/read', auth, notifyController.markRead);
 router.post('/mark-all-read', auth, notifyController.markAllRead);

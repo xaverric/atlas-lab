@@ -2,6 +2,7 @@ import { ApiError } from '@atlas/core';
 import * as documentDao from '../daos/documentDao.js';
 import * as storageService from './storageService.js';
 import * as folderService from './folderService.js';
+import { publishNotification } from './publishNotification.js';
 
 interface UploadInput {
   file: Express.Multer.File;
@@ -29,7 +30,7 @@ interface ListInput {
 export const upload = async ({ file, name, tags, ownerId, folderId }: UploadInput) => {
   const storageKey = await storageService.upload(file);
 
-  return documentDao.create({
+  const doc = await documentDao.create({
     name,
     originalName: file.originalname,
     mimeType: file.mimetype,
@@ -39,6 +40,15 @@ export const upload = async ({ file, name, tags, ownerId, folderId }: UploadInpu
     ownerId,
     folderId: folderId || null,
   });
+
+  publishNotification(
+    ownerId,
+    'File Uploaded',
+    `"${name}" (${(file.size / 1024).toFixed(1)} KB) has been uploaded.`,
+    'dms.document.uploaded',
+  );
+
+  return doc;
 };
 
 export const list = (opts: ListInput) => documentDao.list(opts);
@@ -74,6 +84,13 @@ export const remove = async (id: string, ownerId: string, isAdmin = false) => {
   const doc = await getById(id, ownerId, isAdmin);
   await storageService.remove(doc.storageKey);
   await documentDao.deleteById(id);
+
+  publishNotification(
+    ownerId,
+    'File Deleted',
+    `"${doc.name}" has been deleted.`,
+    'dms.document.deleted',
+  );
 };
 
 export const bulkDelete = async (ids: string[], ownerId: string) => {

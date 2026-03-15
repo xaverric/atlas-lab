@@ -4,6 +4,7 @@ import * as embeddingService from './embeddingService.js';
 import * as vectorService from './vectorService.js';
 import * as noteFolderService from './noteFolderService.js';
 import * as revisionService from './revisionService.js';
+import { publishNotification } from './publishNotification.js';
 
 interface CreateInput {
   title: string;
@@ -61,6 +62,15 @@ export const create = async (input: CreateInput) => {
   const contentSize = Buffer.byteLength(input.content || '', 'utf8');
   const note = await noteDao.create({ ...input, contentSize });
   embedAndUpsert(note.id, note.title, note.content || '', note.tags || [], note.ownerId, note.folderId?.toString() || null, note.isPublic ?? false);
+
+  publishNotification(
+    input.ownerId,
+    'Note Created',
+    `"${note.title}" has been created.`,
+    'notes.note.created',
+    `/notes?noteId=${note.id}`,
+  );
+
   return note;
 };
 
@@ -124,13 +134,29 @@ export const update = async (
     );
   }
 
+  publishNotification(
+    existing.ownerId,
+    'Note Updated',
+    `"${updated.title}" has been updated.`,
+    'notes.note.updated',
+    `/notes?noteId=${updated.id}`,
+  );
+
   return updated;
 };
 
 export const remove = async (id: string, ownerId: string, isAdmin = false) => {
-  await getById(id, ownerId, isAdmin);
+  const note = await getById(id, ownerId, isAdmin);
   await noteDao.deleteById(id);
   vectorService.deleteNote(id).catch((err) => console.error('Qdrant delete failed for note', id, err));
+
+  publishNotification(
+    ownerId,
+    'Note Deleted',
+    `"${note.title}" has been deleted.`,
+    'notes.note.deleted',
+    '/notes',
+  );
 };
 
 export const getTags = (ownerId: string, isAdmin = false) => noteDao.distinctTags(ownerId, isAdmin);

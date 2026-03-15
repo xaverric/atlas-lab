@@ -2,20 +2,33 @@ import { ApiError } from '@atlas/core';
 import * as folderDao from '../daos/folderDao.js';
 import * as documentDao from '../daos/documentDao.js';
 import { Document } from '../models/Document.js';
+import { publishNotification } from './publishNotification.js';
 
 export const create = async (name: string, ownerId: string, parentId?: string | null, isAdmin = false) => {
+  let folder;
   if (parentId) {
     const parent = await folderDao.findById(parentId, ownerId, isAdmin);
     if (!parent) throw new ApiError(404, 'Parent folder not found');
     if (parent.isPublic) {
-      return folderDao.create({
+      folder = await folderDao.create({
         name, parentId, ownerId,
         isPublic: true,
         publicPermission: (parent as any).publicPermission || 'view',
       });
     }
   }
-  return folderDao.create({ name, parentId: parentId || null, ownerId });
+  if (!folder) {
+    folder = await folderDao.create({ name, parentId: parentId || null, ownerId });
+  }
+
+  publishNotification(
+    ownerId,
+    'Folder Created',
+    `Folder "${name}" has been created.`,
+    'dms.folder.created',
+  );
+
+  return folder;
 };
 
 export const listByParent = (ownerId: string, parentId: string | null, isAdmin = false) =>

@@ -1,6 +1,7 @@
 import { ApiError } from '@atlas/core';
 import * as dynamicDao from '../daos/dynamicDao.js';
 import * as schemaValidator from './schemaValidator.js';
+import { publishNotification } from './publishNotification.js';
 
 const getCollectionName = (userId: string, endpointName: string) =>
   `tracker_${userId}_${endpointName}`;
@@ -75,6 +76,13 @@ export const insert = async (
   const collName = getCollectionName(userId, endpointName);
   const doc = { data, metadata, createdAt: new Date() };
   const inserted = await dynamicDao.insertOne(collName, doc);
+
+  publishNotification(
+    userId,
+    'Data Submitted',
+    `New data submitted to "${endpointName}" tracker endpoint.`,
+    'tracker.data.submitted',
+  );
 
   return { ...doc, id: inserted.insertedId };
 };

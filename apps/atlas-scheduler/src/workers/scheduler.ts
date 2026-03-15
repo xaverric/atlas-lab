@@ -83,6 +83,22 @@ const worker = new Worker('atlas-scheduler', async (bullJob) => {
 
     const hasEvaluationFailures = (result.evaluationResults || []).some((r) => !r.passed);
 
+    // Always publish event bus events for job lifecycle
+    if (eventBus) {
+      const eventName = status === 'completed' ? 'scheduler.job.completed'
+        : status === 'timeout' ? 'scheduler.job.timeout'
+        : 'scheduler.job.failed';
+      await eventBus.publish(eventName, {
+        userId: job.ownerId as string,
+        jobId,
+        jobName: job.name,
+        runId: run.id,
+        duration: Date.now() - start,
+        status,
+        error: result.error,
+      }, 'atlas-scheduler').catch(() => {});
+    }
+
     const notifications = (job.notifications || []) as Array<{ trigger: string; channel: string; config: Record<string, unknown> }>;
     if (notifications.length > 0) {
       await evaluateNotifications({
@@ -113,6 +129,19 @@ const worker = new Worker('atlas-scheduler', async (bullJob) => {
     });
 
     await jobDao.updateLastRun(jobId, status);
+
+    if (eventBus) {
+      const eventName = status === 'timeout' ? 'scheduler.job.timeout' : 'scheduler.job.failed';
+      await eventBus.publish(eventName, {
+        userId: job.ownerId as string,
+        jobId,
+        jobName: job.name,
+        runId: run.id,
+        duration: Date.now() - start,
+        status,
+        error: message,
+      }, 'atlas-scheduler').catch(() => {});
+    }
   }
 
   // Compute next run

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Settings, Check, CheckCheck } from 'lucide-react';
+import { Settings, Check, CheckCheck, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { ViewToggle, useViewMode } from '@/components/shared/view-toggle';
@@ -38,6 +38,7 @@ export default function NotificationsPage() {
   const [page, setPage] = useState(1);
   const [view, setView] = useViewMode('notifications-view', 'list');
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [sendingTest, setSendingTest] = useState(false);
   const { markRead, markAllRead } = useNotificationContext();
 
   const load = async (p: number) => {
@@ -55,6 +56,19 @@ export default function NotificationsPage() {
   };
 
   useEffect(() => { load(1); }, [filter]);
+
+  const sendTest = async () => {
+    setSendingTest(true);
+    try {
+      await api('/api/v1/notifications/test', { method: 'POST' });
+      toast.success('Test notification sent');
+      setTimeout(() => load(page), 500);
+    } catch {
+      toast.error('Failed to send test notification');
+    } finally {
+      setSendingTest(false);
+    }
+  };
 
   const handleMarkRead = async (id: string) => {
     await markRead(id);
@@ -101,6 +115,15 @@ export default function NotificationsPage() {
             <CheckCheck className="h-4 w-4" />
           </button>
           <ViewToggle view={view} onChange={setView} />
+          <button
+            onClick={sendTest}
+            disabled={sendingTest}
+            className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
+            title="Send a test notification"
+          >
+            <Send className="h-4 w-4" />
+            {sendingTest ? 'Sending...' : 'Send Test'}
+          </button>
           <Link
             href="/notifications/preferences"
             className="flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"

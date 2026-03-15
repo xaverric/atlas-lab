@@ -23,9 +23,9 @@ export const config = {
     botUsername: process.env.TELEGRAM_BOT_USERNAME || 'AtlasNotifyBot',
   },
   vapid: {
-    publicKey: process.env.VAPID_PUBLIC_KEY || '',
-    privateKey: process.env.VAPID_PRIVATE_KEY || '',
-    subject: process.env.VAPID_SUBJECT || 'mailto:admin@xaverric.cz',
+    publicKey: process.env.VAPID_PUBLIC_KEY || 'BNVWRoH13xKSl0OEpJ4TTCA_nWv6uWjh-ekKU9o-cunsiW-AX06NGW4s9B3XfVHlRrhllc3zEx-mziowbzTtcsw',
+    privateKey: process.env.VAPID_PRIVATE_KEY || 'uwKrOsMRYvGKVo0BFqpdVEFrk6QPprTyS0Qf2jxtopc',
+    subject: process.env.VAPID_SUBJECT || 'mailto:jilek.daniel@gmail.com',
   },
   twilio: {
     accountSid: process.env.TWILIO_ACCOUNT_SID || '',

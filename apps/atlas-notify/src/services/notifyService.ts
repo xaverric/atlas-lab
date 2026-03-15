@@ -100,7 +100,7 @@ export const ensureUserSetup = async (userId: string) => {
 
 export const createDirect = async (
   userId: string,
-  opts: { title: string; body: string; event: string; priority?: string },
+  opts: { title: string; body: string; event: string; priority?: string; url?: string },
 ) => {
   await ensureUserSetup(userId);
 
@@ -134,6 +134,7 @@ export const createDirect = async (
     body: opts.body,
     read: false,
     priority: opts.priority || 'normal',
+    data: opts.url ? { url: opts.url } : undefined,
     deliveries,
   });
 
