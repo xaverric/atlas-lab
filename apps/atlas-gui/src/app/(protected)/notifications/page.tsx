@@ -81,7 +81,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="px-6 py-5 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <select
@@ -144,38 +144,38 @@ export default function NotificationsPage() {
           )}
         </div>
       ) : (
-        <div className="rounded-lg border">
-          <table className="w-full">
+        <div className="rounded-lg border bg-card">
+          <table className="w-full text-sm">
             <thead>
-              <tr className="border-b text-left text-sm text-muted-foreground">
-                <th className="w-8 p-3"></th>
-                <th className="p-3">Channels</th>
-                <th className="p-3">Title</th>
-                <th className="p-3">Event</th>
-                <th className="p-3">Date</th>
-                <th className="w-10 p-3"></th>
+              <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+                <th className="w-8 px-4 py-3"></th>
+                <th className="px-4 py-3">Channels</th>
+                <th className="px-4 py-3">Title</th>
+                <th className="px-4 py-3">Event</th>
+                <th className="px-4 py-3">Date</th>
+                <th className="w-10 px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
               {notifications.map((n) => (
-                <tr key={n.id} className={`border-b last:border-0 hover:bg-muted/50 ${!n.read ? 'bg-info/5' : ''}`}>
-                  <td className="p-3">
+                <tr key={n.id} className={`border-b last:border-b-0 hover:bg-accent/50 transition-colors ${!n.read ? 'bg-info/5' : ''}`}>
+                  <td className="px-4 py-3">
                     {!n.read && <span className="block h-2 w-2 rounded-full bg-info" />}
                   </td>
-                  <td className="p-3">
+                  <td className="px-4 py-3">
                     <div className="flex gap-1">{channelBadges(n)}</div>
                   </td>
-                  <td className="p-3">
+                  <td className="px-4 py-3">
                     <div className="max-w-md">
-                      <p className="truncate text-sm font-medium">{n.title || n.subject || 'Notification'}</p>
+                      <p className="truncate font-medium">{n.title || n.subject || 'Notification'}</p>
                       {n.body && <p className="truncate text-xs text-muted-foreground">{n.body}</p>}
                     </div>
                   </td>
-                  <td className="p-3 text-sm text-muted-foreground">{n.event || n.templateKey}</td>
-                  <td className="p-3 text-sm text-muted-foreground whitespace-nowrap">
+                  <td className="px-4 py-3 text-muted-foreground">{n.event || n.templateKey}</td>
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                     {new Date(n.createdAt).toLocaleString()}
                   </td>
-                  <td className="p-3">
+                  <td className="px-4 py-3">
                     {!n.read && (
                       <button onClick={() => handleMarkRead(n.id)} className="rounded p-1 hover:bg-muted" title="Mark read">
                         <Check className="h-3.5 w-3.5" />
@@ -195,10 +195,10 @@ export default function NotificationsPage() {
       )}
 
       {total > 20 && (
-        <div className="flex gap-2 justify-center">
-          <button onClick={() => load(page - 1)} disabled={page <= 1} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Previous</button>
-          <span className="px-3 py-1 text-sm text-muted-foreground">Page {page} of {Math.ceil(total / 20)}</span>
-          <button onClick={() => load(page + 1)} disabled={page * 20 >= total} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Next</button>
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <button onClick={() => load(page - 1)} disabled={page <= 1} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Previous</button>
+          <span className="text-sm text-muted-foreground">Page {page} of {Math.ceil(total / 20)}</span>
+          <button onClick={() => load(page + 1)} disabled={page * 20 >= total} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Next</button>
         </div>
       )}
     </div>

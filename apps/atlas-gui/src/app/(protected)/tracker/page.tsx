@@ -61,7 +61,7 @@ export default function TrackerListPage() {
   if (loading) return <p className="text-muted-foreground">Loading...</p>;
 
   return (
-    <div className="space-y-6">
+    <div className="px-6 py-5 space-y-4">
       <div className="flex items-center justify-between">
         <Link
           href="/tracker/new"
@@ -72,28 +72,28 @@ export default function TrackerListPage() {
         </Link>
       </div>
 
-      <div className="rounded-lg border">
-        <table className="w-full">
+      <div className="rounded-lg border bg-card">
+        <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-sm text-muted-foreground">
-              <th className="p-3">Name</th>
-              <th className="p-3">Visibility</th>
-              <th className="p-3">Schema Fields</th>
-              <th className="p-3">Retention</th>
-              <th className="p-3">Updated</th>
-              <th className="p-3 w-16" />
+            <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Visibility</th>
+              <th className="px-4 py-3">Schema Fields</th>
+              <th className="px-4 py-3">Retention</th>
+              <th className="px-4 py-3">Updated</th>
+              <th className="px-4 py-3 w-16" />
             </tr>
           </thead>
           <tbody>
             {endpoints.map((ep) => (
-              <tr key={ep.id} className="border-b last:border-0 hover:bg-muted/50">
-                <td className="p-3">
+              <tr key={ep.id} className="border-b last:border-b-0 hover:bg-accent/50 transition-colors">
+                <td className="px-4 py-3">
                   <Link href={`/tracker/${ep.name}`} className="hover:underline font-medium">
                     {ep.displayName}
                   </Link>
                   <p className="text-xs text-muted-foreground font-mono">{ep.name}</p>
                 </td>
-                <td className="p-3">
+                <td className="px-4 py-3">
                   <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                     ep.visibility === 'public'
                       ? 'bg-info/10 text-info'
@@ -103,16 +103,16 @@ export default function TrackerListPage() {
                     {ep.visibility}
                   </span>
                 </td>
-                <td className="p-3 text-sm text-muted-foreground">
+                <td className="px-4 py-3 text-muted-foreground">
                   {Object.keys(ep.schema?.properties || {}).length} fields
                 </td>
-                <td className="p-3 text-sm text-muted-foreground">
+                <td className="px-4 py-3 text-muted-foreground">
                   {ep.retentionDays ? `${ep.retentionDays}d` : 'Forever'}
                 </td>
-                <td className="p-3 text-sm text-muted-foreground">
+                <td className="px-4 py-3 text-muted-foreground">
                   {relativeTime(ep.updatedAt)}
                 </td>
-                <td className="p-3">
+                <td className="px-4 py-3">
                   <button
                     onClick={() => handleDelete(ep.name)}
                     className="rounded p-1 hover:bg-muted text-muted-foreground hover:text-destructive"

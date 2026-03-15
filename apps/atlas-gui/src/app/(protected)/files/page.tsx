@@ -526,27 +526,27 @@ export default function FilesPage() {
 
         {/* Unified table: folders + files */}
         {hasContent ? (
-          <div className="overflow-x-auto rounded-md border">
+          <div className="overflow-x-auto rounded-lg border bg-card">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
-                  <th className="px-4 py-2 w-10">
+                  <th className="px-4 py-3 w-10">
                     <input type="checkbox" checked={docs.length > 0 && docs.every((d) => selectedIds.has(d.id))} onChange={handleSelectAll} className="rounded border-input" />
                   </th>
-                  <th className="px-4 py-2 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('name')}>
+                  <th className="px-4 py-3 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('name')}>
                     Name {sort.field === 'name' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-2 w-24 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('mimeType')}>
+                  <th className="px-4 py-3 w-24 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('mimeType')}>
                     Type {sort.field === 'mimeType' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-2 w-20 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('size')}>
+                  <th className="px-4 py-3 w-20 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('size')}>
                     Size {sort.field === 'size' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-2 w-36">Visibility</th>
-                  <th className="px-4 py-2 w-28 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('createdAt')}>
+                  <th className="px-4 py-3 w-36">Visibility</th>
+                  <th className="px-4 py-3 w-28 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('createdAt')}>
                     Uploaded {sort.field === 'createdAt' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-2 w-16" />
+                  <th className="px-4 py-3 w-16" />
                 </tr>
               </thead>
               <tbody>
@@ -560,8 +560,8 @@ export default function FilesPage() {
                       onClick={() => navigateToFolder(folder.id)}
                       onContextMenu={(e) => openFolderMenu(e, folder)}
                     >
-                      <td className="px-4 py-2" />
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-3" />
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <Folder className="h-4 w-4 shrink-0 text-warning" />
                           <span className="font-medium">{folder.name}</span>
@@ -570,9 +570,9 @@ export default function FilesPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-2 text-muted-foreground">Folder</td>
-                      <td className="px-4 py-2 text-muted-foreground">{folder.totalSize != null ? formatSize(folder.totalSize) : '-'}</td>
-                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3 text-muted-foreground">Folder</td>
+                      <td className="px-4 py-3 text-muted-foreground">{folder.totalSize != null ? formatSize(folder.totalSize) : '-'}</td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => handleToggleFolderPublic(folder.id, !isFolderPublic)}
@@ -603,8 +603,8 @@ export default function FilesPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-2 text-muted-foreground">-</td>
-                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3 text-muted-foreground">-</td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => setInfoModal({ type: 'folder', id: folder.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
                           <Info className="h-3.5 w-3.5" />
                         </button>
@@ -626,10 +626,10 @@ export default function FilesPage() {
                     }}
                     onContextMenu={(e) => openDocMenu(e, doc)}
                   >
-                    <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <input type="checkbox" checked={selectedIds.has(doc.id)} onChange={() => handleSelect(doc.id)} className="rounded border-input" />
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <span className="font-medium truncate">{doc.name}</span>
                         {doc.tags.length > 0 && (
@@ -642,11 +642,11 @@ export default function FilesPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">{doc.mimeType.split('/').pop()}</td>
-                    <td className="px-4 py-2 text-muted-foreground">{formatSize(doc.size)}</td>
-                    <td className="px-4 py-2 text-muted-foreground text-[10px]">inherited</td>
-                    <td className="px-4 py-2 text-muted-foreground">{formatDate(doc.createdAt)}</td>
-                    <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{doc.mimeType.split('/').pop()}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatSize(doc.size)}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-[10px]">inherited</td>
+                    <td className="px-4 py-3 text-muted-foreground">{formatDate(doc.createdAt)}</td>
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <button onClick={() => setInfoModal({ type: 'document', id: doc.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
                         <Info className="h-3.5 w-3.5" />
                       </button>
@@ -663,10 +663,10 @@ export default function FilesPage() {
         {!hasContent && hasFilters && <EmptyState preset="no-results" />}
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2">
-            <button disabled={page <= 1} onClick={() => loadDocs(page - 1)} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Previous</button>
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <button disabled={page <= 1} onClick={() => loadDocs(page - 1)} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Previous</button>
             <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
-            <button disabled={page >= totalPages} onClick={() => loadDocs(page + 1)} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Next</button>
+            <button disabled={page >= totalPages} onClick={() => loadDocs(page + 1)} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Next</button>
           </div>
         )}
       </div>

@@ -174,11 +174,11 @@ export function DocumentTable({
   return (
     <>
       {/* Desktop table */}
-      <div className="hidden md:block rounded-lg border overflow-x-auto">
-        <table className="w-full">
+      <div className="hidden md:block rounded-lg border bg-card overflow-x-auto">
+        <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-sm text-muted-foreground">
-              <th className="p-3 w-10">
+            <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+              <th className="px-4 py-3 w-10">
                 <input
                   type="checkbox"
                   checked={allSelected}
@@ -189,24 +189,24 @@ export function DocumentTable({
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={cn('p-3 whitespace-nowrap', col.sortable && 'cursor-pointer select-none hover:text-foreground')}
+                  className={cn('px-4 py-3 whitespace-nowrap', col.sortable && 'cursor-pointer select-none hover:text-foreground')}
                   onClick={() => col.sortable && onSort(col.key)}
                 >
                   {col.label}
                   {col.sortable && <SortIcon field={col.key} sort={sort} />}
                 </th>
               ))}
-              <th className="p-3 w-24" />
+              <th className="px-4 py-3 w-24" />
             </tr>
           </thead>
           <tbody>
             {documents.map((doc) => (
               <tr
                 key={doc.id}
-                className="border-b last:border-0 hover:bg-muted/50 transition-colors"
+                className="border-b last:border-b-0 hover:bg-accent/50 transition-colors"
                 onContextMenu={(e) => handleContextMenu(e, doc)}
               >
-                <td className="p-3">
+                <td className="px-4 py-3">
                   <input
                     type="checkbox"
                     checked={selectedIds.has(doc.id)}
@@ -214,28 +214,28 @@ export function DocumentTable({
                     className="rounded border-input"
                   />
                 </td>
-                <td className="p-3">
+                <td className="px-4 py-3">
                   <button onClick={() => onDetails ? onDetails(doc) : router.push(`/files/${doc.id}`)} className="flex items-center gap-2 hover:underline text-left">
                     <FileIcon mimeType={doc.mimeType} className="text-muted-foreground shrink-0" />
                     <span className="truncate max-w-xs">{doc.name}</span>
                   </button>
                 </td>
                 {showPath && (
-                  <td className="p-3 text-sm text-muted-foreground">
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
                     <span className="truncate max-w-[200px] inline-block">{doc.folderPath || '/'}</span>
                   </td>
                 )}
-                <td className="p-3 text-sm text-muted-foreground whitespace-nowrap">{doc.mimeType.split('/').pop()}</td>
-                <td className="p-3 text-sm text-muted-foreground whitespace-nowrap">{formatSize(doc.size)}</td>
-                <td className="p-3">
+                <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{doc.mimeType.split('/').pop()}</td>
+                <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{formatSize(doc.size)}</td>
+                <td className="px-4 py-3">
                   <div className="flex gap-1 flex-wrap">
                     {doc.tags.map((tag) => (
                       <span key={tag} className="rounded bg-muted px-2 py-0.5 text-xs">{tag}</span>
                     ))}
                   </div>
                 </td>
-                <td className="p-3 text-sm text-muted-foreground whitespace-nowrap">{formatDate(doc.createdAt)}</td>
-                <td className="p-3">
+                <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{formatDate(doc.createdAt)}</td>
+                <td className="px-4 py-3">
                   <div className="flex gap-1">
                     {canPreview(doc.mimeType, doc.name) && (
                       <button onClick={() => onPreview(doc)} className="text-muted-foreground hover:text-foreground p-1 transition-colors" title="Preview">

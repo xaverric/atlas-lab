@@ -440,25 +440,25 @@ export default function NotesPage() {
 
         {/* Unified list */}
         {(folders.length > 0 || displayNotes.length > 0) ? (
-          <div className="overflow-x-auto rounded-md border">
+          <div className="overflow-x-auto rounded-lg border bg-card">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
-                  <th className="px-4 py-2 w-10">
+                  <th className="px-4 py-3 w-10">
                     <input type="checkbox" checked={displayNotes.length > 0 && displayNotes.every((n) => selectedIds.has(n.id))} onChange={handleSelectAll} className="rounded border-input" />
                   </th>
-                  <th className="px-4 py-2 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('title')}>
+                  <th className="px-4 py-3 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('title')}>
                     Name {sort.field === 'title' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-2 w-20 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('contentSize')}>
+                  <th className="px-4 py-3 w-20 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('contentSize')}>
                     Size {sort.field === 'contentSize' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-2 w-28">Attachments</th>
-                  <th className="px-4 py-2 w-36">Visibility</th>
-                  <th className="px-4 py-2 w-28 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('updatedAt')}>
+                  <th className="px-4 py-3 w-28">Attachments</th>
+                  <th className="px-4 py-3 w-36">Visibility</th>
+                  <th className="px-4 py-3 w-28 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('updatedAt')}>
                     Updated {sort.field === 'updatedAt' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-2 w-16" />
+                  <th className="px-4 py-3 w-16" />
                 </tr>
               </thead>
               <tbody>
@@ -472,8 +472,8 @@ export default function NotesPage() {
                       onClick={() => navigateToFolder(folder.id)}
                       onContextMenu={(e) => openFolderMenu(e, folder)}
                     >
-                      <td className="px-4 py-2" />
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-3" />
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <Folder className="h-4 w-4 shrink-0 text-warning" />
                           <span className="font-medium">{folder.name}</span>
@@ -482,9 +482,9 @@ export default function NotesPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-2 text-muted-foreground">{folder.totalSize != null ? formatSize(folder.totalSize) : '-'}</td>
-                      <td className="px-4 py-2 text-muted-foreground">-</td>
-                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3 text-muted-foreground">{folder.totalSize != null ? formatSize(folder.totalSize) : '-'}</td>
+                      <td className="px-4 py-3 text-muted-foreground">-</td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => handleToggleFolderPublic(folder.id, !isFolderPublic)}
@@ -515,8 +515,8 @@ export default function NotesPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-2 text-muted-foreground">-</td>
-                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3 text-muted-foreground">-</td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => setInfoModal({ type: 'folder', id: folder.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
                           <Info className="h-3.5 w-3.5" />
                         </button>
@@ -535,10 +535,10 @@ export default function NotesPage() {
                       onClick={() => navigateToNote(note.id)}
                       onContextMenu={(e) => openNoteMenu(e, note)}
                     >
-                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <input type="checkbox" checked={selectedIds.has(note.id)} onChange={() => handleSelect(note.id)} className="rounded border-input" />
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                           <span className="font-medium truncate">{note.title}</span>
@@ -552,9 +552,9 @@ export default function NotesPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-2 text-muted-foreground">{note.contentSize != null ? formatSize(note.contentSize) : '-'}</td>
-                      <td className="px-4 py-2 text-muted-foreground">{attachmentSummary(note.attachments)}</td>
-                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3 text-muted-foreground">{note.contentSize != null ? formatSize(note.contentSize) : '-'}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{attachmentSummary(note.attachments)}</td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => handleToggleNotePublic(note.id, !isNotePublic)}
@@ -584,8 +584,8 @@ export default function NotesPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-2 text-muted-foreground">{formatDate(note.updatedAt)}</td>
-                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3 text-muted-foreground">{formatDate(note.updatedAt)}</td>
+                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => setInfoModal({ type: 'note', id: note.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
                           <Info className="h-3.5 w-3.5" />
                         </button>
@@ -608,10 +608,10 @@ export default function NotesPage() {
         )}
 
         {!searchResults && totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2">
-            <button disabled={page <= 1} onClick={() => loadNotes(page - 1)} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Previous</button>
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <button disabled={page <= 1} onClick={() => loadNotes(page - 1)} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Previous</button>
             <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
-            <button disabled={page >= totalPages} onClick={() => loadNotes(page + 1)} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Next</button>
+            <button disabled={page >= totalPages} onClick={() => loadNotes(page + 1)} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Next</button>
           </div>
         )}
       </div>

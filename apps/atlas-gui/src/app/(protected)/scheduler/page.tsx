@@ -185,7 +185,7 @@ export default function SchedulerListPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="px-6 py-5 space-y-4">
       <div className="flex items-center justify-between">
         <Link
           href="/scheduler/jobs/new"
@@ -256,17 +256,17 @@ export default function SchedulerListPage() {
       )}
 
       {/* Table */}
-      <div className="rounded-lg border">
-        <table className="w-full">
+      <div className="rounded-lg border bg-card">
+        <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-sm text-muted-foreground">
-              <th className="p-3">Name</th>
-              <th className="p-3">Type</th>
-              <th className="p-3">Schedule</th>
-              <th className="p-3">Last Run</th>
-              <th className="p-3">Next Run</th>
-              <th className="p-3">Status</th>
-              <th className="p-3 w-28" />
+            <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Type</th>
+              <th className="px-4 py-3">Schedule</th>
+              <th className="px-4 py-3">Last Run</th>
+              <th className="px-4 py-3">Next Run</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3 w-28" />
             </tr>
           </thead>
           <tbody>
@@ -294,8 +294,8 @@ export default function SchedulerListPage() {
                     </tr>
                   )}
                   {!isCollapsed && groupJobs.map((job) => (
-                    <tr key={job.id} className={`border-b last:border-b-0 hover:bg-muted/50 ${allGroups.length > 1 ? `border-l-4 ${groupBorderColor(group)}` : ''}`}>
-                      <td className="p-3">
+                    <tr key={job.id} className={`border-b last:border-b-0 hover:bg-accent/50 transition-colors ${allGroups.length > 1 ? `border-l-4 ${groupBorderColor(group)}` : ''}`}>
+                      <td className="px-4 py-3">
                         <Link href={`/scheduler/jobs/${job.id}`} className="hover:underline font-medium">
                           {job.name}
                         </Link>
@@ -307,21 +307,21 @@ export default function SchedulerListPage() {
                           </div>
                         )}
                       </td>
-                      <td className="p-3 text-sm">
+                      <td className="px-4 py-3">
                         <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">{job.executionType}</span>
                       </td>
-                      <td className="p-3 text-sm text-muted-foreground font-mono">
+                      <td className="px-4 py-3 text-muted-foreground font-mono">
                         {formatSchedule(job.schedule)}
                       </td>
-                      <td className="p-3 text-sm">
+                      <td className="px-4 py-3">
                         {job.lastRunStatus && <StatusBadge status={job.lastRunStatus} className="mr-2" />}
                         {job.lastRunAt && <span className="text-xs text-muted-foreground">{relativeTime(job.lastRunAt)}</span>}
                         {!job.lastRunAt && <span className="text-xs text-muted-foreground">Never</span>}
                       </td>
-                      <td className="p-3 text-sm text-muted-foreground">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {job.nextRunAt ? new Date(job.nextRunAt).toLocaleString() : '-'}
                       </td>
-                      <td className="p-3">
+                      <td className="px-4 py-3">
                         <button
                           onClick={() => handleToggle(job.id, job.enabled)}
                           className={`rounded-full px-3 py-1 text-xs font-medium ${
@@ -331,7 +331,7 @@ export default function SchedulerListPage() {
                           {job.enabled ? 'Enabled' : 'Disabled'}
                         </button>
                       </td>
-                      <td className="p-3">
+                      <td className="px-4 py-3">
                         <div className="flex gap-1">
                           <button onClick={() => handleRun(job.id)} className="rounded p-1 hover:bg-muted" title="Run now">
                             <Play className="h-4 w-4" />
@@ -356,10 +356,10 @@ export default function SchedulerListPage() {
       </div>
 
       {total > 20 && (
-        <div className="flex gap-2 justify-center">
-          <button onClick={() => load(page - 1)} disabled={page <= 1} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Previous</button>
-          <span className="px-3 py-1 text-sm text-muted-foreground">Page {page} of {Math.ceil(total / 20)}</span>
-          <button onClick={() => load(page + 1)} disabled={page * 20 >= total} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Next</button>
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <button onClick={() => load(page - 1)} disabled={page <= 1} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Previous</button>
+          <span className="text-sm text-muted-foreground">Page {page} of {Math.ceil(total / 20)}</span>
+          <button onClick={() => load(page + 1)} disabled={page * 20 >= total} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Next</button>
         </div>
       )}
     </div>

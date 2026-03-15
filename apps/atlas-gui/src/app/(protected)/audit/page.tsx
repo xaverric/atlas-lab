@@ -122,7 +122,7 @@ export default function AuditPage() {
     });
 
   return (
-    <div className="space-y-4">
+    <div className="px-6 py-5 space-y-4">
       <div className="flex items-center justify-between">
         <label className="flex items-center gap-2 text-sm">
           <RefreshCw className={`h-4 w-4 ${autoRefresh ? 'animate-spin' : ''}`} />
@@ -136,7 +136,7 @@ export default function AuditPage() {
         </label>
       </div>
 
-      <div className="flex flex-wrap gap-2 rounded-lg border p-3">
+      <div className="flex flex-wrap gap-3">
         <select
           value={filters.service}
           onChange={(e) => setFilters((f) => ({ ...f, service: e.target.value }))}
@@ -200,18 +200,18 @@ export default function AuditPage() {
         </button>
       </div>
 
-      <div className="rounded-lg border">
-        <table className="w-full">
+      <div className="rounded-lg border bg-card">
+        <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-sm text-muted-foreground">
-              <th className="w-8 p-3"></th>
-              <th className="p-3">Timestamp</th>
-              <th className="p-3">Service</th>
-              <th className="p-3">Action</th>
-              <th className="p-3">User</th>
-              <th className="p-3">Resource</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Duration</th>
+            <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+              <th className="w-8 px-4 py-3"></th>
+              <th className="px-4 py-3">Timestamp</th>
+              <th className="px-4 py-3">Service</th>
+              <th className="px-4 py-3">Action</th>
+              <th className="px-4 py-3">User</th>
+              <th className="px-4 py-3">Resource</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Duration</th>
             </tr>
           </thead>
           <tbody>
@@ -234,26 +234,24 @@ export default function AuditPage() {
         </table>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-center gap-2 pt-2">
+        <button
+          onClick={() => load(offset - LIMIT)}
+          disabled={offset <= 0}
+          className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+        >
+          Previous
+        </button>
         <span className="text-sm text-muted-foreground">
-          Showing {offset + 1}-{Math.min(offset + LIMIT, total)} of {total}
+          {offset + 1}-{Math.min(offset + LIMIT, total)} of {total}
         </span>
-        <div className="flex gap-2">
-          <button
-            onClick={() => load(offset - LIMIT)}
-            disabled={offset <= 0}
-            className="rounded border px-3 py-1 text-sm disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <button
-            onClick={() => load(offset + LIMIT)}
-            disabled={offset + LIMIT >= total}
-            className="rounded border px-3 py-1 text-sm disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        <button
+          onClick={() => load(offset + LIMIT)}
+          disabled={offset + LIMIT >= total}
+          className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
@@ -276,24 +274,24 @@ function EventRow({
     <>
       <tr
         onClick={onToggle}
-        className="border-b last:border-0 hover:bg-muted/50 cursor-pointer"
+        className="border-b last:border-b-0 hover:bg-accent/50 transition-colors cursor-pointer"
       >
-        <td className="p-3">
+        <td className="px-4 py-3">
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </td>
-        <td className="p-3 text-sm whitespace-nowrap">{formatTimestamp(event.timestamp)}</td>
-        <td className="p-3">
+        <td className="px-4 py-3 whitespace-nowrap">{formatTimestamp(event.timestamp)}</td>
+        <td className="px-4 py-3">
           <span className="rounded bg-muted px-1.5 py-0.5 text-xs">{event.service}</span>
         </td>
-        <td className="p-3 text-sm font-medium">{event.action}</td>
-        <td className="p-3 text-sm text-muted-foreground truncate max-w-[140px]">
+        <td className="px-4 py-3 font-medium">{event.action}</td>
+        <td className="px-4 py-3 text-muted-foreground truncate max-w-[140px]">
           {event.userName || event.userId || '-'}
         </td>
-        <td className="p-3 text-sm text-muted-foreground truncate max-w-[140px]">
+        <td className="px-4 py-3 text-muted-foreground truncate max-w-[140px]">
           {event.resourceType ? `${event.resourceType}${event.resourceId ? `:${event.resourceId}` : ''}` : '-'}
         </td>
-        <td className="p-3">{statusBadge(event.status)}</td>
-        <td className="p-3 text-sm text-muted-foreground">
+        <td className="px-4 py-3">{statusBadge(event.status)}</td>
+        <td className="px-4 py-3 text-muted-foreground">
           {event.duration != null ? `${event.duration}ms` : '-'}
         </td>
       </tr>
