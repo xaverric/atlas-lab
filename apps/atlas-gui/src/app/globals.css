@@ -8,24 +8,24 @@
      Warm light with vibrant accents
      Base: #eff1f5 | Text: #4c4f69 | Blue: #1e66f5
      ============================================ */
-  --color-background: #eff1f5;                         /* Base */
+  --color-background: #fbfbfd;                         /* Near white with tiny blue tint */
   --color-foreground: #4c4f69;                          /* Text */
-  --color-card: #e6e9ef;                                /* Mantle */
-  --color-card-foreground: #4c4f69;                     /* Text */
-  --color-popover: #ffffff;                             /* White for popups */
+  --color-card: #ffffff;                                /* Pure white cards */
+  --color-card-foreground: #4c4f69;
+  --color-popover: #ffffff;
   --color-popover-foreground: #4c4f69;
   --color-primary: #1e66f5;                             /* Blue */
-  --color-primary-foreground: #eff1f5;                  /* Base */
-  --color-secondary: #dce0e8;                           /* Crust */
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f0f1f5;                           /* Very light grey — barely visible */
   --color-secondary-foreground: #4c4f69;
-  --color-muted: #e6e9ef;                               /* Mantle */
+  --color-muted: #f4f5f8;                               /* Almost white muted */
   --color-muted-foreground: #6c6f85;                    /* Subtext0 */
-  --color-accent: #dce0e8;                              /* Crust */
+  --color-accent: #eef0f8;                              /* Very light blue-grey hover */
   --color-accent-foreground: #4c4f69;
-  --color-destructive: #d20f39;                         /* Red */
-  --color-destructive-foreground: #eff1f5;
-  --color-border: #ccd0da;                              /* Surface0 */
-  --color-input: #ccd0da;                               /* Surface0 */
+  --color-destructive: #d20f39;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e2e4ea;                              /* Light border — visible but soft */
+  --color-input: #e2e4ea;
   --color-ring: #7287fd;                                /* Lavender */
   --color-success: #40a02b;                             /* Green */
   --color-success-foreground: #eff1f5;
@@ -35,15 +35,15 @@
   --color-info-foreground: #eff1f5;
   --radius: 0.75rem;                                    /* 12px — rounder islands */
 
-  /* Sidebar */
-  --color-sidebar-background: #e6e9ef;                  /* Mantle */
-  --color-sidebar-foreground: #4c4f69;                  /* Text */
-  --color-sidebar-primary: #1e66f5;                     /* Blue */
-  --color-sidebar-primary-foreground: #eff1f5;
-  --color-sidebar-accent: #dce0e8;                      /* Crust */
+  /* Sidebar — slightly off-white, not grey */
+  --color-sidebar-background: #f5f6f9;                  /* Very light, barely tinted */
+  --color-sidebar-foreground: #4c4f69;
+  --color-sidebar-primary: #1e66f5;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #eceef4;                      /* Light hover */
   --color-sidebar-accent-foreground: #4c4f69;
-  --color-sidebar-border: #ccd0da;                      /* Surface0 */
-  --color-sidebar-ring: #7287fd;                        /* Lavender */
+  --color-sidebar-border: #e2e4ea;
+  --color-sidebar-ring: #7287fd;
 }
 
 @layer base {
@@ -120,7 +120,7 @@
   header {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    background: oklch(from #eff1f5 l c h / 0.85);
+    background: oklch(from #fbfbfd l c h / 0.88);
   }
 
   /* Scrollbars — thin, themed */
@@ -132,11 +132,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #ccd0da;
+    background: #dcdee5;
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #acb0be;
+    background: #c5c8d2;
   }
 
   /* Checkbox — rounder */
