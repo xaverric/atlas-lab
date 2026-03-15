@@ -4,45 +4,46 @@
 
 @theme {
   /* ============================================
-     ISLANDS LIGHT — inspired by JetBrains Islands
-     Clean whites, soft greys, blue accents, frost glow
+     CATPPUCCIN LATTE — Light Theme
+     Warm light with vibrant accents
+     Base: #eff1f5 | Text: #4c4f69 | Blue: #1e66f5
      ============================================ */
-  --color-background: hsl(220 14% 96%);              /* #F2F3F5 light grey canvas */
-  --color-foreground: hsl(220 13% 18%);               /* #272A2F dark text */
-  --color-card: hsl(0 0% 100%);                       /* #FFFFFF white islands/cards */
-  --color-card-foreground: hsl(220 13% 18%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(220 13% 18%);
-  --color-primary: hsl(215 80% 52%);                  /* #2B6CB0 → #3078D3 rich blue */
-  --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(220 12% 91%);                /* #E4E6EB soft grey */
-  --color-secondary-foreground: hsl(220 13% 25%);
-  --color-muted: hsl(220 12% 93%);                    /* #ECEDEE slightly lighter */
-  --color-muted-foreground: hsl(220 8% 46%);          /* #6B7280 medium grey */
-  --color-accent: hsl(215 60% 95%);                   /* #E8F0FE light blue tint */
-  --color-accent-foreground: hsl(215 80% 42%);        /* #1A5399 dark blue */
-  --color-destructive: hsl(0 65% 55%);                /* #D14B4B soft red */
-  --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: hsl(220 12% 87%);                   /* #DBDDE0 visible border */
-  --color-input: hsl(220 12% 87%);
-  --color-ring: hsl(215 80% 52%);                     /* blue focus */
-  --color-success: hsl(142 50% 48%);                  /* #3DA760 soft green */
-  --color-success-foreground: hsl(0 0% 100%);
-  --color-warning: hsl(38 80% 52%);                   /* #D49625 warm amber */
-  --color-warning-foreground: hsl(0 0% 100%);
-  --color-info: hsl(215 80% 56%);                     /* lighter blue */
-  --color-info-foreground: hsl(0 0% 100%);
-  --radius: 0.625rem;                                 /* 10px — slightly rounder than before */
+  --color-background: #eff1f5;                         /* Base */
+  --color-foreground: #4c4f69;                          /* Text */
+  --color-card: #e6e9ef;                                /* Mantle */
+  --color-card-foreground: #4c4f69;                     /* Text */
+  --color-popover: #ffffff;                             /* White for popups */
+  --color-popover-foreground: #4c4f69;
+  --color-primary: #1e66f5;                             /* Blue */
+  --color-primary-foreground: #eff1f5;                  /* Base */
+  --color-secondary: #dce0e8;                           /* Crust */
+  --color-secondary-foreground: #4c4f69;
+  --color-muted: #e6e9ef;                               /* Mantle */
+  --color-muted-foreground: #6c6f85;                    /* Subtext0 */
+  --color-accent: #dce0e8;                              /* Crust */
+  --color-accent-foreground: #4c4f69;
+  --color-destructive: #d20f39;                         /* Red */
+  --color-destructive-foreground: #eff1f5;
+  --color-border: #ccd0da;                              /* Surface0 */
+  --color-input: #ccd0da;                               /* Surface0 */
+  --color-ring: #7287fd;                                /* Lavender */
+  --color-success: #40a02b;                             /* Green */
+  --color-success-foreground: #eff1f5;
+  --color-warning: #df8e1d;                             /* Yellow */
+  --color-warning-foreground: #eff1f5;
+  --color-info: #209fb5;                                /* Sapphire */
+  --color-info-foreground: #eff1f5;
+  --radius: 0.625rem;
 
-  /* Sidebar: slightly darker island — clear separation */
-  --color-sidebar-background: hsl(220 14% 93%);       /* #ECEDF0 */
-  --color-sidebar-foreground: hsl(220 13% 25%);
-  --color-sidebar-primary: hsl(215 80% 52%);
-  --color-sidebar-primary-foreground: hsl(0 0% 100%);
-  --color-sidebar-accent: hsl(215 40% 92%);           /* blue-tinted hover */
-  --color-sidebar-accent-foreground: hsl(220 13% 18%);
-  --color-sidebar-border: hsl(220 12% 85%);
-  --color-sidebar-ring: hsl(215 80% 52%);
+  /* Sidebar */
+  --color-sidebar-background: #e6e9ef;                  /* Mantle */
+  --color-sidebar-foreground: #4c4f69;                  /* Text */
+  --color-sidebar-primary: #1e66f5;                     /* Blue */
+  --color-sidebar-primary-foreground: #eff1f5;
+  --color-sidebar-accent: #dce0e8;                      /* Crust */
+  --color-sidebar-accent-foreground: #4c4f69;
+  --color-sidebar-border: #ccd0da;                      /* Surface0 */
+  --color-sidebar-ring: #7287fd;                        /* Lavender */
 }
 
 @layer base {
@@ -54,118 +55,95 @@
     @apply bg-background text-foreground;
   }
 
-  /* Auto frost-glow on primary buttons */
+  /* Frost glow on primary buttons */
   [class*="bg-primary"]:not([class*="bg-primary/"]) {
     box-shadow:
-      0 0 0 1px hsl(215 80% 52% / 0.15),
-      0 1px 3px hsl(215 80% 52% / 0.1),
-      0 4px 12px hsl(215 80% 52% / 0.08);
+      0 0 0 1px oklch(from #1e66f5 l c h / 0.12),
+      0 2px 4px oklch(from #1e66f5 l c h / 0.1),
+      0 4px 14px oklch(from #1e66f5 l c h / 0.07);
+    transition: box-shadow 0.15s ease;
   }
 
-  /* Auto island on card containers */
+  [class*="bg-primary"]:not([class*="bg-primary/"]):hover {
+    box-shadow:
+      0 0 0 1px oklch(from #1e66f5 l c h / 0.18),
+      0 2px 6px oklch(from #1e66f5 l c h / 0.14),
+      0 6px 20px oklch(from #1e66f5 l c h / 0.1);
+  }
+
+  /* Card elevation */
   [class*="bg-card"] {
-    box-shadow: 0 1px 3px hsl(220 14% 10% / 0.04), 0 1px 2px hsl(220 14% 10% / 0.02);
+    box-shadow: 0 1px 2px oklch(0 0 0 / 0.04), 0 1px 3px oklch(0 0 0 / 0.02);
   }
 
-  /* Focus ring glow */
+  /* Focus ring */
   :focus-visible {
-    outline: 2px solid hsl(215 80% 52% / 0.5);
+    outline: 2px solid #7287fd;
     outline-offset: 2px;
-  }
-
-  /* Frost glow effect utility classes */
-  .frost-glow {
-    box-shadow:
-      0 0 0 1px hsl(215 80% 52% / 0.15),
-      0 1px 3px hsl(215 80% 52% / 0.1),
-      0 4px 12px hsl(215 80% 52% / 0.08);
-  }
-
-  .frost-glow-sm {
-    box-shadow:
-      0 0 0 1px hsl(215 80% 52% / 0.1),
-      0 1px 2px hsl(215 80% 52% / 0.06);
-  }
-
-  /* Island card elevation */
-  .island {
-    background: hsl(0 0% 100%);
-    border-radius: 0.625rem;
-    border: 1px solid hsl(220 12% 87%);
-    box-shadow: 0 1px 3px hsl(220 14% 10% / 0.04), 0 1px 2px hsl(220 14% 10% / 0.02);
-  }
-
-  .island-elevated {
-    background: hsl(0 0% 100%);
-    border-radius: 0.625rem;
-    border: 1px solid hsl(220 12% 87%);
-    box-shadow: 0 4px 12px hsl(220 14% 10% / 0.06), 0 1px 3px hsl(220 14% 10% / 0.04);
   }
 }
 
 /* ============================================
-   CATPPUCCIN MOCHA — dark mode
+   CATPPUCCIN MOCHA — Dark Theme
    Warm dark with pastel accents
+   Base: #1e1e2e | Text: #cdd6f4 | Blue: #89b4fa
    ============================================ */
 .dark {
-  --color-background: hsl(240 21% 15%);               /* #1e1e2e Base */
-  --color-foreground: hsl(227 68% 88%);                /* #cdd6f4 Text */
-  --color-card: hsl(240 21% 12%);                      /* #181825 Mantle */
-  --color-card-foreground: hsl(227 68% 88%);
-  --color-popover: hsl(240 21% 12%);
-  --color-popover-foreground: hsl(227 68% 88%);
-  --color-primary: hsl(217 92% 76%);                   /* #89b4fa Blue */
-  --color-primary-foreground: hsl(240 23% 9%);          /* #11111b Crust */
-  --color-secondary: hsl(240 21% 20%);                  /* #313244 Surface0 */
-  --color-secondary-foreground: hsl(227 68% 88%);
-  --color-muted: hsl(240 21% 20%);                      /* #313244 Surface0 */
-  --color-muted-foreground: hsl(228 24% 72%);            /* #a6adc8 Subtext0 */
-  --color-accent: hsl(234 13% 31%);                      /* #45475a Surface1 */
-  --color-accent-foreground: hsl(226 64% 88%);
-  --color-destructive: hsl(343 81% 75%);                 /* #f38ba8 Red */
-  --color-destructive-foreground: hsl(240 23% 9%);
-  --color-border: hsl(234 13% 31%);                      /* #45475a Surface1 */
-  --color-input: hsl(234 13% 31%);
-  --color-ring: hsl(217 92% 76%);                        /* Blue */
-  --color-success: hsl(115 54% 76%);                     /* #a6e3a1 Green */
-  --color-success-foreground: hsl(240 23% 9%);
-  --color-warning: hsl(40 62% 73%);                      /* #f9e2af Yellow */
-  --color-warning-foreground: hsl(240 23% 9%);
-  --color-info: hsl(199 89% 86%);                        /* #89dceb Sky */
-  --color-info-foreground: hsl(240 23% 9%);
+  --color-background: #1e1e2e;                          /* Base */
+  --color-foreground: #cdd6f4;                          /* Text */
+  --color-card: #181825;                                /* Mantle */
+  --color-card-foreground: #cdd6f4;
+  --color-popover: #313244;                             /* Surface0 */
+  --color-popover-foreground: #cdd6f4;
+  --color-primary: #89b4fa;                             /* Blue */
+  --color-primary-foreground: #11111b;                  /* Crust */
+  --color-secondary: #313244;                           /* Surface0 */
+  --color-secondary-foreground: #cdd6f4;
+  --color-muted: #313244;                               /* Surface0 */
+  --color-muted-foreground: #a6adc8;                    /* Subtext0 */
+  --color-accent: #45475a;                              /* Surface1 */
+  --color-accent-foreground: #cdd6f4;
+  --color-destructive: #f38ba8;                         /* Red */
+  --color-destructive-foreground: #11111b;
+  --color-border: #45475a;                              /* Surface1 */
+  --color-input: #45475a;
+  --color-ring: #b4befe;                                /* Lavender */
+  --color-success: #a6e3a1;                             /* Green */
+  --color-success-foreground: #11111b;
+  --color-warning: #f9e2af;                             /* Yellow */
+  --color-warning-foreground: #11111b;
+  --color-info: #89dceb;                                /* Sky */
+  --color-info-foreground: #11111b;
 
-  --color-sidebar-background: hsl(240 23% 9%);          /* #11111b Crust */
-  --color-sidebar-foreground: hsl(226 64% 88%);          /* #bac2de Subtext1 */
-  --color-sidebar-primary: hsl(217 92% 76%);             /* Blue */
-  --color-sidebar-primary-foreground: hsl(240 23% 9%);
-  --color-sidebar-accent: hsl(240 21% 15%);              /* Base */
-  --color-sidebar-accent-foreground: hsl(227 68% 88%);
-  --color-sidebar-border: hsl(240 21% 15%);              /* Base */
-  --color-sidebar-ring: hsl(217 92% 76%);
+  --color-sidebar-background: #11111b;                  /* Crust */
+  --color-sidebar-foreground: #bac2de;                  /* Subtext1 */
+  --color-sidebar-primary: #89b4fa;                     /* Blue */
+  --color-sidebar-primary-foreground: #11111b;
+  --color-sidebar-accent: #1e1e2e;                      /* Base */
+  --color-sidebar-accent-foreground: #cdd6f4;
+  --color-sidebar-border: #1e1e2e;
+  --color-sidebar-ring: #b4befe;                        /* Lavender */
 
-  /* Dark mode frost glow — uses Catppuccin blue */
-  & .frost-glow {
+  /* Dark frost glow */
+  & [class*="bg-primary"]:not([class*="bg-primary/"]) {
     box-shadow:
-      0 0 0 1px hsl(217 92% 76% / 0.2),
-      0 1px 3px hsl(217 92% 76% / 0.12),
-      0 4px 12px hsl(217 92% 76% / 0.08);
+      0 0 0 1px oklch(from #89b4fa l c h / 0.15),
+      0 2px 4px oklch(from #89b4fa l c h / 0.1),
+      0 4px 14px oklch(from #89b4fa l c h / 0.07);
   }
 
-  & .frost-glow-sm {
+  & [class*="bg-primary"]:not([class*="bg-primary/"]):hover {
     box-shadow:
-      0 0 0 1px hsl(217 92% 76% / 0.12),
-      0 1px 2px hsl(217 92% 76% / 0.06);
+      0 0 0 1px oklch(from #89b4fa l c h / 0.22),
+      0 2px 6px oklch(from #89b4fa l c h / 0.15),
+      0 6px 20px oklch(from #89b4fa l c h / 0.1);
   }
 
-  & .island {
-    background: hsl(240 21% 12%);
-    border-color: hsl(234 13% 31%);
-    box-shadow: 0 1px 3px hsl(240 23% 5% / 0.3), 0 1px 2px hsl(240 23% 5% / 0.2);
+  & [class*="bg-card"] {
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.25), 0 1px 2px oklch(0 0 0 / 0.15);
   }
 
-  & .island-elevated {
-    background: hsl(240 21% 12%);
-    border-color: hsl(234 13% 31%);
-    box-shadow: 0 4px 12px hsl(240 23% 5% / 0.4), 0 1px 3px hsl(240 23% 5% / 0.3);
+  & :focus-visible {
+    outline-color: #b4befe;
   }
 }
