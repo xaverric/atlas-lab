@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, RotateCcw } from 'lucide-react';
+import { X, RotateCcw, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -27,7 +27,7 @@ function relativeTime(date: string): string {
   if (mins < 60) return `${mins}m ago`;
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours}h ago`;
-  return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function groupByDate(revisions: Revision[]): { label: string; items: Revision[] }[] {
@@ -65,6 +65,13 @@ export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDra
     if (isOpen) fetchRevisions();
   }, [isOpen, fetchRevisions]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
   const handleRestore = async (rev: Revision) => {
     if (!confirm('Restore this version? Current content will be replaced.')) return;
     try {
@@ -80,69 +87,86 @@ export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDra
 
   const groups = groupByDate(revisions);
   const mostRecentId = revisions[0]?.id;
-
-  // version label: count from oldest (1 = oldest)
   const versionIndex = Object.fromEntries(
     [...revisions].reverse().map((r, i) => [r.id, i + 1])
   );
 
   return (
-    <div className="w-[300px] border-l flex flex-col bg-background shrink-0">
-      <div className="flex items-center justify-between border-b px-4 py-3">
-        <span className="text-sm font-medium">History</span>
-        <button onClick={onClose} className="rounded p-1 hover:bg-accent">
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div className="overflow-y-auto flex-1 py-2">
-        {loading && (
-          <p className="px-4 py-6 text-center text-sm text-muted-foreground">Loading...</p>
-        )}
-
-        {!loading && revisions.length === 0 && (
-          <p className="px-4 py-6 text-center text-sm text-muted-foreground">No history yet</p>
-        )}
-
-        {!loading && groups.map(({ label, items }) => (
-          <div key={label}>
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-4 py-1">
-              {label}
-            </p>
-            {items.map((rev) => {
-              const isCurrent = rev.id === mostRecentId;
-              return (
-                <div
-                  key={rev.id}
-                  className={cn(
-                    'px-4 py-2.5 rounded-md mx-2 cursor-pointer hover:bg-accent/50',
-                    isCurrent && 'bg-accent/30 border-l-2 border-info'
-                  )}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium truncate">
-                      Version {versionIndex[rev.id]}
-                    </span>
-                    {!isCurrent && (
-                      <button
-                        onClick={() => handleRestore(rev)}
-                        className="shrink-0 flex items-center gap-1 rounded-md border bg-muted px-2 py-0.5 text-xs hover:bg-accent"
-                      >
-                        <RotateCcw className="h-3 w-3" />
-                        Restore
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{rev.editorName}</p>
-                  {rev.summary && (
-                    <p className="text-xs text-muted-foreground truncate">{rev.summary}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-0.5">{relativeTime(rev.createdAt)}</p>
-                </div>
-              );
-            })}
+    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-md max-h-[80vh] rounded-xl border bg-card shadow-xl flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-3 border-b px-5 py-4">
+          <Clock className="h-5 w-5 text-muted-foreground" />
+          <div className="flex-1">
+            <h2 className="text-sm font-semibold">Version History</h2>
+            <p className="text-xs text-muted-foreground">{revisions.length} version{revisions.length !== 1 ? 's' : ''}</p>
           </div>
-        ))}
+          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-accent transition-colors">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="overflow-y-auto flex-1 py-2">
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          )}
+
+          {!loading && revisions.length === 0 && (
+            <p className="px-5 py-12 text-center text-sm text-muted-foreground">No history yet. Changes will appear here after saving.</p>
+          )}
+
+          {!loading && groups.map(({ label, items }) => (
+            <div key={label} className="mb-2">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold px-5 py-1.5">
+                {label}
+              </p>
+              {items.map((rev) => {
+                const isCurrent = rev.id === mostRecentId;
+                return (
+                  <div
+                    key={rev.id}
+                    className={cn(
+                      'mx-3 px-3 py-3 rounded-lg transition-colors',
+                      isCurrent ? 'bg-primary/5 border border-primary/20' : 'hover:bg-accent/50'
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={cn(
+                          'text-sm font-medium',
+                          isCurrent && 'text-primary'
+                        )}>
+                          {isCurrent ? 'Current' : `Version ${versionIndex[rev.id]}`}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{relativeTime(rev.createdAt)}</span>
+                      </div>
+                      {!isCurrent && (
+                        <button
+                          onClick={() => handleRestore(rev)}
+                          className="shrink-0 flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          Restore
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                      <span>{rev.editorName}</span>
+                      {rev.summary && <span>· {rev.summary}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
