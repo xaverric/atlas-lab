@@ -165,13 +165,16 @@ export const getSystemResources: RequestHandler = async (_req, res, next) => {
 
 const SECTION_DB_MAP: Record<string, string> = {
   'core': 'atlas',
+  'core-users-auth': 'atlas',
   'file-storage-metadata': 'atlas-dms',
   'scheduler': 'atlas-scheduler',
   'notifications': 'atlas-notify',
   'notes-metadata': 'atlas-notes',
+  'notes-metadata-1': 'atlas-notes',
   'data-tracker': 'atlas-tracker',
   'atlas-audit': 'atlas-audit',
   'keycloak': 'keycloak',
+  'keycloak-auth': 'keycloak',
 };
 
 export const getStorageDetail: RequestHandler = async (req, res, next) => {
@@ -180,7 +183,7 @@ export const getStorageDetail: RequestHandler = async (req, res, next) => {
     const sortBy = (req.query.sortBy as string) || 'size';
     const sortOrder = (req.query.sortOrder as string) === 'asc' ? 1 : -1;
 
-    if (section === 'uploaded-files') {
+    if (section === 'uploaded-files' || section === 'uploaded-files-s3-' || section === 'uploaded-files-s3') {
       const db = mongoose.connection.client.db('atlas-dms');
       const sortField = sortBy === 'name' ? 'originalName' : sortBy === 'date' ? 'createdAt' : 'size';
       const docs = await db.collection('documents')
