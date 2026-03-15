@@ -35,7 +35,18 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Atlas</h1>
+          <svg viewBox="0 0 140 40" fill="none" className="h-10 text-foreground mx-auto" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="28" r="3.5" />
+              <circle cx="26" cy="20" r="3" />
+              <circle cx="18" cy="8" r="2.5" />
+              <circle cx="32" cy="10" r="2.5" />
+              <line x1="14.5" y1="26" x2="23.5" y2="21.5" />
+              <line x1="19.5" y1="10" x2="24" y2="18" />
+              <line x1="28.5" y1="18.5" x2="30" y2="12" />
+            </g>
+            <text x="42" y="28" fontFamily="system-ui, sans-serif" fontSize="22" fontWeight="600" letterSpacing="-0.5" fill="currentColor">atlas</text>
+          </svg>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
         </div>
 
