@@ -84,3 +84,119 @@ export const getStorageStats: RequestHandler = async (_req, res, next) => {
     next(err);
   }
 };
+
+const SECTION_DB_MAP: Record<string, string> = {
+  'core': 'atlas',
+  'file-storage-metadata': 'atlas-dms',
+  'scheduler': 'atlas-scheduler',
+  'notifications': 'atlas-notify',
+  'notes-metadata': 'atlas-notes',
+  'data-tracker': 'atlas-tracker',
+  'atlas-audit': 'atlas-audit',
+  'keycloak': 'keycloak',
+};
+
+export const getStorageDetail: RequestHandler = async (req, res, next) => {
+  try {
+    const { section } = req.params;
+    const sortBy = (req.query.sortBy as string) || 'size';
+    const sortOrder = (req.query.sortOrder as string) === 'asc' ? 1 : -1;
+
+    if (section === 'uploaded-files') {
+      const db = mongoose.connection.client.db('atlas-dms');
+      const sortField = sortBy === 'name' ? 'originalName' : sortBy === 'date' ? 'createdAt' : 'size';
+      const docs = await db.collection('documents')
+        .find({}, { projection: { name: 1, originalName: 1, mimeType: 1, size: 1, createdAt: 1 } })
+        .sort({ [sortField]: sortOrder })
+        .limit(100)
+        .toArray();
+      const total = await db.collection('documents').countDocuments();
+
+      res.json({
+        data: {
+          items: docs.map((d) => ({
+            id: d._id.toString(),
+            name: d.originalName || d.name,
+            type: d.mimeType || 'file',
+            size: d.size || 0,
+            sizeFormatted: formatBytes(d.size || 0),
+            date: d.createdAt || null,
+          })),
+          total,
+        },
+      });
+      return;
+    }
+
+    if (section === 'notes-content') {
+      const db = mongoose.connection.client.db('atlas-notes');
+      const sortField = sortBy === 'name' ? 'title' : sortBy === 'date' ? 'updatedAt' : 'contentSize';
+      const notes = await db.collection('notes')
+        .find({}, { projection: { title: 1, contentSize: 1, updatedAt: 1 } })
+        .sort({ [sortField]: sortOrder })
+        .limit(100)
+        .toArray();
+      const total = await db.collection('notes').countDocuments();
+
+      res.json({
+        data: {
+          items: notes.map((n) => ({
+            id: n._id.toString(),
+            name: n.title || 'Untitled',
+            type: 'note',
+            size: n.contentSize || 0,
+            sizeFormatted: formatBytes(n.contentSize || 0),
+            date: n.updatedAt || null,
+          })),
+          total,
+        },
+      });
+      return;
+    }
+
+    const dbName = SECTION_DB_MAP[section];
+    if (!dbName) {
+      res.status(400).json({ error: `Unknown section: ${section}` });
+      return;
+    }
+
+    const db = mongoose.connection.client.db(dbName);
+    const collections = await db.listCollections().toArray();
+    const items: { id: string; name: string; type: string; size: number; sizeFormatted: string; date: string | null }[] = [];
+
+    for (const col of collections) {
+      try {
+        const stats = await db.collection(col.name).stats();
+        items.push({
+          id: col.name,
+          name: col.name,
+          type: 'collection',
+          size: stats.size,
+          sizeFormatted: formatBytes(stats.size),
+          date: null,
+        });
+      } catch {
+        items.push({
+          id: col.name,
+          name: col.name,
+          type: 'collection',
+          size: 0,
+          sizeFormatted: '0 B',
+          date: null,
+        });
+      }
+    }
+
+    const sortFn = (a: typeof items[0], b: typeof items[0]) => {
+      if (sortBy === 'name') return sortOrder * a.name.localeCompare(b.name);
+      return sortOrder * (a.size - b.size);
+    };
+    items.sort(sortFn);
+
+    res.json({
+      data: { items, total: items.length },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
