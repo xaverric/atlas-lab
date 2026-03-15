@@ -3,14 +3,14 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  Upload, FolderPlus, RefreshCw, Info, Pencil, Globe, Lock, Trash2, Folder,
+  Upload, FolderPlus, RefreshCw, Info, Globe, Lock, Folder, Eye,
+  Pencil, Trash2, ChevronRight, Home, ArrowUp, ArrowDown, Download,
+  FolderInput,
 } from 'lucide-react';
+import { Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { api, uploadFile } from '@/lib/api';
-import { formatSize } from '@/lib/utils';
-import { TreeSidebar } from '@/components/shared/tree-sidebar';
-import type { TreeItem } from '@/components/shared/tree-sidebar';
-import { VisibilityBadge } from '@/components/shared/visibility-badge';
+import { formatSize, formatDate } from '@/lib/utils';
 import { DocumentTable } from '@/components/files/document-table';
 import type { DocumentItem } from '@/components/files/document-table';
 import { EmptyState } from '@/components/files/empty-state';
@@ -18,17 +18,23 @@ import { BulkActionsBar } from '@/components/files/bulk-actions-bar';
 import { PreviewModal } from '@/components/files/preview-modal';
 import { RenameDialog } from '@/components/files/rename-dialog';
 import { MoveDialog } from '@/components/files/move-dialog';
-import { FolderInfoPanel } from '@/components/files/folder-info-panel';
 import { SearchBar } from '@/components/files/search-bar';
-import { BreadcrumbNav } from '@/components/files/breadcrumb-nav';
 import { UploadModal } from '@/components/files/upload-modal';
 import { DetailModal } from '@/components/files/detail-modal';
+import { FileItemInfoModal } from '@/components/files/item-info-modal';
+import { NoteContextMenu } from '@/components/notes/context-menu';
 
 interface FolderItem {
   id: string;
   name: string;
   isPublic?: boolean;
   publicPermission?: 'view' | 'edit' | 'full';
+  docCount?: number;
+  totalSize?: number;
+}
+
+interface FolderDetail extends FolderItem {
+  breadcrumb: { id: string; name: string }[];
 }
 
 interface FolderMetadata {
@@ -49,17 +55,22 @@ interface ListResponse {
   limit: number;
 }
 
+interface InfoModalState {
+  type: 'folder' | 'document';
+  id: string;
+}
+
 export default function FilesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const folderId = searchParams.get('folderId') || null;
   const docId = searchParams.get('docId') || null;
 
-  const [treeKey, setTreeKey] = useState(0);
   const [folders, setFolders] = useState<FolderItem[]>([]);
   const [docs, setDocs] = useState<DocumentItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [currentFolder, setCurrentFolder] = useState<FolderDetail | null>(null);
   const [folderMeta, setFolderMeta] = useState<FolderMetadata | null>(null);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -69,13 +80,10 @@ export default function FilesPage() {
   const [dragging, setDragging] = useState(false);
   const [renameDoc, setRenameDoc] = useState<DocumentItem | null>(null);
   const [moveDoc, setMoveDoc] = useState<DocumentItem | null>(null);
-  const [infoFolderId, setInfoFolderId] = useState<string | null>(null);
-  const [renamingFolder, setRenamingFolder] = useState<string | null>(null);
-  const [renameFolderName, setRenameFolderName] = useState('');
-  const [breadcrumb, setBreadcrumb] = useState<{ id: string; name: string }[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [detailDocId, setDetailDocId] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [infoModal, setInfoModal] = useState<InfoModalState | null>(null);
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: { icon: any; label: string; action: () => void; destructive?: boolean }[] } | null>(null);
 
   const [filters, setFilters] = useState({
     search: '',
@@ -87,6 +95,22 @@ export default function FilesPage() {
 
   const [sort, setSort] = useState({ field: 'createdAt', order: 'desc' as 'asc' | 'desc' });
 
+  const loadFolderDetail = useCallback(async () => {
+    if (!folderId) { setCurrentFolder(null); return; }
+    try {
+      const res = await api<{ data: FolderDetail }>(`/api/v1/files/folders/${folderId}`);
+      setCurrentFolder(res.data);
+    } catch { setCurrentFolder(null); }
+  }, [folderId]);
+
+  const loadFolderMeta = useCallback(async () => {
+    if (!folderId) { setFolderMeta(null); return; }
+    try {
+      const res = await api<{ data: FolderMetadata }>(`/api/v1/files/folders/${folderId}/metadata`);
+      setFolderMeta(res.data);
+    } catch { setFolderMeta(null); }
+  }, [folderId]);
+
   const loadFolders = useCallback(async () => {
     try {
       const q = folderId ? `?parentId=${folderId}` : '';
@@ -95,18 +119,6 @@ export default function FilesPage() {
     } catch {
       toast.error('Failed to load folders');
     }
-  }, [folderId]);
-
-  const loadFolderMeta = useCallback(async () => {
-    if (!folderId) { setFolderMeta(null); setBreadcrumb([]); return; }
-    try {
-      const [metaRes, detailRes] = await Promise.all([
-        api<{ data: FolderMetadata }>(`/api/v1/files/folders/${folderId}/metadata`),
-        api<{ data: { breadcrumb: { id: string; name: string }[] } }>(`/api/v1/files/folders/${folderId}`),
-      ]);
-      setFolderMeta(metaRes.data);
-      setBreadcrumb(detailRes.data.breadcrumb);
-    } catch { setFolderMeta(null); setBreadcrumb([]); }
   }, [folderId]);
 
   const loadDocs = useCallback(async (p: number) => {
@@ -140,49 +152,19 @@ export default function FilesPage() {
     } catch { /* */ }
   }, []);
 
-  const loadTreeChildren = useCallback(async (parentId: string | null): Promise<TreeItem[]> => {
-    const folderQ = parentId ? `?parentId=${parentId}` : '';
-    const docParams = new URLSearchParams({ limit: '100', folderId: parentId ?? '' });
-
-    const [foldersRes, docsRes] = await Promise.all([
-      api<{ data: FolderItem[] }>(`/api/v1/files/folders${folderQ}`),
-      api<ListResponse>(`/api/v1/files/documents?${docParams}`),
-    ]);
-
-    const folderItems: TreeItem[] = foldersRes.data.map((f) => ({
-      id: f.id,
-      name: f.name,
-      type: 'folder' as const,
-      isPublic: f.isPublic,
-      publicPermission: f.publicPermission,
-    }));
-
-    const docItems: TreeItem[] = docsRes.data.map((d) => ({
-      id: d.id,
-      name: d.name,
-      type: 'item' as const,
-      size: d.size,
-    }));
-
-    return [...folderItems, ...docItems];
-  }, []);
-
   const reload = useCallback(() => {
     loadFolders();
     loadFolderMeta();
+    loadFolderDetail();
     loadDocs(page);
-  }, [loadFolders, loadFolderMeta, loadDocs, page]);
-
-  const refreshAll = useCallback(() => {
-    setTreeKey((k) => k + 1);
-    reload();
-  }, [reload]);
+  }, [loadFolders, loadFolderMeta, loadFolderDetail, loadDocs, page]);
 
   useEffect(() => {
-    loadFolders();
+    loadFolderDetail();
     loadFolderMeta();
+    loadFolders();
     loadTags();
-  }, [loadFolders, loadFolderMeta, loadTags]);
+  }, [loadFolderDetail, loadFolderMeta, loadFolders, loadTags]);
 
   useEffect(() => {
     loadDocs(1);
@@ -193,7 +175,6 @@ export default function FilesPage() {
     if (docId && !detailDocId) setDetailDocId(docId);
   }, [docId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // drag-and-drop upload
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer.types.includes('Files')) setDragging(true);
@@ -224,7 +205,6 @@ export default function FilesPage() {
       toast.success(`${uploaded} file(s) uploaded`);
       loadDocs(page);
       loadTags();
-      setTreeKey((k) => k + 1);
     }
     if (uploaded < files.length) {
       toast.error(`${files.length - uploaded} file(s) failed`);
@@ -273,7 +253,6 @@ export default function FilesPage() {
       await api(`/api/v1/files/documents/${id}`, { method: 'DELETE' });
       toast.success('Document deleted');
       loadDocs(page);
-      setTreeKey((k) => k + 1);
     } catch { toast.error('Failed to delete'); }
   };
 
@@ -286,7 +265,6 @@ export default function FilesPage() {
       toast.success(`${selectedIds.size} document(s) deleted`);
       setSelectedIds(new Set());
       loadDocs(page);
-      setTreeKey((k) => k + 1);
     } catch { toast.error('Failed to delete'); }
   };
 
@@ -298,7 +276,6 @@ export default function FilesPage() {
       toast.success(`${selectedIds.size} document(s) moved`);
       setSelectedIds(new Set());
       loadDocs(page);
-      setTreeKey((k) => k + 1);
     } catch { toast.error('Failed to move'); }
   };
 
@@ -309,7 +286,6 @@ export default function FilesPage() {
       });
       toast.success('Renamed');
       loadDocs(page);
-      setTreeKey((k) => k + 1);
     } catch { toast.error('Failed to rename'); }
   };
 
@@ -320,7 +296,6 @@ export default function FilesPage() {
       });
       toast.success('Moved');
       loadDocs(page);
-      setTreeKey((k) => k + 1);
     } catch { toast.error('Failed to move'); }
   };
 
@@ -335,309 +310,383 @@ export default function FilesPage() {
       setNewFolderName('');
       setShowNewFolder(false);
       loadFolders();
-      setTreeKey((k) => k + 1);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to create folder');
     }
   };
 
-  const handleToggleFolderPublic = async (id: string, isPublic: boolean) => {
+  const handleToggleFolderPublic = async (id: string, makePublic: boolean) => {
     try {
       await api(`/api/v1/files/folders/${id}/public`, {
-        method: 'PATCH', body: JSON.stringify({ isPublic }),
+        method: 'PATCH', body: JSON.stringify({ isPublic: makePublic }),
       });
-      toast.success(isPublic ? 'Folder is now public' : 'Folder is now private');
+      toast.success(makePublic ? 'Folder is now public' : 'Folder is now private');
       loadFolders();
       loadFolderMeta();
-      setTreeKey((k) => k + 1);
+      if (id === folderId) loadFolderDetail();
     } catch {
       toast.error('Failed to update visibility');
     }
+  };
+
+  const handleFolderPermission = async (id: string, perm: string) => {
+    try {
+      await api(`/api/v1/files/folders/${id}/public`, {
+        method: 'PATCH', body: JSON.stringify({ isPublic: true, publicPermission: perm }),
+      });
+      loadFolders();
+      loadFolderMeta();
+      if (id === folderId) loadFolderDetail();
+    } catch { toast.error('Failed to update permission'); }
   };
 
   const handleRenameFolder = async (id: string, name: string) => {
     try {
       await api(`/api/v1/files/folders/${id}`, { method: 'PATCH', body: JSON.stringify({ name }) });
       loadFolders();
-      loadFolderMeta();
-      setTreeKey((k) => k + 1);
-      setRenamingFolder(null);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to rename');
-    }
+      if (id === folderId) loadFolderDetail();
+    } catch { toast.error('Failed to rename folder'); }
   };
 
   const handleDeleteFolder = async (id: string) => {
-    if (!confirm('Delete this folder? It must be empty.')) return;
     try {
       await api(`/api/v1/files/folders/${id}`, { method: 'DELETE' });
-      toast.success('Folder deleted');
       loadFolders();
-      setTreeKey((k) => k + 1);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to delete folder');
-    }
+      if (id === folderId) router.push('/files');
+    } catch (err) { toast.error(err instanceof Error ? err.message : 'Failed to delete folder'); }
+  };
+
+  const copyFolderLink = (id: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/public/files/${id}`);
+    toast.success('Public link copied');
+  };
+
+  const openFolderMenu = (e: React.MouseEvent, folder: FolderItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isFolderPublic = folder.isPublic ?? false;
+    setCtxMenu({
+      x: e.clientX, y: e.clientY,
+      items: [
+        { icon: Eye, label: 'Open', action: () => navigateToFolder(folder.id) },
+        { icon: Pencil, label: 'Rename', action: () => { const name = prompt('Rename folder:', folder.name); if (name?.trim()) handleRenameFolder(folder.id, name.trim()); } },
+        { icon: isFolderPublic ? Lock : Globe, label: isFolderPublic ? 'Make Private' : 'Make Public', action: () => handleToggleFolderPublic(folder.id, !isFolderPublic) },
+        ...(isFolderPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => copyFolderLink(folder.id) }] : []),
+        { icon: Info, label: 'Info', action: () => setInfoModal({ type: 'folder', id: folder.id }) },
+        { icon: FolderInput, label: 'Move to...', action: () => { const target = prompt('Move to folder ID (or empty for root):'); if (target !== null) { api(`/api/v1/files/folders/${folder.id}`, { method: 'PATCH', body: JSON.stringify({ parentId: target || null }) }).then(() => { toast.success('Moved'); loadFolders(); }).catch(() => toast.error('Failed to move')); } } },
+        { icon: Trash2, label: 'Delete', action: () => handleDeleteFolder(folder.id), destructive: true },
+      ],
+    });
+  };
+
+  const openDocMenu = (e: React.MouseEvent, doc: DocumentItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCtxMenu({
+      x: e.clientX, y: e.clientY,
+      items: [
+        { icon: Eye, label: 'Preview', action: () => setPreviewDoc(doc) },
+        { icon: Download, label: 'Download', action: () => { api<{ data: { url: string } }>(`/api/v1/files/documents/${doc.id}/download`).then((res) => window.open(res.data.url, '_blank')).catch(() => {}); } },
+        { icon: Pencil, label: 'Rename', action: () => setRenameDoc(doc) },
+        { icon: FolderInput, label: 'Move to...', action: () => setMoveDoc(doc) },
+        { icon: Info, label: 'Info', action: () => setInfoModal({ type: 'document', id: doc.id }) },
+        { icon: Trash2, label: 'Delete', action: () => handleDelete(doc.id), destructive: true },
+      ],
+    });
   };
 
   const hasContent = folders.length > 0 || docs.length > 0;
   const hasFilters = filters.search || filters.mimeType || filters.dateFrom || filters.dateTo || filters.tags.length > 0;
-  const showPath = !!(hasFilters && !folderId);
+  const totalPages = Math.ceil(total / 20);
+  const folderIsPublic = currentFolder?.isPublic ?? false;
+
+  const bc = currentFolder?.breadcrumb || [];
+  const parentCrumbs = bc.slice(0, -1);
+  const currentCrumb = bc.length > 0 ? bc[bc.length - 1] : null;
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
-      <TreeSidebar
-        key={treeKey}
-        storageKey="files"
-        selectedFolderId={folderId}
-        selectedItemId={docId}
-        onSelectFolder={navigateToFolder}
-        onSelectItem={(id) => {
-          const params = new URLSearchParams(searchParams.toString());
-          params.set('docId', id);
-          router.push(`/files?${params}`);
-        }}
-        loadChildren={loadTreeChildren}
-        title="Files"
-        expandPath={breadcrumb.map((b) => b.id)}
-        onOpenChange={setSidebarOpen}
-      />
-
-      <div
-        className="flex-1 flex flex-col overflow-hidden"
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        {dragging && (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-primary/5 border-2 border-dashed border-primary rounded-lg pointer-events-none">
-            <div className="rounded-lg bg-background px-8 py-6 shadow-lg text-center">
-              <Upload className="h-10 w-10 text-primary mx-auto mb-2" />
-              <p className="text-lg font-medium">Drop files to upload</p>
-              <p className="text-sm text-muted-foreground">
-                to {folderMeta?.name || 'root'}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Header */}
-        <div className="shrink-0 border-b px-4 py-3">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-3 min-w-0">
-              <h1 className="text-lg font-semibold tracking-tight truncate">
-                {folderMeta?.name || 'File Storage'}
-              </h1>
-              {folderMeta && (
-                <VisibilityBadge
-                  isPublic={folderMeta.isPublic ?? false}
-                  permission={folderMeta.publicPermission}
-                  size="md"
-                />
-              )}
-              {folderMeta && (
-                <span className="text-xs text-muted-foreground hidden sm:inline">
-                  {folderMeta.docCount} files · {folderMeta.subfolderCount} folders · {formatSize(folderMeta.totalSize)}
-                </span>
-              )}
-            </div>
-            <div className="flex gap-2 shrink-0">
-              {folderId && (
-                <button
-                  onClick={() => setInfoFolderId(folderId)}
-                  className="flex items-center gap-1.5 rounded-md border px-2.5 py-2 text-sm active:bg-muted"
-                  title="Folder settings"
-                >
-                  <Info className="h-4 w-4" />
-                </button>
-              )}
-              <button
-                onClick={refreshAll}
-                className="flex items-center gap-1.5 rounded-md border px-2.5 py-2 text-sm active:bg-muted"
-                title="Refresh"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setShowNewFolder(true)}
-                className="flex items-center gap-2 rounded-md border px-2.5 py-2 text-sm font-medium active:bg-muted"
-              >
-                <FolderPlus className="h-4 w-4" />
-                <span className="hidden sm:inline">New Folder</span>
-              </button>
-              <button
-                onClick={() => setShowUpload(true)}
-                className="flex items-center gap-2 rounded-md bg-primary px-3 sm:px-4 py-2 text-sm font-medium text-primary-foreground active:bg-primary/90"
-              >
-                <Upload className="h-4 w-4" />
-                <span className="hidden sm:inline">Upload</span>
-              </button>
-            </div>
+    <div
+      className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {dragging && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-primary/5 border-2 border-dashed border-primary rounded-lg pointer-events-none">
+          <div className="rounded-lg bg-background px-8 py-6 shadow-lg text-center">
+            <Upload className="h-10 w-10 text-primary mx-auto mb-2" />
+            <p className="text-lg font-medium">Drop files to upload</p>
+            <p className="text-sm text-muted-foreground">
+              to {folderMeta?.name || 'root'}
+            </p>
           </div>
         </div>
+      )}
 
-        {/* Breadcrumb — only when sidebar is collapsed */}
-        {!sidebarOpen && breadcrumb.length > 0 && (
-          <div className="shrink-0 border-b px-4 py-1.5">
-            <BreadcrumbNav items={breadcrumb} onNavigate={navigateToFolder} />
-          </div>
-        )}
-
-        {/* Content area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          <SearchBar
-            filters={filters}
-            onChange={setFilters}
-            availableTags={availableTags}
-          />
-
-          {showNewFolder && (
-            <div className="flex gap-2 items-center">
-              <input
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleCreateFolder();
-                  if (e.key === 'Escape') setShowNewFolder(false);
-                }}
-                placeholder="Folder name"
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-                autoFocus
-              />
-              <button onClick={handleCreateFolder} className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground">
-                Create
+      {/* Toolbar */}
+      <div className="shrink-0 flex items-center justify-between gap-4 px-6 py-2.5 border-b">
+        <div className="flex items-center gap-2 min-w-0">
+          <nav className="flex items-center gap-1 text-sm min-w-0">
+            <button onClick={() => navigateToFolder(null)} className={`flex items-center gap-1 shrink-0 ${folderId ? 'text-muted-foreground hover:text-foreground' : 'font-medium text-foreground'}`}>
+              <Home className="h-3.5 w-3.5" />
+            </button>
+            {parentCrumbs.map((b) => (
+              <span key={b.id} className="flex items-center gap-1 shrink-0">
+                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                <button onClick={() => navigateToFolder(b.id)} className="text-muted-foreground hover:text-foreground">{b.name}</button>
+              </span>
+            ))}
+            {currentCrumb && (
+              <span className="flex items-center gap-1 shrink-0">
+                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                <span className="font-medium">{currentCrumb.name}</span>
+              </span>
+            )}
+          </nav>
+          {currentFolder && (
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={(e) => { e.stopPropagation(); handleToggleFolderPublic(folderId!, !folderIsPublic); }}
+                className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
+                  folderIsPublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-muted'
+                }`}
+                title={folderIsPublic ? 'Make private' : 'Make public'}
+              >
+                {folderIsPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                {folderIsPublic ? (currentFolder.publicPermission || 'public') : 'private'}
               </button>
-              <button onClick={() => setShowNewFolder(false)} className="rounded-md border px-3 py-2 text-sm">
-                Cancel
-              </button>
-            </div>
-          )}
-
-          {selectedIds.size > 0 && (
-            <BulkActionsBar
-              count={selectedIds.size}
-              onDelete={handleBulkDelete}
-              onMove={handleBulkMove}
-              onClear={() => setSelectedIds(new Set())}
-              currentFolderId={folderId}
-            />
-          )}
-
-          {/* Folder rows */}
-          {folders.length > 0 && (
-            <div className="rounded-lg border divide-y">
-              {folders.map((folder) => (
-                <div
-                  key={folder.id}
-                  className="group flex items-center gap-3 px-3 py-2 hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => navigateToFolder(folder.id)}
+              {folderIsPublic && (
+                <select
+                  value={currentFolder.publicPermission || 'view'}
+                  onChange={(e) => { e.stopPropagation(); handleFolderPermission(folderId!, e.target.value); }}
+                  className="rounded border bg-background px-1 py-0.5 text-[10px]"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <Folder className="h-4 w-4 text-muted-foreground shrink-0" />
-                  {renamingFolder === folder.id ? (
-                    <input
-                      value={renameFolderName}
-                      onChange={(e) => setRenameFolderName(e.target.value)}
-                      onKeyDown={(e) => {
-                        e.stopPropagation();
-                        if (e.key === 'Enter') handleRenameFolder(folder.id, renameFolderName);
-                        if (e.key === 'Escape') setRenamingFolder(null);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="rounded border border-input bg-background px-2 py-0.5 text-sm flex-1 min-w-0"
-                      autoFocus
-                    />
-                  ) : (
-                    <span className="text-sm truncate flex-1 min-w-0">{folder.name}</span>
-                  )}
-                  {folder.isPublic && (
-                    <VisibilityBadge isPublic showLabel={false} />
-                  )}
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => setInfoFolderId(folder.id)}
-                      className="p-1 text-muted-foreground hover:text-foreground rounded"
-                      title="Info"
-                    >
-                      <Info className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => { setRenamingFolder(folder.id); setRenameFolderName(folder.name); }}
-                      className="p-1 text-muted-foreground hover:text-foreground rounded"
-                      title="Rename"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleToggleFolderPublic(folder.id, !folder.isPublic)}
-                      className="p-1 text-muted-foreground hover:text-foreground rounded"
-                      title={folder.isPublic ? 'Make private' : 'Make public'}
-                    >
-                      {folder.isPublic ? <Lock className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteFolder(folder.id)}
-                      className="p-1 text-muted-foreground hover:text-destructive rounded"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                  <option value="view">view</option>
+                  <option value="edit">edit</option>
+                  <option value="full">full</option>
+                </select>
+              )}
             </div>
           )}
-
-          {docs.length > 0 ? (
-            <>
-              <DocumentTable
-                documents={docs}
-                sort={sort}
-                onSort={handleSort}
-                selectedIds={selectedIds}
-                onSelect={handleSelect}
-                onSelectAll={handleSelectAll}
-                onDelete={handleDelete}
-                onPreview={setPreviewDoc}
-                onRename={setRenameDoc}
-                onMove={setMoveDoc}
-                onDetails={(doc) => {
-                  const params = new URLSearchParams(searchParams.toString());
-                  params.set('docId', doc.id);
-                  router.push(`/files?${params}`);
-                }}
-                showPath={showPath}
-                view="list"
-              />
-              {total > 20 && (
-                <div className="flex gap-2 justify-center">
-                  <button
-                    onClick={() => loadDocs(page - 1)}
-                    disabled={page <= 1}
-                    className="rounded border px-3 py-1 text-sm disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  <span className="px-3 py-1 text-sm text-muted-foreground">
-                    Page {page} of {Math.ceil(total / 20)}
-                  </span>
-                  <button
-                    onClick={() => loadDocs(page + 1)}
-                    disabled={page * 20 >= total}
-                    className="rounded border px-3 py-1 text-sm disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            !hasContent && !hasFilters && <EmptyState preset={folderId ? 'empty-folder' : 'no-documents'} />
+          {folderMeta && (
+            <span className="text-xs text-muted-foreground shrink-0">
+              {folderMeta.docCount} files · {folderMeta.subfolderCount} folders · {formatSize(folderMeta.totalSize)}
+            </span>
           )}
-
-          {!hasContent && hasFilters && <EmptyState preset="no-results" />}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {folderId && currentFolder && (
+            <button onClick={() => setInfoModal({ type: 'folder', id: folderId })} className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground" title="Folder info">
+              <Info className="h-4 w-4" />
+            </button>
+          )}
+          <button onClick={reload} className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground" title="Refresh">
+            <RefreshCw className="h-4 w-4" />
+          </button>
+          <button onClick={() => setShowNewFolder(true)} className="flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm hover:bg-accent">
+            <FolderPlus className="h-4 w-4" /> Folder
+          </button>
+          <button
+            onClick={() => setShowUpload(true)}
+            className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            <Upload className="h-4 w-4" /> Upload
+          </button>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <SearchBar
+          filters={filters}
+          onChange={setFilters}
+          availableTags={availableTags}
+        />
+
+        {showNewFolder && (
+          <div className="flex items-center gap-2">
+            <input value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleCreateFolder(); if (e.key === 'Escape') setShowNewFolder(false); }}
+              placeholder="Folder name" autoFocus className="rounded-md border bg-background px-3 py-1.5 text-sm" />
+            <button onClick={handleCreateFolder} className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground">Create</button>
+            <button onClick={() => setShowNewFolder(false)} className="rounded-md border px-3 py-1.5 text-sm">Cancel</button>
+          </div>
+        )}
+
+        {selectedIds.size > 0 && (
+          <BulkActionsBar
+            count={selectedIds.size}
+            onDelete={handleBulkDelete}
+            onMove={handleBulkMove}
+            onClear={() => setSelectedIds(new Set())}
+            currentFolderId={folderId}
+          />
+        )}
+
+        {/* Unified table: folders + files */}
+        {hasContent ? (
+          <div className="overflow-x-auto rounded-md border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+                  <th className="px-4 py-2 w-10">
+                    <input type="checkbox" checked={docs.length > 0 && docs.every((d) => selectedIds.has(d.id))} onChange={handleSelectAll} className="rounded border-input" />
+                  </th>
+                  <th className="px-4 py-2 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('name')}>
+                    Name {sort.field === 'name' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
+                  </th>
+                  <th className="px-4 py-2 w-24 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('mimeType')}>
+                    Type {sort.field === 'mimeType' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
+                  </th>
+                  <th className="px-4 py-2 w-20 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('size')}>
+                    Size {sort.field === 'size' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
+                  </th>
+                  <th className="px-4 py-2 w-36">Visibility</th>
+                  <th className="px-4 py-2 w-28 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('createdAt')}>
+                    Uploaded {sort.field === 'createdAt' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
+                  </th>
+                  <th className="px-4 py-2 w-16" />
+                </tr>
+              </thead>
+              <tbody>
+                {/* Folders */}
+                {folders.map((folder) => {
+                  const isFolderPublic = folder.isPublic ?? false;
+                  return (
+                    <tr
+                      key={`folder-${folder.id}`}
+                      className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
+                      onClick={() => navigateToFolder(folder.id)}
+                      onContextMenu={(e) => openFolderMenu(e, folder)}
+                    >
+                      <td className="px-4 py-2" />
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-2">
+                          <Folder className="h-4 w-4 shrink-0 text-warning" />
+                          <span className="font-medium">{folder.name}</span>
+                          {folder.docCount != null && (
+                            <span className="text-xs text-muted-foreground">({folder.docCount})</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-muted-foreground">Folder</td>
+                      <td className="px-4 py-2 text-muted-foreground">{folder.totalSize != null ? formatSize(folder.totalSize) : '-'}</td>
+                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleToggleFolderPublic(folder.id, !isFolderPublic)}
+                            className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
+                              isFolderPublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-muted'
+                            }`}
+                            title={isFolderPublic ? 'Make private' : 'Make public'}
+                          >
+                            {isFolderPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                            {isFolderPublic ? (folder.publicPermission || 'public') : 'private'}
+                          </button>
+                          {isFolderPublic && (
+                            <>
+                              <select
+                                value={folder.publicPermission || 'view'}
+                                onChange={(e) => handleFolderPermission(folder.id, e.target.value)}
+                                className="rounded border bg-background px-1 py-0.5 text-[10px]"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <option value="view">view</option>
+                                <option value="edit">edit</option>
+                                <option value="full">full</option>
+                              </select>
+                              <button onClick={() => copyFolderLink(folder.id)} className="rounded p-0.5 hover:bg-accent text-muted-foreground" title="Copy public link">
+                                <LinkIcon className="h-3 w-3" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-muted-foreground">-</td>
+                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setInfoModal({ type: 'folder', id: folder.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
+                          <Info className="h-3.5 w-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+
+                {/* Documents */}
+                {docs.map((doc) => (
+                  <tr
+                    key={`doc-${doc.id}`}
+                    className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      setDetailDocId(doc.id);
+                      const params = new URLSearchParams(searchParams.toString());
+                      params.set('docId', doc.id);
+                      router.push(`/files?${params}`);
+                    }}
+                    onContextMenu={(e) => openDocMenu(e, doc)}
+                  >
+                    <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <input type="checkbox" checked={selectedIds.has(doc.id)} onChange={() => handleSelect(doc.id)} className="rounded border-input" />
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium truncate">{doc.name}</span>
+                        {doc.tags.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {doc.tags.slice(0, 3).map((tag) => (
+                              <span key={tag} className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
+                            ))}
+                            {doc.tags.length > 3 && <span className="text-[10px] text-muted-foreground">+{doc.tags.length - 3}</span>}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">{doc.mimeType.split('/').pop()}</td>
+                    <td className="px-4 py-2 text-muted-foreground">{formatSize(doc.size)}</td>
+                    <td className="px-4 py-2 text-muted-foreground text-[10px]">inherited</td>
+                    <td className="px-4 py-2 text-muted-foreground">{formatDate(doc.createdAt)}</td>
+                    <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <button onClick={() => setInfoModal({ type: 'document', id: doc.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
+                        <Info className="h-3.5 w-3.5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          !hasFilters && <EmptyState preset={folderId ? 'empty-folder' : 'no-documents'} />
+        )}
+
+        {!hasContent && hasFilters && <EmptyState preset="no-results" />}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2">
+            <button disabled={page <= 1} onClick={() => loadDocs(page - 1)} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Previous</button>
+            <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+            <button disabled={page >= totalPages} onClick={() => loadDocs(page + 1)} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Next</button>
+          </div>
+        )}
+      </div>
+
+      {/* Context menu */}
+      {ctxMenu && (
+        <NoteContextMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />
+      )}
+
+      {/* Info modal */}
+      {infoModal && (
+        <FileItemInfoModal
+          type={infoModal.type}
+          itemId={infoModal.id}
+          onClose={() => setInfoModal(null)}
+          onUpdate={reload}
+        />
+      )}
+
+      {/* Existing modals */}
       {previewDoc && (
         <PreviewModal document={previewDoc} onClose={() => setPreviewDoc(null)} />
       )}
@@ -659,20 +708,14 @@ export default function FilesPage() {
         />
       )}
 
-      {infoFolderId && (
-        <FolderInfoPanel
-          folderId={infoFolderId}
-          onClose={() => setInfoFolderId(null)}
-        />
-      )}
-
       {showUpload && (
         <UploadModal
           folderId={folderId}
           onClose={() => setShowUpload(false)}
           onComplete={() => {
             setShowUpload(false);
-            refreshAll();
+            reload();
+            loadTags();
           }}
         />
       )}
@@ -681,7 +724,7 @@ export default function FilesPage() {
         <DetailModal
           documentId={detailDocId}
           onClose={closeDetail}
-          onUpdate={refreshAll}
+          onUpdate={reload}
         />
       )}
     </div>
