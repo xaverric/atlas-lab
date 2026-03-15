@@ -8,6 +8,7 @@ const noteSchema = new mongoose.Schema(
     ownerId: { type: String, required: true },
     tags: [{ type: String }],
     isPublic: { type: Boolean, default: false },
+    publicPermission: { type: String, enum: ['view', 'edit'], default: 'view' },
     contentSize: { type: Number, default: 0 },
     attachments: [{
       documentId: { type: String, required: true },

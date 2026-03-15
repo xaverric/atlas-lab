@@ -21,6 +21,7 @@ export const create = (data: {
   ownerId: string;
   tags?: string[];
   isPublic?: boolean;
+  publicPermission?: string;
   contentSize?: number;
 }) => Note.create({ ...data, folderId: data.folderId || null });
 
@@ -52,7 +53,7 @@ export const list = async (opts: ListOptions) => {
   return { data, total, page, limit };
 };
 
-export const updateById = (id: string, data: Partial<{ title: string; content: string; tags: string[]; folderId: string | null; isPublic: boolean; contentSize: number }>) =>
+export const updateById = (id: string, data: Partial<{ title: string; content: string; tags: string[]; folderId: string | null; isPublic: boolean; publicPermission: string; contentSize: number }>) =>
   Note.findByIdAndUpdate(id, { $set: data }, { new: true });
 
 export const deleteById = (id: string) => Note.findByIdAndDelete(id);

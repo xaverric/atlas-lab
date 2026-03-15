@@ -26,6 +26,7 @@ interface Note {
   tags: string[];
   folderId: string | null;
   isPublic: boolean;
+  publicPermission?: 'view' | 'edit';
   dmsFolderId: string | null;
   attachments: Attachment[];
   createdAt: string;
@@ -52,6 +53,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
   const [tags, setTags] = useState('');
   const [folderId, setFolderId] = useState('');
   const [isPublic, setIsPublic] = useState(false);
+  const [publicPermission, setPublicPermission] = useState<'view' | 'edit'>('view');
   const [folders, setFolders] = useState<FolderOption[]>([]);
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -89,6 +91,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
       setTags(n.tags.join(', '));
       setFolderId(n.folderId || '');
       setIsPublic(n.isPublic);
+      setPublicPermission(n.publicPermission || 'view');
       setLoaded(true);
     } catch {
       toast.error('Failed to load note');
@@ -115,6 +118,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
     setTags(note.tags.join(', '));
     setFolderId(note.folderId || '');
     setIsPublic(note.isPublic);
+    setPublicPermission(note.publicPermission || 'view');
   };
 
   const enterEdit = () => setMode('edit');
@@ -137,6 +141,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
         tags: tagList,
         folderId: folderId || null,
         isPublic,
+        publicPermission: isPublic ? publicPermission : undefined,
       };
 
       await api(`/api/v1/notes/${noteId}`, { method: 'PATCH', body: JSON.stringify(body) });
@@ -241,7 +246,9 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
               <span className="text-xs">{folderName}</span>
               {note?.isPublic && (
                 <>
-                  <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">Public</span>
+                  <span className="rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                    Public{note.publicPermission === 'edit' ? ' (editable)' : ' (view only)'}
+                  </span>
                   <button
                     onClick={() => {
                       const url = `${window.location.origin}/public/notes/${note.id}`;
@@ -372,16 +379,20 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
                 ))}
               </select>
             </div>
-            <div className="flex items-end gap-2">
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={isPublic}
-                  onChange={(e) => setIsPublic(e.target.checked)}
-                  className="rounded"
-                />
-                Public
-              </label>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">Visibility</label>
+              <select
+                value={isPublic ? publicPermission : 'private'}
+                onChange={(e) => {
+                  if (e.target.value === 'private') { setIsPublic(false); }
+                  else { setIsPublic(true); setPublicPermission(e.target.value as 'view' | 'edit'); }
+                }}
+                className="rounded-md border bg-background px-3 py-2 text-sm"
+              >
+                <option value="private">Private</option>
+                <option value="view">Public (view only)</option>
+                <option value="edit">Public (editable)</option>
+              </select>
             </div>
           </div>
 
