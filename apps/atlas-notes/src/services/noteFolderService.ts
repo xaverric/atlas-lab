@@ -90,6 +90,16 @@ export const isFolderPublic = async (folderId: string): Promise<boolean> => {
   return false;
 };
 
+export const resolvePublicPermission = async (folderId: string): Promise<string> => {
+  let current = await noteFolderDao.findById(folderId);
+  while (current) {
+    if (current.visibility === 'public') return current.publicPermission || 'view';
+    if (!current.parentId) return 'view';
+    current = await noteFolderDao.findById(current.parentId.toString());
+  }
+  return 'view';
+};
+
 export const getByIdPublic = async (id: string) => {
   const folder = await noteFolderDao.findById(id);
   if (!folder) throw new ApiError(404, 'Folder not found');

@@ -140,10 +140,15 @@ export const getByIdPublic = async (id: string) => {
   if (!note) throw new ApiError(404, 'Note not found');
 
   // Note is public if: (a) isPublic flag is true on the note itself, or (b) it's in a public folder
-  if (note.isPublic) return note;
+  if (note.isPublic) {
+    return { ...note.toJSON(), publicPermission: (note as any).publicPermission || 'view' };
+  }
   if (note.folderId) {
     const folderPublic = await noteFolderService.isFolderPublic(note.folderId.toString());
-    if (folderPublic) return note;
+    if (folderPublic) {
+      const perm = await noteFolderService.resolvePublicPermission(note.folderId.toString());
+      return { ...note.toJSON(), publicPermission: perm };
+    }
   }
   throw new ApiError(404, 'Note not found');
 };
@@ -152,8 +157,19 @@ export const updatePublic = async (id: string, data: { title?: string; content?:
   const note = await noteDao.findById(id);
   if (!note) throw new ApiError(404, 'Note not found');
 
-  const noteIsPublic = note.isPublic || (note.folderId && await noteFolderService.isFolderPublic(note.folderId.toString()));
-  if (!noteIsPublic) throw new ApiError(403, 'Note is not public');
+  // Check public access
+  let canEdit = false;
+  if (note.isPublic) {
+    canEdit = (note as any).publicPermission === 'edit';
+  }
+  if (!canEdit && note.folderId) {
+    const folderPublic = await noteFolderService.isFolderPublic(note.folderId.toString());
+    if (folderPublic) {
+      const perm = await noteFolderService.resolvePublicPermission(note.folderId.toString());
+      canEdit = perm === 'edit' || perm === 'full';
+    }
+  }
+  if (!canEdit) throw new ApiError(403, 'Note is not publicly editable');
 
   const updateData: Record<string, unknown> = { ...data };
   if (data.content !== undefined) {
