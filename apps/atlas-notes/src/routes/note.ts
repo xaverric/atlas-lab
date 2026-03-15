@@ -14,6 +14,7 @@ const createSchema = z.object({
   folderId: objectIdSchema.nullable().optional(),
   tags: z.array(z.string()).optional(),
   isPublic: z.boolean().optional(),
+  publicPermission: z.enum(['view', 'edit']).optional(),
 });
 
 const updateSchema = z.object({
@@ -22,6 +23,7 @@ const updateSchema = z.object({
   tags: z.array(z.string()).optional(),
   folderId: objectIdSchema.nullable().optional(),
   isPublic: z.boolean().optional(),
+  publicPermission: z.enum(['view', 'edit']).optional(),
   dmsFolderId: z.string().min(1).optional(),
 }).refine((d) => Object.keys(d).length > 0, { message: 'At least one field required' });
 
