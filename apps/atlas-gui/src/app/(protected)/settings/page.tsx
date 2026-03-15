@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+import { StorageChart } from '@/components/system/storage-chart';
 import type { User } from '@atlas/core';
 
 export default function SettingsPage() {
@@ -57,6 +58,11 @@ export default function SettingsPage() {
         >
           Save
         </button>
+      </div>
+
+      <div className="space-y-3 rounded-lg border p-6">
+        <h2 className="text-sm font-medium">Storage Usage</h2>
+        <StorageChart />
       </div>
     </div>
   );
