@@ -51,14 +51,14 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-full flex-col border-r bg-sidebar-background">
-      <div className="flex h-14 items-center border-b px-4">
-        <span className="text-lg font-bold text-primary">Atlas</span>
+    <aside className="flex h-full flex-col border-r bg-sidebar-background/80 backdrop-blur-xl">
+      <div className="flex h-14 items-center border-b border-sidebar-border px-5">
+        <span className="text-lg font-bold text-primary tracking-tight">Atlas</span>
       </div>
-      <nav className="flex-1 overflow-auto p-3">
+      <nav className="flex-1 overflow-auto p-3 pt-4">
         {navGroups.map((group) => (
           <div key={group.title} className="mb-4">
-            <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
               {group.title}
             </p>
             <div className="space-y-1">
@@ -68,10 +68,10 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                     href={href}
                     onClick={onNavigate}
                     className={cn(
-                      'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                      'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
                       pathname.startsWith(href)
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent/50',
+                        ? 'bg-primary/10 text-primary shadow-sm'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent/60',
                     )}
                   >
                     <Icon className="h-4 w-4" />

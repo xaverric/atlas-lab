@@ -43,7 +43,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
   const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
 
   return (
-    <header className="flex h-14 items-center justify-between border-b px-4 md:px-6">
+    <header className="flex h-14 items-center justify-between border-b border-border/60 px-4 md:px-6 bg-background/80 backdrop-blur-lg sticky top-0 z-30">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuToggle}
