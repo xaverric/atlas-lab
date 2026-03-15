@@ -5,6 +5,7 @@ import * as systemController from '../controllers/systemController.js';
 const router = Router();
 
 router.use(auth);
+router.get('/resources', systemController.getSystemResources);
 router.get('/storage', systemController.getStorageStats);
 router.get('/storage/:section', systemController.getStorageDetail);
 

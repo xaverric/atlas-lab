@@ -85,6 +85,84 @@ export const getStorageStats: RequestHandler = async (_req, res, next) => {
   }
 };
 
+export const getSystemResources: RequestHandler = async (_req, res, next) => {
+  try {
+    const os = await import('os');
+
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const usedMem = totalMem - freeMem;
+
+    const cpus = os.cpus();
+    const cpuCount = cpus.length;
+    const cpuModel = cpus[0]?.model || 'Unknown';
+
+    const cpuTimes = cpus.map(cpu => {
+      const total = Object.values(cpu.times).reduce((a, b) => a + b, 0);
+      return { total, idle: cpu.times.idle };
+    });
+    const totalCpu = cpuTimes.reduce((a, b) => a + b.total, 0);
+    const totalIdle = cpuTimes.reduce((a, b) => a + b.idle, 0);
+    const cpuUsage = ((totalCpu - totalIdle) / totalCpu) * 100;
+
+    const uptimeSeconds = os.uptime();
+    const processUptime = process.uptime();
+    const platform = os.platform();
+    const hostname = os.hostname();
+    const nodeVersion = process.version;
+
+    const formatUptime = (seconds: number) => {
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      if (days > 0) return `${days}d ${hours}h ${mins}m`;
+      if (hours > 0) return `${hours}h ${mins}m`;
+      return `${mins}m`;
+    };
+
+    const procMem = process.memoryUsage();
+
+    res.json({
+      data: {
+        system: {
+          hostname,
+          platform,
+          nodeVersion,
+          cpuModel,
+          cpuCount,
+          uptimeFormatted: formatUptime(uptimeSeconds),
+          uptimeSeconds,
+        },
+        memory: {
+          total: totalMem,
+          used: usedMem,
+          free: freeMem,
+          usagePercent: ((usedMem / totalMem) * 100).toFixed(1),
+          totalFormatted: formatBytes(totalMem),
+          usedFormatted: formatBytes(usedMem),
+          freeFormatted: formatBytes(freeMem),
+        },
+        cpu: {
+          usagePercent: cpuUsage.toFixed(1),
+          cores: cpuCount,
+          model: cpuModel,
+        },
+        process: {
+          uptimeFormatted: formatUptime(processUptime),
+          heapUsed: procMem.heapUsed,
+          heapTotal: procMem.heapTotal,
+          rss: procMem.rss,
+          heapUsedFormatted: formatBytes(procMem.heapUsed),
+          rssFormatted: formatBytes(procMem.rss),
+        },
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const SECTION_DB_MAP: Record<string, string> = {
   'core': 'atlas',
   'file-storage-metadata': 'atlas-dms',
