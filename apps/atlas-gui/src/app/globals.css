@@ -3,43 +3,46 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Light theme — Soft blues, light & airy */
-  --color-background: hsl(210 30% 97%);             /* faint blue-white */
-  --color-foreground: hsl(215 25% 27%);              /* deep navy text */
-  --color-card: hsl(0 0% 100%);                      /* pure white cards */
-  --color-card-foreground: hsl(215 25% 27%);
+  /* ============================================
+     ISLANDS LIGHT — inspired by JetBrains Islands
+     Clean whites, soft greys, blue accents, frost glow
+     ============================================ */
+  --color-background: hsl(220 14% 96%);              /* #F2F3F5 light grey canvas */
+  --color-foreground: hsl(220 13% 18%);               /* #272A2F dark text */
+  --color-card: hsl(0 0% 100%);                       /* #FFFFFF white islands/cards */
+  --color-card-foreground: hsl(220 13% 18%);
   --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(215 25% 27%);
-  --color-primary: hsl(210 70% 50%);                 /* rich blue */
+  --color-popover-foreground: hsl(220 13% 18%);
+  --color-primary: hsl(215 80% 52%);                  /* #2B6CB0 → #3078D3 rich blue */
   --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(210 25% 93%);               /* light blue-grey */
-  --color-secondary-foreground: hsl(215 25% 30%);
-  --color-muted: hsl(210 20% 95%);                   /* very light blue */
-  --color-muted-foreground: hsl(215 15% 50%);        /* medium blue-grey */
-  --color-accent: hsl(210 30% 94%);                  /* subtle blue hover */
-  --color-accent-foreground: hsl(215 25% 27%);
-  --color-destructive: hsl(0 55% 60%);               /* pale red */
+  --color-secondary: hsl(220 12% 91%);                /* #E4E6EB soft grey */
+  --color-secondary-foreground: hsl(220 13% 25%);
+  --color-muted: hsl(220 12% 93%);                    /* #ECEDEE slightly lighter */
+  --color-muted-foreground: hsl(220 8% 46%);          /* #6B7280 medium grey */
+  --color-accent: hsl(215 60% 95%);                   /* #E8F0FE light blue tint */
+  --color-accent-foreground: hsl(215 80% 42%);        /* #1A5399 dark blue */
+  --color-destructive: hsl(0 65% 55%);                /* #D14B4B soft red */
   --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: hsl(210 20% 90%);                  /* soft blue-tinted border */
-  --color-input: hsl(210 20% 90%);
-  --color-ring: hsl(210 70% 50%);                    /* blue focus ring */
-  --color-success: hsl(150 45% 50%);                 /* pale green */
+  --color-border: hsl(220 12% 87%);                   /* #DBDDE0 visible border */
+  --color-input: hsl(220 12% 87%);
+  --color-ring: hsl(215 80% 52%);                     /* blue focus */
+  --color-success: hsl(142 50% 48%);                  /* #3DA760 soft green */
   --color-success-foreground: hsl(0 0% 100%);
-  --color-warning: hsl(38 70% 55%);                  /* soft amber */
+  --color-warning: hsl(38 80% 52%);                   /* #D49625 warm amber */
   --color-warning-foreground: hsl(0 0% 100%);
-  --color-info: hsl(210 70% 55%);                    /* lighter blue */
+  --color-info: hsl(215 80% 56%);                     /* lighter blue */
   --color-info-foreground: hsl(0 0% 100%);
-  --radius: 0.5rem;
+  --radius: 0.625rem;                                 /* 10px — slightly rounder than before */
 
-  /* Sidebar: light blue — blends with page, no harsh contrast */
-  --color-sidebar-background: hsl(210 25% 95%);      /* very light blue */
-  --color-sidebar-foreground: hsl(215 25% 30%);      /* dark navy text */
-  --color-sidebar-primary: hsl(210 70% 50%);         /* blue active */
+  /* Sidebar: slightly darker island — clear separation */
+  --color-sidebar-background: hsl(220 14% 93%);       /* #ECEDF0 */
+  --color-sidebar-foreground: hsl(220 13% 25%);
+  --color-sidebar-primary: hsl(215 80% 52%);
   --color-sidebar-primary-foreground: hsl(0 0% 100%);
-  --color-sidebar-accent: hsl(210 30% 90%);          /* blue hover */
-  --color-sidebar-accent-foreground: hsl(215 25% 27%);
-  --color-sidebar-border: hsl(210 20% 88%);
-  --color-sidebar-ring: hsl(210 70% 50%);
+  --color-sidebar-accent: hsl(215 40% 92%);           /* blue-tinted hover */
+  --color-sidebar-accent-foreground: hsl(220 13% 18%);
+  --color-sidebar-border: hsl(220 12% 85%);
+  --color-sidebar-ring: hsl(215 80% 52%);
 }
 
 @layer base {
@@ -50,41 +53,119 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Auto frost-glow on primary buttons */
+  [class*="bg-primary"]:not([class*="bg-primary/"]) {
+    box-shadow:
+      0 0 0 1px hsl(215 80% 52% / 0.15),
+      0 1px 3px hsl(215 80% 52% / 0.1),
+      0 4px 12px hsl(215 80% 52% / 0.08);
+  }
+
+  /* Auto island on card containers */
+  [class*="bg-card"] {
+    box-shadow: 0 1px 3px hsl(220 14% 10% / 0.04), 0 1px 2px hsl(220 14% 10% / 0.02);
+  }
+
+  /* Focus ring glow */
+  :focus-visible {
+    outline: 2px solid hsl(215 80% 52% / 0.5);
+    outline-offset: 2px;
+  }
+
+  /* Frost glow effect utility classes */
+  .frost-glow {
+    box-shadow:
+      0 0 0 1px hsl(215 80% 52% / 0.15),
+      0 1px 3px hsl(215 80% 52% / 0.1),
+      0 4px 12px hsl(215 80% 52% / 0.08);
+  }
+
+  .frost-glow-sm {
+    box-shadow:
+      0 0 0 1px hsl(215 80% 52% / 0.1),
+      0 1px 2px hsl(215 80% 52% / 0.06);
+  }
+
+  /* Island card elevation */
+  .island {
+    background: hsl(0 0% 100%);
+    border-radius: 0.625rem;
+    border: 1px solid hsl(220 12% 87%);
+    box-shadow: 0 1px 3px hsl(220 14% 10% / 0.04), 0 1px 2px hsl(220 14% 10% / 0.02);
+  }
+
+  .island-elevated {
+    background: hsl(0 0% 100%);
+    border-radius: 0.625rem;
+    border: 1px solid hsl(220 12% 87%);
+    box-shadow: 0 4px 12px hsl(220 14% 10% / 0.06), 0 1px 3px hsl(220 14% 10% / 0.04);
+  }
 }
 
+/* ============================================
+   CATPPUCCIN MOCHA — dark mode
+   Warm dark with pastel accents
+   ============================================ */
 .dark {
-  --color-background: hsl(215 25% 9%);
-  --color-foreground: hsl(210 20% 90%);
-  --color-card: hsl(215 22% 13%);
-  --color-card-foreground: hsl(210 20% 90%);
-  --color-popover: hsl(215 22% 13%);
-  --color-popover-foreground: hsl(210 20% 90%);
-  --color-primary: hsl(210 70% 55%);
-  --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(215 20% 18%);
-  --color-secondary-foreground: hsl(210 20% 90%);
-  --color-muted: hsl(215 20% 16%);
-  --color-muted-foreground: hsl(215 15% 55%);
-  --color-accent: hsl(215 20% 18%);
-  --color-accent-foreground: hsl(210 20% 90%);
-  --color-destructive: hsl(0 50% 50%);
-  --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: hsl(215 20% 20%);
-  --color-input: hsl(215 20% 20%);
-  --color-ring: hsl(210 70% 55%);
-  --color-success: hsl(150 40% 42%);
-  --color-success-foreground: hsl(0 0% 100%);
-  --color-warning: hsl(38 65% 48%);
-  --color-warning-foreground: hsl(0 0% 100%);
-  --color-info: hsl(210 70% 55%);
-  --color-info-foreground: hsl(0 0% 100%);
+  --color-background: hsl(240 21% 15%);               /* #1e1e2e Base */
+  --color-foreground: hsl(227 68% 88%);                /* #cdd6f4 Text */
+  --color-card: hsl(240 21% 12%);                      /* #181825 Mantle */
+  --color-card-foreground: hsl(227 68% 88%);
+  --color-popover: hsl(240 21% 12%);
+  --color-popover-foreground: hsl(227 68% 88%);
+  --color-primary: hsl(217 92% 76%);                   /* #89b4fa Blue */
+  --color-primary-foreground: hsl(240 23% 9%);          /* #11111b Crust */
+  --color-secondary: hsl(240 21% 20%);                  /* #313244 Surface0 */
+  --color-secondary-foreground: hsl(227 68% 88%);
+  --color-muted: hsl(240 21% 20%);                      /* #313244 Surface0 */
+  --color-muted-foreground: hsl(228 24% 72%);            /* #a6adc8 Subtext0 */
+  --color-accent: hsl(234 13% 31%);                      /* #45475a Surface1 */
+  --color-accent-foreground: hsl(226 64% 88%);
+  --color-destructive: hsl(343 81% 75%);                 /* #f38ba8 Red */
+  --color-destructive-foreground: hsl(240 23% 9%);
+  --color-border: hsl(234 13% 31%);                      /* #45475a Surface1 */
+  --color-input: hsl(234 13% 31%);
+  --color-ring: hsl(217 92% 76%);                        /* Blue */
+  --color-success: hsl(115 54% 76%);                     /* #a6e3a1 Green */
+  --color-success-foreground: hsl(240 23% 9%);
+  --color-warning: hsl(40 62% 73%);                      /* #f9e2af Yellow */
+  --color-warning-foreground: hsl(240 23% 9%);
+  --color-info: hsl(199 89% 86%);                        /* #89dceb Sky */
+  --color-info-foreground: hsl(240 23% 9%);
 
-  --color-sidebar-background: hsl(215 25% 7%);
-  --color-sidebar-foreground: hsl(210 20% 85%);
-  --color-sidebar-primary: hsl(210 70% 55%);
-  --color-sidebar-primary-foreground: hsl(0 0% 100%);
-  --color-sidebar-accent: hsl(215 20% 14%);
-  --color-sidebar-accent-foreground: hsl(210 20% 90%);
-  --color-sidebar-border: hsl(215 20% 12%);
-  --color-sidebar-ring: hsl(210 70% 55%);
+  --color-sidebar-background: hsl(240 23% 9%);          /* #11111b Crust */
+  --color-sidebar-foreground: hsl(226 64% 88%);          /* #bac2de Subtext1 */
+  --color-sidebar-primary: hsl(217 92% 76%);             /* Blue */
+  --color-sidebar-primary-foreground: hsl(240 23% 9%);
+  --color-sidebar-accent: hsl(240 21% 15%);              /* Base */
+  --color-sidebar-accent-foreground: hsl(227 68% 88%);
+  --color-sidebar-border: hsl(240 21% 15%);              /* Base */
+  --color-sidebar-ring: hsl(217 92% 76%);
+
+  /* Dark mode frost glow — uses Catppuccin blue */
+  & .frost-glow {
+    box-shadow:
+      0 0 0 1px hsl(217 92% 76% / 0.2),
+      0 1px 3px hsl(217 92% 76% / 0.12),
+      0 4px 12px hsl(217 92% 76% / 0.08);
+  }
+
+  & .frost-glow-sm {
+    box-shadow:
+      0 0 0 1px hsl(217 92% 76% / 0.12),
+      0 1px 2px hsl(217 92% 76% / 0.06);
+  }
+
+  & .island {
+    background: hsl(240 21% 12%);
+    border-color: hsl(234 13% 31%);
+    box-shadow: 0 1px 3px hsl(240 23% 5% / 0.3), 0 1px 2px hsl(240 23% 5% / 0.2);
+  }
+
+  & .island-elevated {
+    background: hsl(240 21% 12%);
+    border-color: hsl(234 13% 31%);
+    box-shadow: 0 4px 12px hsl(240 23% 5% / 0.4), 0 1px 3px hsl(240 23% 5% / 0.3);
+  }
 }
