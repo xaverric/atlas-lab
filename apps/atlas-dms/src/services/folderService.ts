@@ -68,7 +68,7 @@ export const remove = async (id: string, ownerId: string, isAdmin = false) => {
 export const setPublic = async (folderId: string, isPublic: boolean, ownerId: string, isAdmin = false, publicPermission?: string) => {
   const folder = await folderDao.findById(folderId, ownerId, isAdmin);
   if (!folder) throw new ApiError(404, 'Folder not found');
-  if (!folder.parentId && isPublic) throw new ApiError(400, 'Root folder cannot be made public');
+  // Any folder can be made public, including root-level folders
   return folderDao.updateIsPublic(folderId, isPublic, publicPermission);
 };
 
