@@ -247,24 +247,39 @@ export const getStorageDetail: RequestHandler = async (req, res, next) => {
 
     for (const col of collections) {
       try {
-        const stats = await db.collection(col.name).stats();
+        const result = await db.command({ collStats: col.name });
+        const size = result.storageSize || result.size || 0;
+        const count = result.count || 0;
         items.push({
           id: col.name,
           name: col.name,
-          type: 'collection',
-          size: stats.size,
-          sizeFormatted: formatBytes(stats.size),
+          type: `collection (${count} docs)`,
+          size,
+          sizeFormatted: formatBytes(size),
           date: null,
         });
       } catch {
-        items.push({
-          id: col.name,
-          name: col.name,
-          type: 'collection',
-          size: 0,
-          sizeFormatted: '0 B',
-          date: null,
-        });
+        // fallback: count documents and estimate size
+        try {
+          const count = await db.collection(col.name).countDocuments();
+          items.push({
+            id: col.name,
+            name: col.name,
+            type: `collection (${count} docs)`,
+            size: 0,
+            sizeFormatted: '0 B',
+            date: null,
+          });
+        } catch {
+          items.push({
+            id: col.name,
+            name: col.name,
+            type: 'collection',
+            size: 0,
+            sizeFormatted: '0 B',
+            date: null,
+          });
+        }
       }
     }
 
