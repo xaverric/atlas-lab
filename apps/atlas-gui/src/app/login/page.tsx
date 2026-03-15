@@ -45,7 +45,7 @@ export default function LoginPage() {
               <line x1="19.5" y1="10" x2="24" y2="18" />
               <line x1="28.5" y1="18.5" x2="30" y2="12" />
             </g>
-            <text x="42" y="28" fontFamily="system-ui, sans-serif" fontSize="22" fontWeight="600" letterSpacing="-0.5" fill="currentColor">atlas</text>
+            <text x="40" y="31" fontFamily="system-ui, sans-serif" fontSize="28" fontWeight="600" letterSpacing="-0.5" fill="currentColor">atlas</text>
           </svg>
           <p className="mt-2 text-sm text-muted-foreground">Sign in to your account</p>
         </div>
