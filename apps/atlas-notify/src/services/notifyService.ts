@@ -69,3 +69,90 @@ export const markAllRead = (userId: string) =>
 
 export const unreadCount = (userId: string) =>
   notificationDao.countUnread(userId);
+
+export const ensureUserSetup = async (userId: string) => {
+  const channels = await channelDao.findByUser(userId);
+
+  let inAppChannel = channels.find((ch) => ch.type === 'in_app');
+  if (!inAppChannel) {
+    inAppChannel = await channelDao.create({
+      userId,
+      type: 'in_app',
+      label: 'In-App Notifications',
+      config: {},
+      verified: true,
+      enabled: true,
+    });
+  }
+
+  const rules = await preferenceDao.findRulesForUser(userId);
+  if (rules.length === 0) {
+    await preferenceDao.createRule({
+      userId,
+      eventPattern: '*',
+      channelIds: [inAppChannel._id],
+      enabled: true,
+    });
+  }
+
+  return inAppChannel;
+};
+
+export const createDirect = async (
+  userId: string,
+  opts: { title: string; body: string; event: string; priority?: string },
+) => {
+  await ensureUserSetup(userId);
+
+  const rules = await preferenceDao.findMatchingRules(userId, opts.event);
+  if (rules.length === 0) return null;
+
+  const channelMap = new Map<string, any>();
+  for (const rule of rules) {
+    for (const ch of rule.channelIds as any[]) {
+      if (ch.enabled && ch.verified && !channelMap.has(ch._id.toString())) {
+        channelMap.set(ch._id.toString(), ch);
+      }
+    }
+  }
+
+  if (channelMap.size === 0) return null;
+
+  const channelList = Array.from(channelMap.values());
+  const deliveries = channelList.map((ch: any) => ({
+    channelType: ch.type as string,
+    channelId: ch._id,
+    status: ch.type === 'in_app' ? 'sent' : 'pending',
+    sentAt: ch.type === 'in_app' ? new Date() : undefined,
+  }));
+
+  const notification = await notificationDao.create({
+    userId,
+    event: opts.event,
+    title: opts.title,
+    subject: opts.title,
+    body: opts.body,
+    read: false,
+    priority: opts.priority || 'normal',
+    deliveries,
+  });
+
+  for (let i = 0; i < deliveries.length; i++) {
+    const d = deliveries[i];
+    if (d.channelType === 'in_app') continue;
+
+    await queue.add('deliver', {
+      notificationId: notification.id,
+      deliveryIndex: i,
+      channelType: d.channelType,
+      channelConfig: channelList[i].config,
+    });
+  }
+
+  sseManager.pushToUser(userId, 'notification', notification.toJSON());
+  const unread = await notificationDao.countUnread(userId);
+  sseManager.pushToUser(userId, 'unread-count', { count: unread });
+
+  await notificationDao.prune(userId);
+  return notification;
+};
