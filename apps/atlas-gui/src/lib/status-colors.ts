@@ -21,6 +21,7 @@ const statusMap: Record<string, string> = {
   paused: 'bg-warning/10 text-warning',
 };
 
-export function getStatusClasses(status: string): string {
+export function getStatusClasses(status?: string | null): string {
+  if (!status) return 'bg-muted text-muted-foreground';
   return statusMap[status.toLowerCase()] ?? 'bg-muted text-muted-foreground';
 }
