@@ -5,17 +5,17 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Plus, FolderPlus, Folder, FileText, RefreshCw,
-  Eye, Pencil, Trash2, Bot, Globe, Lock, ChevronRight, Home, Settings,
-  ArrowUp, ArrowDown,
+  Eye, Pencil, Trash2, Globe, Lock, ChevronRight, Home,
+  ArrowUp, ArrowDown, Info,
 } from 'lucide-react';
+import { Link as LinkIcon, FolderInput } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { formatSize, formatDate } from '@/lib/utils';
-import { VisibilityBadge } from '@/components/shared/visibility-badge';
 import { SearchBar } from '@/components/notes/search-bar';
 import { NoteDetail } from '@/components/notes/note-detail';
 import { NoteContextMenu } from '@/components/notes/context-menu';
-import { Link as LinkIcon, FolderInput, Info } from 'lucide-react';
+import { ItemInfoModal } from '@/components/notes/item-info-modal';
 
 interface FolderItem {
   id: string;
@@ -34,6 +34,7 @@ interface NoteItem {
   tags: string[];
   updatedAt: string;
   isPublic?: boolean;
+  publicPermission?: 'view' | 'edit';
   contentSize?: number;
   ownerName?: string;
   attachments?: { filename: string; size: number }[];
@@ -53,6 +54,11 @@ interface ListResponse {
 interface SearchResult {
   note: NoteItem;
   score: number;
+}
+
+interface InfoModalState {
+  type: 'folder' | 'note';
+  id: string;
 }
 
 function attachmentSummary(attachments?: { filename: string; size: number }[]): string {
@@ -77,11 +83,9 @@ export default function NotesPage() {
   const [searchResults, setSearchResults] = useState<SearchResult[] | null>(null);
   const [folderMeta, setFolderMeta] = useState<{ noteCount: number; subfolderCount: number; totalSize: number } | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [showFolderSettings, setShowFolderSettings] = useState(false);
-  const [editingFolderName, setEditingFolderName] = useState(false);
-  const [folderNameDraft, setFolderNameDraft] = useState('');
   const [sort, setSort] = useState({ field: 'updatedAt', order: 'desc' as 'asc' | 'desc' });
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: { icon: any; label: string; action: () => void; destructive?: boolean }[] } | null>(null);
+  const [infoModal, setInfoModal] = useState<InfoModalState | null>(null);
 
   const loadFolderDetail = useCallback(async () => {
     if (!folderId) { setCurrentFolder(null); return; }
@@ -182,23 +186,46 @@ export default function NotesPage() {
     } catch (err) { toast.error(err instanceof Error ? err.message : 'Failed to delete folder'); }
   };
 
-  const handleToggleAi = async (id: string, current: boolean) => {
+  const handleToggleFolderPublic = async (id: string, makePublic: boolean) => {
     try {
-      await api(`/api/v1/notes/folders/${id}`, { method: 'PATCH', body: JSON.stringify({ aiAccessible: !current }) });
+      await api(`/api/v1/notes/folders/${id}`, { method: 'PATCH', body: JSON.stringify({ visibility: makePublic ? 'public' : 'private' }) });
       loadFolders();
       if (id === folderId) loadFolderDetail();
-      toast.success(`AI access ${current ? 'disabled' : 'enabled'}`);
-    } catch { toast.error('Failed to toggle AI access'); }
+      toast.success(makePublic ? 'Folder is now public' : 'Folder is now private');
+    } catch { toast.error('Failed to update visibility'); }
   };
 
-  const handleTogglePublic = async (id: string, isPublic: boolean) => {
+  const handleFolderPermission = async (id: string, perm: string) => {
     try {
-      const body: Record<string, unknown> = { visibility: isPublic ? 'public' : 'private' };
-      await api(`/api/v1/notes/folders/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+      await api(`/api/v1/notes/folders/${id}`, { method: 'PATCH', body: JSON.stringify({ publicPermission: perm }) });
       loadFolders();
       if (id === folderId) loadFolderDetail();
-      toast.success(isPublic ? 'Folder is now public' : 'Folder is now private');
+    } catch { toast.error('Failed to update permission'); }
+  };
+
+  const handleToggleNotePublic = async (id: string, makePublic: boolean) => {
+    try {
+      await api(`/api/v1/notes/${id}`, { method: 'PATCH', body: JSON.stringify({ isPublic: makePublic }) });
+      loadNotes(page);
+      toast.success(makePublic ? 'Note is now public' : 'Note is now private');
     } catch { toast.error('Failed to update visibility'); }
+  };
+
+  const handleNotePermission = async (id: string, perm: string) => {
+    try {
+      await api(`/api/v1/notes/${id}`, { method: 'PATCH', body: JSON.stringify({ publicPermission: perm }) });
+      loadNotes(page);
+    } catch { toast.error('Failed to update permission'); }
+  };
+
+  const copyFolderLink = (id: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/public/notes/folders/${id}`);
+    toast.success('Public link copied');
+  };
+
+  const copyNoteLink = (id: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/public/notes/${id}`);
+    toast.success('Public link copied');
   };
 
   const handleSearch = async (query: string, semantic: boolean) => {
@@ -253,9 +280,9 @@ export default function NotesPage() {
       items: [
         { icon: Eye, label: 'Open', action: () => navigateToFolder(folder.id) },
         { icon: Pencil, label: 'Rename', action: () => { const name = prompt('Rename folder:', folder.name); if (name?.trim()) handleRenameFolder(folder.id, name.trim()); } },
-        { icon: isPublic ? Lock : Globe, label: isPublic ? 'Make Private' : 'Make Public', action: () => handleTogglePublic(folder.id, !isPublic) },
-        ...(isPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => { navigator.clipboard.writeText(`${window.location.origin}/public/notes/folders/${folder.id}`); toast.success('Public link copied'); } }] : []),
-        { icon: Bot, label: folder.aiAccessible ? 'Disable AI' : 'Enable AI', action: () => handleToggleAi(folder.id, folder.aiAccessible) },
+        { icon: isPublic ? Lock : Globe, label: isPublic ? 'Make Private' : 'Make Public', action: () => handleToggleFolderPublic(folder.id, !isPublic) },
+        ...(isPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => copyFolderLink(folder.id) }] : []),
+        { icon: Info, label: 'Info', action: () => setInfoModal({ type: 'folder', id: folder.id }) },
         { icon: FolderInput, label: 'Move to...', action: () => { const target = prompt('Move to folder ID (or empty for root):'); if (target !== null) { api(`/api/v1/notes/folders/${folder.id}`, { method: 'PATCH', body: JSON.stringify({ parentId: target || null }) }).then(() => { toast.success('Moved'); loadFolders(); }).catch(() => toast.error('Failed to move')); } } },
         { icon: Trash2, label: 'Delete', action: () => handleDeleteFolder(folder.id), destructive: true },
       ],
@@ -270,8 +297,9 @@ export default function NotesPage() {
       items: [
         { icon: Eye, label: 'Open', action: () => navigateToNote(note.id) },
         { icon: Pencil, label: 'Rename', action: () => { const title = prompt('Rename note:', note.title); if (title?.trim()) { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ title: title.trim() }) }).then(() => { toast.success('Renamed'); loadNotes(page); }).catch(() => toast.error('Failed to rename')); } } },
-        { icon: note.isPublic ? Lock : Globe, label: note.isPublic ? 'Make Private' : 'Make Public', action: () => { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ isPublic: !note.isPublic }) }).then(() => { toast.success(note.isPublic ? 'Now private' : 'Now public'); loadNotes(page); }).catch(() => toast.error('Failed')); } },
-        ...(note.isPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => { navigator.clipboard.writeText(`${window.location.origin}/public/notes/${note.id}`); toast.success('Public link copied'); } }] : []),
+        { icon: note.isPublic ? Lock : Globe, label: note.isPublic ? 'Make Private' : 'Make Public', action: () => handleToggleNotePublic(note.id, !note.isPublic) },
+        ...(note.isPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => copyNoteLink(note.id) }] : []),
+        { icon: Info, label: 'Info', action: () => setInfoModal({ type: 'note', id: note.id }) },
         { icon: FolderInput, label: 'Move to...', action: () => { const target = prompt('Move to folder ID (or empty for root):'); if (target !== null) { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ folderId: target || null }) }).then(() => { toast.success('Moved'); loadNotes(page); }).catch(() => toast.error('Failed to move')); } } },
         { icon: Trash2, label: 'Delete', action: () => { if (confirm('Delete this note?')) { api(`/api/v1/notes/${note.id}`, { method: 'DELETE' }).then(() => { toast.success('Deleted'); loadNotes(page); }).catch(() => toast.error('Failed')); } }, destructive: true },
       ],
@@ -282,13 +310,10 @@ export default function NotesPage() {
   const displayNotes = searchResults ? searchResults.map((r) => r.note) : notes;
   const folderIsPublic = currentFolder?.visibility === 'public';
 
-  // If noteId is set, show detail view
   if (noteId) {
-    // breadcrumb includes current folder as last element
     const bc = currentFolder?.breadcrumb || [];
     return (
       <div className="flex h-[calc(100vh-4rem)] flex-col">
-        {/* Breadcrumb for note detail */}
         <div className="shrink-0 border-b px-6 py-2">
           <nav className="flex items-center gap-1 text-sm">
             <button onClick={() => navigateToFolder(null)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
@@ -311,15 +336,13 @@ export default function NotesPage() {
     );
   }
 
-  // Folder/list view
-  // breadcrumb from backend includes current folder as last element
   const bc = currentFolder?.breadcrumb || [];
   const parentCrumbs = bc.slice(0, -1);
   const currentCrumb = bc.length > 0 ? bc[bc.length - 1] : null;
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
-      {/* Toolbar: breadcrumb + actions in one row */}
+      {/* Toolbar */}
       <div className="shrink-0 flex items-center justify-between gap-4 px-6 py-2.5 border-b">
         <div className="flex items-center gap-2 min-w-0">
           <nav className="flex items-center gap-1 text-sm min-w-0">
@@ -341,11 +364,27 @@ export default function NotesPage() {
           </nav>
           {currentFolder && (
             <div className="flex items-center gap-2 shrink-0">
-              <VisibilityBadge isPublic={folderIsPublic} permission={currentFolder.publicPermission} />
-              {currentFolder.aiAccessible && (
-                <span className="inline-flex items-center gap-1 text-xs text-purple-500">
-                  <Bot className="h-3 w-3" /> AI
-                </span>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleToggleFolderPublic(folderId!, !folderIsPublic); }}
+                className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
+                  folderIsPublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-muted'
+                }`}
+                title={folderIsPublic ? 'Make private' : 'Make public'}
+              >
+                {folderIsPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                {folderIsPublic ? (currentFolder.publicPermission || 'public') : 'private'}
+              </button>
+              {folderIsPublic && (
+                <select
+                  value={currentFolder.publicPermission || 'view'}
+                  onChange={(e) => { e.stopPropagation(); handleFolderPermission(folderId!, e.target.value); }}
+                  className="rounded border bg-background px-1 py-0.5 text-[10px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <option value="view">view</option>
+                  <option value="edit">edit</option>
+                  <option value="full">full</option>
+                </select>
               )}
             </div>
           )}
@@ -357,8 +396,8 @@ export default function NotesPage() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {folderId && currentFolder && (
-            <button onClick={() => setShowFolderSettings((v) => !v)} className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground" title="Folder settings">
-              <Settings className="h-4 w-4" />
+            <button onClick={() => setInfoModal({ type: 'folder', id: folderId })} className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground" title="Folder info">
+              <Info className="h-4 w-4" />
             </button>
           )}
           <button onClick={reload} className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground" title="Refresh">
@@ -372,41 +411,6 @@ export default function NotesPage() {
           </Link>
         </div>
       </div>
-
-      {/* Folder settings panel */}
-      {showFolderSettings && folderId && currentFolder && (
-        <div className="shrink-0 border-b px-6 py-3 space-y-2 bg-muted/30">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Folder Settings</span>
-            <button onClick={() => { setShowFolderSettings(false); setEditingFolderName(false); }} className="text-xs text-muted-foreground hover:text-foreground">Close</button>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            {editingFolderName ? (
-              <div className="flex items-center gap-1">
-                <input value={folderNameDraft} onChange={(e) => setFolderNameDraft(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && folderNameDraft.trim()) { handleRenameFolder(folderId, folderNameDraft.trim()); setEditingFolderName(false); } if (e.key === 'Escape') setEditingFolderName(false); }}
-                  className="rounded border bg-background px-2 py-1 text-sm" autoFocus />
-                <button onClick={() => { if (folderNameDraft.trim()) { handleRenameFolder(folderId, folderNameDraft.trim()); setEditingFolderName(false); } }} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
-                <button onClick={() => setEditingFolderName(false)} className="rounded border px-2 py-1 text-xs">Cancel</button>
-              </div>
-            ) : (
-              <button onClick={() => { setFolderNameDraft(currentFolder.name); setEditingFolderName(true); }} className="flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-accent">
-                <Pencil className="h-3 w-3" /> Rename
-              </button>
-            )}
-            <button onClick={() => handleTogglePublic(folderId, !folderIsPublic)} className="flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-accent">
-              {folderIsPublic ? <Lock className="h-3 w-3" /> : <Globe className="h-3 w-3" />}
-              {folderIsPublic ? 'Make Private' : 'Make Public'}
-            </button>
-            <button onClick={() => handleToggleAi(folderId, currentFolder.aiAccessible)} className="flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-accent">
-              <Bot className="h-3 w-3" /> {currentFolder.aiAccessible ? 'Disable AI' : 'Enable AI'}
-            </button>
-            <button onClick={() => handleDeleteFolder(folderId)} className="flex items-center gap-1 rounded border px-2 py-1 text-xs text-destructive hover:bg-destructive/10">
-              <Trash2 className="h-3 w-3" /> Delete Folder
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
@@ -434,7 +438,7 @@ export default function NotesPage() {
           </div>
         )}
 
-        {/* Unified list: folders + notes together */}
+        {/* Unified list */}
         {(folders.length > 0 || displayNotes.length > 0) ? (
           <div className="overflow-x-auto rounded-md border">
             <table className="w-full text-sm">
@@ -450,7 +454,7 @@ export default function NotesPage() {
                     Size {sort.field === 'contentSize' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
                   <th className="px-4 py-2 w-28">Attachments</th>
-                  <th className="px-4 py-2 w-24">Visibility</th>
+                  <th className="px-4 py-2 w-36">Visibility</th>
                   <th className="px-4 py-2 w-28 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('updatedAt')}>
                     Updated {sort.field === 'updatedAt' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
@@ -458,86 +462,137 @@ export default function NotesPage() {
                 </tr>
               </thead>
               <tbody>
-                {/* Folders first */}
-                {folders.map((folder) => (
-                  <tr
-                    key={`folder-${folder.id}`}
-                    className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
-                    onClick={() => navigateToFolder(folder.id)}
-                    onContextMenu={(e) => openFolderMenu(e, folder)}
-                  >
-                    <td className="px-4 py-2" />
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-2">
-                        <Folder className="h-4 w-4 shrink-0 text-warning" />
-                        <span className="font-medium">{folder.name}</span>
-                        {folder.noteCount != null && (
-                          <span className="text-xs text-muted-foreground">({folder.noteCount})</span>
-                        )}
-                        {folder.aiAccessible && <Bot className="h-3 w-3 text-purple-500" title="AI accessible" />}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 text-muted-foreground">{folder.totalSize != null ? formatSize(folder.totalSize) : '-'}</td>
-                    <td className="px-4 py-2 text-muted-foreground">-</td>
-                    <td className="px-4 py-2">
-                      <VisibilityBadge isPublic={folder.visibility === 'public'} permission={folder.publicPermission} />
-                    </td>
-                    <td className="px-4 py-2 text-muted-foreground">-</td>
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => handleToggleAi(folder.id, folder.aiAccessible)} className="rounded p-1 hover:bg-accent" title={folder.aiAccessible ? 'Disable AI' : 'Enable AI'}>
-                          <Bot className="h-3.5 w-3.5" />
+                {/* Folders */}
+                {folders.map((folder) => {
+                  const isFolderPublic = folder.visibility === 'public';
+                  return (
+                    <tr
+                      key={`folder-${folder.id}`}
+                      className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
+                      onClick={() => navigateToFolder(folder.id)}
+                      onContextMenu={(e) => openFolderMenu(e, folder)}
+                    >
+                      <td className="px-4 py-2" />
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-2">
+                          <Folder className="h-4 w-4 shrink-0 text-warning" />
+                          <span className="font-medium">{folder.name}</span>
+                          {folder.noteCount != null && (
+                            <span className="text-xs text-muted-foreground">({folder.noteCount})</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-muted-foreground">{folder.totalSize != null ? formatSize(folder.totalSize) : '-'}</td>
+                      <td className="px-4 py-2 text-muted-foreground">-</td>
+                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleToggleFolderPublic(folder.id, !isFolderPublic)}
+                            className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
+                              isFolderPublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-muted'
+                            }`}
+                            title={isFolderPublic ? 'Make private' : 'Make public'}
+                          >
+                            {isFolderPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                            {isFolderPublic ? (folder.publicPermission || 'public') : 'private'}
+                          </button>
+                          {isFolderPublic && (
+                            <>
+                              <select
+                                value={folder.publicPermission || 'view'}
+                                onChange={(e) => handleFolderPermission(folder.id, e.target.value)}
+                                className="rounded border bg-background px-1 py-0.5 text-[10px]"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <option value="view">view</option>
+                                <option value="edit">edit</option>
+                                <option value="full">full</option>
+                              </select>
+                              <button onClick={() => copyFolderLink(folder.id)} className="rounded p-0.5 hover:bg-accent text-muted-foreground" title="Copy public link">
+                                <LinkIcon className="h-3 w-3" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-muted-foreground">-</td>
+                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setInfoModal({ type: 'folder', id: folder.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
+                          <Info className="h-3.5 w-3.5" />
                         </button>
-                        <button onClick={() => handleDeleteFolder(folder.id)} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-destructive" title="Delete">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
 
                 {/* Notes */}
-                {displayNotes.map((note) => (
-                  <tr
-                    key={`note-${note.id}`}
-                    className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
-                    onClick={() => navigateToNote(note.id)}
-                    onContextMenu={(e) => openNoteMenu(e, note)}
-                  >
-                    <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
-                      <input type="checkbox" checked={selectedIds.has(note.id)} onChange={() => handleSelect(note.id)} className="rounded border-input" />
-                    </td>
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                        <span className="font-medium truncate">{note.title}</span>
-                        {note.tags.length > 0 && (
-                          <div className="flex items-center gap-1">
-                            {note.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
-                            ))}
-                            {note.tags.length > 3 && <span className="text-[10px] text-muted-foreground">+{note.tags.length - 3}</span>}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 text-muted-foreground">{note.contentSize != null ? formatSize(note.contentSize) : '-'}</td>
-                    <td className="px-4 py-2 text-muted-foreground">{attachmentSummary(note.attachments)}</td>
-                    <td className="px-4 py-2"><VisibilityBadge isPublic={note.isPublic ?? false} /></td>
-                    <td className="px-4 py-2 text-muted-foreground">{formatDate(note.updatedAt)}</td>
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => navigateToNote(note.id)} className="rounded p-1 hover:bg-accent" title="View">
-                          <Eye className="h-3.5 w-3.5" />
+                {displayNotes.map((note) => {
+                  const isNotePublic = note.isPublic ?? false;
+                  return (
+                    <tr
+                      key={`note-${note.id}`}
+                      className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
+                      onClick={() => navigateToNote(note.id)}
+                      onContextMenu={(e) => openNoteMenu(e, note)}
+                    >
+                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                        <input type="checkbox" checked={selectedIds.has(note.id)} onChange={() => handleSelect(note.id)} className="rounded border-input" />
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <span className="font-medium truncate">{note.title}</span>
+                          {note.tags.length > 0 && (
+                            <div className="flex items-center gap-1">
+                              {note.tags.slice(0, 3).map((tag) => (
+                                <span key={tag} className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
+                              ))}
+                              {note.tags.length > 3 && <span className="text-[10px] text-muted-foreground">+{note.tags.length - 3}</span>}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-muted-foreground">{note.contentSize != null ? formatSize(note.contentSize) : '-'}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{attachmentSummary(note.attachments)}</td>
+                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleToggleNotePublic(note.id, !isNotePublic)}
+                            className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
+                              isNotePublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-muted'
+                            }`}
+                            title={isNotePublic ? 'Make private' : 'Make public'}
+                          >
+                            {isNotePublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                            {isNotePublic ? (note.publicPermission || 'public') : 'private'}
+                          </button>
+                          {isNotePublic && (
+                            <>
+                              <select
+                                value={note.publicPermission || 'view'}
+                                onChange={(e) => handleNotePermission(note.id, e.target.value)}
+                                className="rounded border bg-background px-1 py-0.5 text-[10px]"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <option value="view">view</option>
+                                <option value="edit">edit</option>
+                              </select>
+                              <button onClick={() => copyNoteLink(note.id)} className="rounded p-0.5 hover:bg-accent text-muted-foreground" title="Copy public link">
+                                <LinkIcon className="h-3 w-3" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-muted-foreground">{formatDate(note.updatedAt)}</td>
+                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setInfoModal({ type: 'note', id: note.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
+                          <Info className="h-3.5 w-3.5" />
                         </button>
-                        <button onClick={() => { if (confirm('Delete this note?')) { api(`/api/v1/notes/${note.id}`, { method: 'DELETE' }).then(() => { toast.success('Note deleted'); loadNotes(page); }).catch(() => toast.error('Failed to delete')); } }}
-                          className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-destructive" title="Delete">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -563,6 +618,15 @@ export default function NotesPage() {
 
       {ctxMenu && (
         <NoteContextMenu x={ctxMenu.x} y={ctxMenu.y} items={ctxMenu.items} onClose={() => setCtxMenu(null)} />
+      )}
+
+      {infoModal && (
+        <ItemInfoModal
+          type={infoModal.type}
+          itemId={infoModal.id}
+          onClose={() => setInfoModal(null)}
+          onUpdate={reload}
+        />
       )}
     </div>
   );
