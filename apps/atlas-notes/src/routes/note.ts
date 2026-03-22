@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { validate } from '@atlas/server-common';
+import { validate, stripHtml } from '@atlas/server-common';
 import { paginationSchema, objectIdSchema } from '@atlas/core';
 import { auth } from '../middleware/auth.js';
 import * as noteController from '../controllers/noteController.js';
@@ -8,19 +8,21 @@ import revisionRoutes from './revision.js';
 
 const router = Router();
 
+const safeText = z.string().transform(stripHtml);
+
 const createSchema = z.object({
-  title: z.string().min(1).max(500),
+  title: safeText.pipe(z.string().min(1).max(500)),
   content: z.string().optional(),
   folderId: objectIdSchema.nullable().optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(safeText).optional(),
   isPublic: z.boolean().optional(),
   publicPermission: z.enum(['view', 'edit']).optional(),
 });
 
 const updateSchema = z.object({
-  title: z.string().min(1).max(500).optional(),
+  title: safeText.pipe(z.string().min(1).max(500)).optional(),
   content: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(safeText).optional(),
   folderId: objectIdSchema.nullable().optional(),
   isPublic: z.boolean().optional(),
   publicPermission: z.enum(['view', 'edit']).optional(),

@@ -56,13 +56,27 @@ export const sendTest: RequestHandler = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+const ALLOWED_URL_PROTOCOLS = ['http:', 'https:'];
+const validateNotificationUrl = (url?: string): string | undefined => {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    if (!ALLOWED_URL_PROTOCOLS.includes(parsed.protocol)) return undefined;
+    if (parsed.hostname === 'localhost' || /^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.)/.test(parsed.hostname)) return undefined;
+    return url;
+  } catch {
+    return undefined;
+  }
+};
+
 export const sendDirect: RequestHandler = async (req, res, next) => {
   try {
     const { userId, title, body, event, priority, url } = req.body;
     if (!userId || !title || !body || !event) {
       throw new ApiError(400, 'Missing required fields: userId, title, body, event');
     }
-    const notification = await notifyService.createDirect(userId, { title, body, event, priority, url });
+    const safeUrl = validateNotificationUrl(url);
+    const notification = await notifyService.createDirect(userId, { title, body, event, priority, url: safeUrl });
     res.json({ data: notification });
   } catch (err) { next(err); }
 };

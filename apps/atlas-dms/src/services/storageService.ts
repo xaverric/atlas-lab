@@ -29,11 +29,18 @@ export const getPresignedDownloadUrl = async (key: string, filename: string): Pr
   return getSignedUrl(s3Public, command, { expiresIn: 300 });
 };
 
+const DANGEROUS_EXTENSIONS = new Set(['.html', '.htm', '.svg', '.xml', '.xhtml', '.xsl']);
+
 export const getPresignedInlineUrl = async (key: string, filename: string): Promise<string> => {
+  const ext = filename.toLowerCase().slice(filename.lastIndexOf('.'));
+  const disposition = DANGEROUS_EXTENSIONS.has(ext)
+    ? `attachment; filename="${filename}"`
+    : `inline; filename="${filename}"`;
+
   const command = new GetObjectCommand({
     Bucket: bucket,
     Key: key,
-    ResponseContentDisposition: `inline; filename="${filename}"`,
+    ResponseContentDisposition: disposition,
   });
 
   return getSignedUrl(s3Public, command, { expiresIn: 300 });

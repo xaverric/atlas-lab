@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import multer from 'multer';
-import { validate } from '@atlas/server-common';
+import { validate, stripHtml } from '@atlas/server-common';
 import { paginationSchema, objectIdSchema } from '@atlas/core';
 import { auth } from '../middleware/auth.js';
 import * as documentController from '../controllers/documentController.js';
@@ -22,9 +22,11 @@ const listQuerySchema = paginationSchema.extend({
 
 const idParamSchema = z.object({ id: objectIdSchema });
 
+const safeText = z.string().transform(stripHtml);
+
 const updateBodySchema = z.object({
-  name: z.string().min(1).optional(),
-  tags: z.array(z.string()).optional(),
+  name: safeText.pipe(z.string().min(1)).optional(),
+  tags: z.array(safeText).optional(),
   folderId: z.string().nullable().optional(),
 }).refine((d) => Object.keys(d).length > 0, { message: 'At least one field required' });
 

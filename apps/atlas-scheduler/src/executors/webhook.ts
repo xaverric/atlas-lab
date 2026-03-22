@@ -2,6 +2,22 @@ import type { Executor, ExecutionResult, EvaluationResult, ExecutionContext } fr
 
 const MAX_BODY = 50_000;
 
+const BLOCKED_HOST_PATTERNS = [
+  /^localhost$/i, /^127\./, /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./,
+  /^169\.254\./, /^0\.0\.0\.0$/, /^::1$/, /^\[::1\]$/,
+  /^keycloak/i, /^mongodb/i, /^redis/i, /^minio/i, /^qdrant/i, /^ollama/i,
+  /^atlas-/i, /^signal-cli/i, /^n8n/i,
+];
+
+const isBlockedUrl = (rawUrl: string): boolean => {
+  try {
+    const parsed = new URL(rawUrl);
+    return BLOCKED_HOST_PATTERNS.some((p) => p.test(parsed.hostname));
+  } catch {
+    return true;
+  }
+};
+
 interface EvaluationRule {
   type: 'statusEquals' | 'bodyContains' | 'jsonPathEquals' | 'jsonSchema';
   value: unknown;
@@ -93,6 +109,11 @@ export const webhookExecutor: Executor = {
     } = config as unknown as WebhookConfig;
 
     ctx?.logger.info(`${method} ${url}`);
+
+    if (isBlockedUrl(url)) {
+      ctx?.logger.error(`Blocked SSRF attempt: ${url}`);
+      return { exitCode: 1, error: `URL not allowed: requests to internal/private networks are blocked` };
+    }
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);

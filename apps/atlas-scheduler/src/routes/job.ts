@@ -1,9 +1,12 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { validate } from '@atlas/server-common';
+import { validate, requireRole, stripHtml } from '@atlas/server-common';
 import { paginationSchema, objectIdSchema } from '@atlas/core';
 import { auth } from '../middleware/auth.js';
 import * as jobController from '../controllers/jobController.js';
+
+const DANGEROUS_EXECUTORS = ['javascript', 'shell', 'git'];
+const safeText = z.string().transform(stripHtml);
 
 const router = Router();
 
@@ -82,8 +85,8 @@ const retryPolicySchema = z.object({
 }).optional();
 
 const createJobSchema = z.object({
-  name: z.string().min(1).max(200),
-  description: z.string().max(2000).default(''),
+  name: safeText.pipe(z.string().min(1).max(200)),
+  description: safeText.pipe(z.string().max(2000)).default(''),
   executionType: z.enum(['webhook', 'javascript', 'shell', 'git', 'n8n']),
   enabled: z.boolean().default(true),
   group: z.string().max(50).default(''),
@@ -140,7 +143,18 @@ const idWithNidParamSchema = z.object({ id: objectIdSchema, nid: objectIdSchema 
 
 router.use(auth);
 
-router.post('/', validate(createJobSchema), jobController.create);
+const requireAdminForDangerousExecutors: import('express').RequestHandler = (req, _res, next) => {
+  const execType = req.body?.executionType;
+  if (execType && DANGEROUS_EXECUTORS.includes(execType)) {
+    const roles = req.auth?.realm_access?.roles || [];
+    if (!roles.includes('admin')) {
+      return next(Object.assign(new Error('Only admins can create javascript/shell/git jobs'), { status: 403 }));
+    }
+  }
+  next();
+};
+
+router.post('/', validate(createJobSchema), requireAdminForDangerousExecutors, jobController.create);
 router.get('/', validate(listQuerySchema, 'query'), jobController.list);
 router.get('/:id', validate(idParamSchema, 'params'), jobController.getById);
 router.patch('/:id', validate(idParamSchema, 'params'), validate(updateJobSchema), jobController.update);
