@@ -15,7 +15,7 @@
     "@atlas/server-common": "*",
     "@modelcontextprotocol/sdk": "^1.13.0",
     "cors": "^2.8.5",
-    "express": "^4.21.2",
+    "express": "^5.2.1",
     "helmet": "^8.0.0",
     "zod": "^3.24.0"
   },

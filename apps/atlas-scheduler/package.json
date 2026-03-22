@@ -17,7 +17,7 @@
     "bullmq": "^5.71.0",
     "cors": "^2.8.5",
     "cron-parser": "^5.5.0",
-    "express": "^4.21.2",
+    "express": "^5.2.1",
     "helmet": "^8.0.0",
     "ioredis": "^5.10.1",
     "jsonpath-plus": "^10.4.0",
