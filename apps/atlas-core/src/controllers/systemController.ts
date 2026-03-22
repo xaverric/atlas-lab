@@ -1,6 +1,8 @@
 import type { RequestHandler } from 'express';
 import mongoose from 'mongoose';
 
+const getClientDb = (name: string) => (mongoose.connection as any).client.db(name);
+
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
   const k = 1024;
@@ -29,7 +31,7 @@ export const getStorageStats: RequestHandler = async (_req, res, next) => {
     );
 
     // DMS file sizes from documents collection
-    const dmsDb = mongoose.connection.client.db('atlas-dms');
+    const dmsDb = getClientDb('atlas-dms');
     const fileSizeResult = await dmsDb
       .collection('documents')
       .aggregate([{ $group: { _id: null, total: { $sum: '$size' } } }])
@@ -37,7 +39,7 @@ export const getStorageStats: RequestHandler = async (_req, res, next) => {
     const totalFileSize = fileSizeResult[0]?.total || 0;
 
     // Notes content sizes
-    const notesDb = mongoose.connection.client.db('atlas-notes');
+    const notesDb = getClientDb('atlas-notes');
     const notesSizeResult = await notesDb
       .collection('notes')
       .aggregate([{ $group: { _id: null, total: { $sum: '$contentSize' } } }])
@@ -50,8 +52,8 @@ export const getStorageStats: RequestHandler = async (_req, res, next) => {
       const info = SERVICE_MAP[db.name] || { name: db.name, color: '#acb0be' };
       breakdown.push({
         name: info.name,
-        bytes: db.sizeOnDisk,
-        formatted: formatBytes(db.sizeOnDisk),
+        bytes: db.sizeOnDisk ?? 0,
+        formatted: formatBytes(db.sizeOnDisk ?? 0),
         color: info.color,
       });
     }
@@ -184,7 +186,7 @@ export const getStorageDetail: RequestHandler = async (req, res, next) => {
     const sortOrder = (req.query.sortOrder as string) === 'asc' ? 1 : -1;
 
     if (section === 'uploaded-files' || section === 'uploaded-files-s3-' || section === 'uploaded-files-s3') {
-      const db = mongoose.connection.client.db('atlas-dms');
+      const db = getClientDb('atlas-dms');
       const sortField = sortBy === 'name' ? 'originalName' : sortBy === 'date' ? 'createdAt' : 'size';
       const docs = await db.collection('documents')
         .find({}, { projection: { name: 1, originalName: 1, mimeType: 1, size: 1, createdAt: 1 } })
@@ -195,7 +197,7 @@ export const getStorageDetail: RequestHandler = async (req, res, next) => {
 
       res.json({
         data: {
-          items: docs.map((d) => ({
+          items: docs.map((d: any) => ({
             id: d._id.toString(),
             name: d.originalName || d.name,
             type: d.mimeType || 'file',
@@ -210,7 +212,7 @@ export const getStorageDetail: RequestHandler = async (req, res, next) => {
     }
 
     if (section === 'notes-content') {
-      const db = mongoose.connection.client.db('atlas-notes');
+      const db = getClientDb('atlas-notes');
       const sortField = sortBy === 'name' ? 'title' : sortBy === 'date' ? 'updatedAt' : 'contentSize';
       const notes = await db.collection('notes')
         .find({}, { projection: { title: 1, contentSize: 1, updatedAt: 1 } })
@@ -221,7 +223,7 @@ export const getStorageDetail: RequestHandler = async (req, res, next) => {
 
       res.json({
         data: {
-          items: notes.map((n) => ({
+          items: notes.map((n: any) => ({
             id: n._id.toString(),
             name: n.title || 'Untitled',
             type: 'note',
@@ -235,13 +237,13 @@ export const getStorageDetail: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const dbName = SECTION_DB_MAP[section];
+    const dbName = SECTION_DB_MAP[section as string];
     if (!dbName) {
       res.status(400).json({ error: `Unknown section: ${section}` });
       return;
     }
 
-    const db = mongoose.connection.client.db(dbName);
+    const db = getClientDb(dbName);
     const collections = await db.listCollections().toArray();
     const items: { id: string; name: string; type: string; size: number; sizeFormatted: string; date: string | null }[] = [];
 

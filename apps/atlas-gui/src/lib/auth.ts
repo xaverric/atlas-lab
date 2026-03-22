@@ -56,7 +56,7 @@ export async function loginWithCredentials(username: string, password: string): 
     id_token: tokens.id_token,
     refresh_token: tokens.refresh_token,
     scope: tokens.scope || 'openid profile email',
-    profile: parseJwtPayload(tokens.id_token),
+    profile: parseJwtPayload(tokens.id_token) as any,
     expires_at: Math.floor(Date.now() / 1000) + tokens.expires_in,
   });
 

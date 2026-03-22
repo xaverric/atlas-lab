@@ -72,7 +72,7 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
     if (editor && !editor.isDestroyed) {
       const currentHtml = editor.getHTML();
       if (currentHtml !== content) {
-        editor.commands.setContent(content, false);
+        editor.commands.setContent(content, { emitUpdate: false });
       }
     }
   }, [editor, content]);

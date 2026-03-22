@@ -111,4 +111,17 @@ export const dashboardStore = {
     }));
     write(reordered);
   },
+
+  hasItem(resourceId: string): boolean {
+    return read().some((w) => w.config.jobId === resourceId || w.id === resourceId);
+  },
+
+  addItem(resourceId: string, name: string): DashboardWidget {
+    return dashboardStore.addWidget({ type: 'job', title: name, config: { jobId: resourceId }, size: 'sm' });
+  },
+
+  removeItem(resourceId: string): void {
+    const widget = read().find((w) => w.config.jobId === resourceId);
+    if (widget) dashboardStore.removeWidget(widget.id);
+  },
 };

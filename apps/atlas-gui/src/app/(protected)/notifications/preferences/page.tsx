@@ -23,7 +23,7 @@ interface Rule {
   enabled: boolean;
 }
 
-const CHANNEL_TYPES = [
+const CHANNEL_TYPES: Array<{ value: string; label: string; configField: string | null; placeholder: string; disabled?: boolean }> = [
   { value: 'email', label: 'Email', configField: 'address', placeholder: 'you@example.com' },
   { value: 'telegram', label: 'Telegram', configField: 'chatId', placeholder: 'Chat ID' },
   { value: 'web_push', label: 'Web Push', configField: null, placeholder: '' },

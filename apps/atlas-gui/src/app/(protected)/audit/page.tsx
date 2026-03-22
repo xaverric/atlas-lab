@@ -17,9 +17,9 @@ interface AuditEvent {
   resourceId?: string;
   status: string;
   duration?: number;
-  request?: unknown;
-  result?: unknown;
-  details?: unknown;
+  request?: Record<string, unknown>;
+  result?: Record<string, unknown>;
+  details?: Record<string, unknown>;
   error?: string;
 }
 
