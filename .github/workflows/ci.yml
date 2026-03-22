@@ -39,7 +39,7 @@ jobs:
         run: npx vitest run --reporter=default --reporter=junit --outputFile=test-results/junit.xml
 
       - name: Test Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: always()
         with:
           name: Vitest Results
