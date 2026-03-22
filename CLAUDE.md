@@ -17,9 +17,11 @@ gh run watch <RUN_ID> -R xaverric/atlas-lab
 gh run view <RUN_ID> -R xaverric/atlas-lab --log-failed
 ```
 
-**Before pushing:** Always run `npm run typecheck && npm run test` locally.
+**Before pushing:** Always run `npm run lint && npm run typecheck && npm run test` locally.
 
-**After pushing:** Verify CI + Build workflows pass on GitHub Actions. If they fail, fix immediately before continuing other work.
+**After pushing:** Verify Pipeline workflow passes on GitHub Actions (CI → Build → Security). If it fails, fix immediately before continuing other work.
+
+**Security scans:** After build, Trivy scans all 8 Docker images. Results appear in GitHub Security tab (SARIF) and as downloadable artifacts (SBOM + vulnerability report). Critical vulnerabilities should be fixed immediately.
 
 **Docker Hub images:** `xaverric/atlas-lab-atlas-*:latest` — pushed automatically on every main push.
 

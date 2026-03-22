@@ -15,6 +15,9 @@ concurrency:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
+    permissions:
+      checks: write
+      contents: read
 
   build:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -53,3 +56,93 @@ jobs:
             xaverric/atlas-lab-${{ matrix.service.name }}:latest
           cache-from: type=gha,scope=${{ matrix.service.name }}
           cache-to: type=gha,scope=${{ matrix.service.name }},mode=max
+          sbom: true
+          provenance: true
+
+  security-core:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    uses: ./.github/workflows/security.yml
+    with:
+      image: xaverric/atlas-lab-atlas-core:dev
+      service_name: atlas-core
+    permissions:
+      security-events: write
+      contents: read
+
+  security-dms:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    uses: ./.github/workflows/security.yml
+    with:
+      image: xaverric/atlas-lab-atlas-dms:dev
+      service_name: atlas-dms
+    permissions:
+      security-events: write
+      contents: read
+
+  security-scheduler:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    uses: ./.github/workflows/security.yml
+    with:
+      image: xaverric/atlas-lab-atlas-scheduler:dev
+      service_name: atlas-scheduler
+    permissions:
+      security-events: write
+      contents: read
+
+  security-notify:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    uses: ./.github/workflows/security.yml
+    with:
+      image: xaverric/atlas-lab-atlas-notify:dev
+      service_name: atlas-notify
+    permissions:
+      security-events: write
+      contents: read
+
+  security-notes:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    uses: ./.github/workflows/security.yml
+    with:
+      image: xaverric/atlas-lab-atlas-notes:dev
+      service_name: atlas-notes
+    permissions:
+      security-events: write
+      contents: read
+
+  security-gui:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    uses: ./.github/workflows/security.yml
+    with:
+      image: xaverric/atlas-lab-atlas-gui:dev
+      service_name: atlas-gui
+    permissions:
+      security-events: write
+      contents: read
+
+  security-mcp:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    uses: ./.github/workflows/security.yml
+    with:
+      image: xaverric/atlas-lab-atlas-mcp:dev
+      service_name: atlas-mcp
+    permissions:
+      security-events: write
+      contents: read
+
+  security-tracker:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build
+    uses: ./.github/workflows/security.yml
+    with:
+      image: xaverric/atlas-lab-atlas-tracker:dev
+      service_name: atlas-tracker
+    permissions:
+      security-events: write
+      contents: read

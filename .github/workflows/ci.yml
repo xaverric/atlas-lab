@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       sha_short: ${{ steps.sha.outputs.sha_short }}
+    permissions:
+      checks: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -33,4 +36,20 @@ jobs:
         run: npm run typecheck
 
       - name: Test
-        run: npm run test
+        run: npx vitest run --reporter=default --reporter=junit --outputFile=test-results/junit.xml
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Vitest Results
+          path: test-results/junit.xml
+          reporter: java-junit
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 30
