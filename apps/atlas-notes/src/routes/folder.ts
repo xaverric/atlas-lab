@@ -7,6 +7,7 @@ import * as noteFolderController from '../controllers/noteFolderController.js';
 
 const router = Router();
 
+// eslint-disable-next-line no-control-regex
 const safeName = z.string().min(1).max(255).regex(/^[^<>:"/\\|?*\x00-\x1f]+$/, 'Invalid characters in name').refine((n) => !n.includes('..'), 'Path traversal not allowed');
 
 const createSchema = z.object({

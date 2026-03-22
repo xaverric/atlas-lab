@@ -1,3 +1,4 @@
+/* eslint-disable no-control-regex */
 const HTML_TAG_RE = /<[^>]*>/g;
 const SCRIPT_RE = /javascript:|data:|vbscript:/gi;
 const NULL_BYTE_RE = /\x00/g;

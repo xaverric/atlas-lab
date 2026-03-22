@@ -1,108 +1,85 @@
-import vm from 'node:vm';
+import { execFile } from 'node:child_process';
 import type { Executor, ExecutionResult, ExecutionContext } from './types.js';
 
 const MAX_OUTPUT = 50_000;
+const SANDBOX_IMAGE = 'node:22-alpine';
 
 export const javascriptExecutor: Executor = {
   async execute(config, timeoutMs, ctx?: ExecutionContext): Promise<ExecutionResult> {
-    const { code, env = {} } = config as { code: string; env?: Record<string, string> };
+    const { code } = config as { code: string };
 
-    let stdout = '';
-    const log = (...args: unknown[]) => {
-      const line = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
-      stdout += line + '\n';
-      ctx?.logger.info(line);
-    };
-
-    const console = {
-      log,
-      info: log,
-      warn: (...args: unknown[]) => {
-        const line = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
-        stdout += `[WARN] ${line}\n`;
-        ctx?.logger.warn(line);
-      },
-      error: (...args: unknown[]) => {
-        const line = args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
-        stdout += `[ERROR] ${line}\n`;
-        ctx?.logger.error(line);
-      },
-    };
-
-    const httpFetch = async (url: string, options?: RequestInit) => {
-      ctx?.logger.info(`fetch: ${options?.method || 'GET'} ${url}`);
-      const res = await fetch(url, options);
-      const text = await res.text();
-      let json: unknown;
-      try { json = JSON.parse(text); } catch { json = undefined; }
-      return { status: res.status, ok: res.ok, text, json, headers: Object.fromEntries(res.headers) };
-    };
-
-    const storage = ctx?.storage
-      ? {
-          get: (key: string) => ctx.storage.get(key),
-          set: (key: string, value: unknown) => ctx.storage.set(key, value),
-          remove: (key: string) => ctx.storage.remove(key),
-        }
-      : { get: async () => undefined, set: async () => {}, remove: async () => {} };
-
-    // NOTE: Node.js vm is not a security sandbox. JavaScript execution
-    // is gated behind admin role. Do not expose to untrusted users.
-    const sandbox = {
-      console,
-      env: { ...env },
-      http: { fetch: httpFetch },
-      storage,
-      jobId: ctx?.jobId,
-      runId: ctx?.runId,
-      setTimeout: globalThis.setTimeout,
-      clearTimeout: globalThis.clearTimeout,
-      JSON,
-      Date,
-      Math,
-      Array,
-      Object,
-      String: globalThis.String,
-      Number: globalThis.Number,
-      Boolean: globalThis.Boolean,
-      Map,
-      Set,
-      RegExp,
-      Error,
-      Promise,
-      URL,
-      URLSearchParams,
-      TextEncoder,
-      TextDecoder,
-      __result: undefined as unknown,
-    };
+    ctx?.logger.info('Executing JavaScript in isolated Docker container');
 
     const wrappedCode = `
+      const __log = [];
+      const console = {
+        log: (...a) => __log.push(a.map(x => typeof x === 'object' ? JSON.stringify(x) : String(x)).join(' ')),
+        info: (...a) => __log.push(a.map(x => typeof x === 'object' ? JSON.stringify(x) : String(x)).join(' ')),
+        warn: (...a) => __log.push('[WARN] ' + a.map(x => typeof x === 'object' ? JSON.stringify(x) : String(x)).join(' ')),
+        error: (...a) => __log.push('[ERROR] ' + a.map(x => typeof x === 'object' ? JSON.stringify(x) : String(x)).join(' ')),
+      };
+      const http = {
+        fetch: async (url, opts) => {
+          const r = await fetch(url, opts);
+          const t = await r.text();
+          let j; try { j = JSON.parse(t); } catch {}
+          return { status: r.status, ok: r.ok, text: t, json: j };
+        }
+      };
       (async () => {
         ${code}
-      })().then(r => { __result = r; }).catch(e => { throw e; });
+      })().then(r => {
+        process.stdout.write(JSON.stringify({ stdout: __log.join('\\n'), data: r }));
+      }).catch(e => {
+        process.stdout.write(JSON.stringify({ stdout: __log.join('\\n'), error: e.message || String(e) }));
+        process.exit(1);
+      });
     `;
 
-    ctx?.logger.info('Executing JavaScript code');
+    return new Promise((resolve) => {
+      const timeoutSec = Math.ceil(timeoutMs / 1000);
 
-    try {
-      const context = vm.createContext(sandbox);
-      const script = new vm.Script(wrappedCode);
-      const promise = script.runInContext(context, { timeout: timeoutMs });
-      await promise;
+      const child = execFile('docker', [
+        'run', '--rm',
+        '--network=none',
+        '--memory=128m',
+        '--cpus=0.5',
+        '--read-only',
+        '--no-new-privileges',
+        '--cap-drop=ALL',
+        '--security-opt=no-new-privileges',
+        `--stop-timeout=${timeoutSec}`,
+        SANDBOX_IMAGE,
+        'node', '-e', wrappedCode,
+      ], {
+        timeout: timeoutMs + 5000,
+        maxBuffer: MAX_OUTPUT * 2,
+        env: {},
+      }, (err, stdout, stderr) => {
+        const stdoutStr = stdout.slice(0, MAX_OUTPUT);
+        const stderrStr = stderr.slice(0, MAX_OUTPUT);
 
-      return {
-        stdout: stdout.slice(0, MAX_OUTPUT),
-        data: sandbox.__result,
-      };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      ctx?.logger.error(`Execution error: ${message}`);
-      return {
-        exitCode: 1,
-        stdout: stdout.slice(0, MAX_OUTPUT),
-        error: message,
-      };
-    }
+        if (stderrStr) ctx?.logger.warn(stderrStr);
+
+        try {
+          const result = JSON.parse(stdoutStr);
+          if (result.stdout) ctx?.logger.info(result.stdout);
+          resolve({
+            stdout: result.stdout || '',
+            data: result.data,
+            ...(result.error ? { exitCode: 1, error: result.error } : {}),
+          });
+        } catch {
+          const exitCode = child.exitCode ?? (err ? 1 : 0);
+          ctx?.logger.error(`Container error: ${err?.message || stderrStr || 'unknown'}`);
+          resolve({
+            exitCode,
+            stdout: stdoutStr,
+            stderr: stderrStr,
+            ...(err ? { error: err.message } : {}),
+          });
+        }
+      });
+    });
   },
 };

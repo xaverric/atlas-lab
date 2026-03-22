@@ -14,7 +14,7 @@ const BLOCKED_HOST_PATTERNS = [
 const isBlockedUrl = (rawUrl: string): boolean => {
   try {
     const parsed = new URL(rawUrl);
-    const host = parsed.hostname.replace(/[\[\]]/g, '');
+    const host = parsed.hostname.replace(/[[\]]/g, '');
     if (BLOCKED_HOST_PATTERNS.some((p) => p.test(host))) return true;
     if (parsed.port && ['27017', '6379', '5432', '6333', '11434', '9000', '9001', '8080'].includes(parsed.port)) return true;
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return true;

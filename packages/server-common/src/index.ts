@@ -8,3 +8,4 @@ export { createAuditMiddleware, logAuditEvent, type AuditEvent } from './middlew
 export { resolveOwner } from './middleware/resolve-owner.js';
 export { createPublishNotification } from './services/publish-notification.js';
 export { stripHtml, sanitizeString } from './sanitize.js';
+export { createRateLimiter, apiRateLimiter, authRateLimiter, writeRateLimiter } from './middleware/rate-limit.js';

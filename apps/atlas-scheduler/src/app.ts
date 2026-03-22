@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { errorHandler, createAuditMiddleware } from '@atlas/server-common';
+import { errorHandler, apiRateLimiter, createAuditMiddleware } from '@atlas/server-common';
 import { config } from './config/index.js';
 import routes from './routes/index.js';
 
@@ -11,6 +11,7 @@ export const createApp = () => {
   const app = express();
   app.use(helmet());
   app.use(cors({ origin: config.corsOrigin, credentials: true }));
+  app.use(apiRateLimiter);
   app.use(express.json({ limit: '1mb' }));
   app.use(createAuditMiddleware('atlas-scheduler', auditMongoUri));
   app.use(routes);
