@@ -2,6 +2,39 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## CI/CD verification rules
+
+After every commit and push, verify the CI/CD pipeline:
+
+```bash
+# Check CI status after push
+gh run list -R xaverric/atlas-lab --limit 3
+
+# Watch a specific run
+gh run watch <RUN_ID> -R xaverric/atlas-lab
+
+# If build fails, check logs
+gh run view <RUN_ID> -R xaverric/atlas-lab --log-failed
+```
+
+**Before pushing:** Always run `npm run typecheck && npm run test` locally.
+
+**After pushing:** Verify CI + Build workflows pass on GitHub Actions. If they fail, fix immediately before continuing other work.
+
+**Docker Hub images:** `xaverric/atlas-lab-atlas-*:latest` — pushed automatically on every main push.
+
+**Docker Hub MCP:** Use `mcp__MCP_DOCKER__checkRepositoryTag` to verify images exist on Docker Hub after build.
+
+## Testing
+
+```bash
+npm run test                  # run all tests
+npm run test:watch            # watch mode
+npm run test:coverage         # with coverage report
+```
+
+Vitest workspace with 7 projects. Tests live in `__tests__/` directories next to `src/`. Each backend service has `src/app.ts` (Express app factory) separate from `src/index.ts` (server startup) for testability with supertest.
+
 ## Commands
 
 ```bash
