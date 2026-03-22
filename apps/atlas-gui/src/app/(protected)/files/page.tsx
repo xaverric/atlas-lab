@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Upload, FolderPlus, RefreshCw, Info, Globe, Lock, Folder, Eye,
   Pencil, Trash2, ChevronRight, Home, ArrowUp, ArrowDown, Download,
-  FolderInput,
+  FolderInput, Link2,
 } from 'lucide-react';
 import { Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -28,6 +28,8 @@ interface FolderItem {
   id: string;
   name: string;
   isPublic?: boolean;
+  effectivePublic?: boolean;
+  publicInherited?: boolean;
   publicPermission?: 'view' | 'edit' | 'full';
   docCount?: number;
   totalSize?: number;
@@ -398,7 +400,8 @@ export default function FilesPage() {
   const hasContent = folders.length > 0 || docs.length > 0;
   const hasFilters = filters.search || filters.mimeType || filters.dateFrom || filters.dateTo || filters.tags.length > 0;
   const totalPages = Math.ceil(total / 20);
-  const folderIsPublic = currentFolder?.isPublic ?? false;
+  const folderIsPublic = (currentFolder as any)?.effectivePublic ?? currentFolder?.isPublic ?? false;
+  const folderPublicInherited = (currentFolder as any)?.publicInherited ?? false;
 
   const bc = currentFolder?.breadcrumb || [];
   const parentCrumbs = bc.slice(0, -1);
@@ -552,7 +555,7 @@ export default function FilesPage() {
               <tbody>
                 {/* Folders */}
                 {folders.map((folder) => {
-                  const isFolderPublic = folder.isPublic ?? false;
+                  const isFolderPublic = folder.effectivePublic ?? folder.isPublic ?? false;
                   return (
                     <tr
                       key={`folder-${folder.id}`}
@@ -575,14 +578,15 @@ export default function FilesPage() {
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-1.5">
                           <button
-                            onClick={() => handleToggleFolderPublic(folder.id, !isFolderPublic)}
+                            onClick={() => !folder.publicInherited && handleToggleFolderPublic(folder.id, !isFolderPublic)}
                             className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
+                              folder.publicInherited ? 'text-amber-500 cursor-default' :
                               isFolderPublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-muted'
                             }`}
-                            title={isFolderPublic ? 'Make private' : 'Make public'}
+                            title={folder.publicInherited ? 'Public (inherited from parent)' : isFolderPublic ? 'Make private' : 'Make public'}
                           >
-                            {isFolderPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                            {isFolderPublic ? (folder.publicPermission || 'public') : 'private'}
+                            {folder.publicInherited ? <Link2 className="h-3 w-3" /> : isFolderPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                            {folder.publicInherited ? `${folder.publicPermission || 'public'} (inherited)` : isFolderPublic ? (folder.publicPermission || 'public') : 'private'}
                           </button>
                           {isFolderPublic && (
                             <>
