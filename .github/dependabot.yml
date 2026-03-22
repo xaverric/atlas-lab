@@ -44,6 +44,9 @@ updates:
     labels:
       - dependencies
       - docker
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /apps/atlas-dms
@@ -53,6 +56,9 @@ updates:
     labels:
       - dependencies
       - docker
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /apps/atlas-scheduler
@@ -62,6 +68,9 @@ updates:
     labels:
       - dependencies
       - docker
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /apps/atlas-notify
@@ -71,6 +80,9 @@ updates:
     labels:
       - dependencies
       - docker
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /apps/atlas-notes
@@ -80,6 +92,9 @@ updates:
     labels:
       - dependencies
       - docker
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /apps/atlas-tracker
@@ -89,6 +104,9 @@ updates:
     labels:
       - dependencies
       - docker
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /apps/atlas-mcp
@@ -98,6 +116,9 @@ updates:
     labels:
       - dependencies
       - docker
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: docker
     directory: /apps/atlas-gui
@@ -107,3 +128,6 @@ updates:
     labels:
       - dependencies
       - docker
+    ignore:
+      - dependency-name: node
+        update-types: [version-update:semver-major]

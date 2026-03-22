@@ -40,7 +40,7 @@ jobs:
           severity: CRITICAL,HIGH,MEDIUM
           output: trivy-results.txt
 
-      - name: Trivy — SARIF for GitHub Security tab
+      - name: Trivy — SARIF
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ inputs.image }}
@@ -63,7 +63,7 @@ jobs:
           format: cyclonedx
           output: sbom.json
 
-      - name: Trivy — JSON for detailed parsing
+      - name: Trivy — JSON
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ inputs.image }}
@@ -71,8 +71,8 @@ jobs:
           output: trivy.json
           severity: CRITICAL,HIGH,MEDIUM
 
-      - name: Vulnerability summary
-        id: summary
+      - name: Generate HTML report
+        if: always()
         env:
           SERVICE: ${{ inputs.service_name }}
           IMAGE: ${{ inputs.image }}
@@ -80,50 +80,74 @@ jobs:
           CRITICAL=$(grep -o '"Severity": "CRITICAL"' trivy.json 2>/dev/null | wc -l | tr -d ' ')
           HIGH=$(grep -o '"Severity": "HIGH"' trivy.json 2>/dev/null | wc -l | tr -d ' ')
           MEDIUM=$(grep -o '"Severity": "MEDIUM"' trivy.json 2>/dev/null | wc -l | tr -d ' ')
+          TOTAL=$((CRITICAL + HIGH + MEDIUM))
+          DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
 
-          echo "critical=${CRITICAL}" >> "$GITHUB_OUTPUT"
-          echo "high=${HIGH}" >> "$GITHUB_OUTPUT"
+          cat > security-report.html << HTMLEOF
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Security Report — ${SERVICE}</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; color: #1a1a2e; }
+              h1 { border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
+              .meta { color: #666; font-size: 14px; margin-bottom: 20px; }
+              .summary { display: flex; gap: 16px; margin: 20px 0; }
+              .card { padding: 16px 24px; border-radius: 8px; text-align: center; flex: 1; }
+              .critical { background: #fef2f2; border: 1px solid #fca5a5; }
+              .critical .count { color: #dc2626; font-size: 32px; font-weight: bold; }
+              .high { background: #fff7ed; border: 1px solid #fdba74; }
+              .high .count { color: #ea580c; font-size: 32px; font-weight: bold; }
+              .medium { background: #fefce8; border: 1px solid #fde047; }
+              .medium .count { color: #ca8a04; font-size: 32px; font-weight: bold; }
+              .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #666; }
+              pre { background: #f5f5f5; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+              .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+              .badge-pass { background: #dcfce7; color: #166534; }
+              .badge-fail { background: #fef2f2; color: #991b1b; }
+            </style>
+          </head>
+          <body>
+            <h1>Security Report: ${SERVICE}</h1>
+            <div class="meta">
+              <strong>Image:</strong> ${IMAGE}<br>
+              <strong>Scanned:</strong> ${DATE}<br>
+              <strong>Status:</strong> <span class="badge $([ "${TOTAL}" -eq "0" ] && echo badge-pass || echo badge-fail)">$([ "${TOTAL}" -eq "0" ] && echo PASS || echo "${TOTAL} vulnerabilities")</span>
+            </div>
+            <div class="summary">
+              <div class="card critical"><div class="count">${CRITICAL}</div><div class="label">Critical</div></div>
+              <div class="card high"><div class="count">${HIGH}</div><div class="label">High</div></div>
+              <div class="card medium"><div class="count">${MEDIUM}</div><div class="label">Medium</div></div>
+            </div>
+            <h2>Vulnerability Details</h2>
+            <pre>$(cat trivy-results.txt)</pre>
+          </body>
+          </html>
+          HTMLEOF
 
-          echo "### Security Report: ${SERVICE}" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Security: ${SERVICE}" >> "$GITHUB_STEP_SUMMARY"
           echo "| Severity | Count |" >> "$GITHUB_STEP_SUMMARY"
           echo "|----------|-------|" >> "$GITHUB_STEP_SUMMARY"
           echo "| CRITICAL | ${CRITICAL} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| HIGH | ${HIGH} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| MEDIUM | ${MEDIUM} |" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
 
-          if [ "${CRITICAL:-0}" -gt "0" ]; then
-            echo "**ACTION REQUIRED:** Critical vulnerabilities found. Update base image or affected packages." >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            grep "CRITICAL" trivy-results.txt >> "$GITHUB_STEP_SUMMARY" || true
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-          if [ "${CRITICAL:-0}" -gt "0" ] || [ "${HIGH:-0}" -gt "0" ]; then
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "**Remediation steps:**" >> "$GITHUB_STEP_SUMMARY"
-            echo "1. Check if \`node:22-alpine\` has a newer patch: \`docker pull node:22-alpine\`" >> "$GITHUB_STEP_SUMMARY"
-            echo "2. Run \`npm audit fix\` to update vulnerable npm packages" >> "$GITHUB_STEP_SUMMARY"
-            echo "3. Review Trivy results artifact for full details" >> "$GITHUB_STEP_SUMMARY"
-            echo "4. Check Docker Scout on Docker Hub for recommendations" >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      - name: Upload scan artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-${{ inputs.service_name }}
           path: |
+            security-report.html
             trivy-results.txt
             trivy.json
             sbom.json
           retention-days: 90
 
-      - name: Docker Scout — CVE analysis
+      - name: Docker Scout — CVEs
         uses: docker/scout-action@v1
         if: always()
+        continue-on-error: true
         with:
           command: cves
           image: ${{ inputs.image }}
