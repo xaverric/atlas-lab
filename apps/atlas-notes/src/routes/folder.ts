@@ -7,13 +7,15 @@ import * as noteFolderController from '../controllers/noteFolderController.js';
 
 const router = Router();
 
+const safeName = z.string().min(1).max(255).regex(/^[^<>:"/\\|?*\x00-\x1f]+$/, 'Invalid characters in name').refine((n) => !n.includes('..'), 'Path traversal not allowed');
+
 const createSchema = z.object({
-  name: z.string().min(1).max(255),
+  name: safeName,
   parentId: objectIdSchema.nullable().optional(),
 });
 
 const updateSchema = z.object({
-  name: z.string().min(1).max(255).optional(),
+  name: safeName.optional(),
   parentId: objectIdSchema.nullable().optional(),
   visibility: z.enum(['private', 'public']).optional(),
   aiAccessible: z.boolean().optional(),
