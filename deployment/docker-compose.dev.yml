@@ -105,6 +105,7 @@ services:
     volumes:
       - ..:/app
       - app-node-modules:/app/node_modules
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       MONGO_URI: mongodb://mongodb:27017/atlas-scheduler
       KEYCLOAK_ISSUER: http://keycloak:8080/realms/atlas

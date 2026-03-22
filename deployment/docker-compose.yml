@@ -114,6 +114,8 @@ services:
 
   atlas-scheduler:
     image: xaverric/atlas-lab-atlas-scheduler:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-scheduler?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
