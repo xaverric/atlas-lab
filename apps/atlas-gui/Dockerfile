@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:25-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -22,7 +22,7 @@ ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
 RUN npm -w @atlas/gui run build
 
-FROM node:22-alpine
+FROM node:25-alpine
 
 LABEL org.opencontainers.image.source="https://github.com/xaverric/atlas-lab"
 LABEL org.opencontainers.image.description="Atlas Lab — atlas-gui (Next.js)"
