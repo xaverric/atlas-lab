@@ -1,18 +1,27 @@
-name: Build & Push
+name: Pipeline
 
 on:
   push:
+    branches: [main, 'feature/*']
+    paths-ignore: ['docs/**', '*.md', 'LICENSE']
+  pull_request:
     branches: [main]
-    tags: ['v*']
+    paths-ignore: ['docs/**', '*.md', 'LICENSE']
+
+concurrency:
+  group: pipeline-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
 
   build:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: ci
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         service:
           - { name: atlas-core, dockerfile: apps/atlas-core/Dockerfile }
@@ -25,26 +34,22 @@ jobs:
           - { name: atlas-gui, dockerfile: apps/atlas-gui/Dockerfile }
     steps:
       - uses: actions/checkout@v4
+
       - uses: docker/setup-buildx-action@v3
+
       - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - uses: docker/metadata-action@v5
-        id: meta
-        with:
-          images: xaverric/atlas-lab-${{ matrix.service.name }}
-          tags: |
-            type=sha,prefix=
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+
       - uses: docker/build-push-action@v6
         with:
           context: .
           file: ${{ matrix.service.dockerfile }}
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: |
+            xaverric/atlas-lab-${{ matrix.service.name }}:dev
+            xaverric/atlas-lab-${{ matrix.service.name }}:${{ needs.ci.outputs.sha_short }}
+            xaverric/atlas-lab-${{ matrix.service.name }}:latest
+          cache-from: type=gha,scope=${{ matrix.service.name }}
+          cache-to: type=gha,scope=${{ matrix.service.name }},mode=max

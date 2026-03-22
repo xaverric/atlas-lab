@@ -1,23 +1,36 @@
 name: CI
 
 on:
-  push:
-    branches: [main, 'feature/*']
-  pull_request:
-    branches: [main]
   workflow_call:
+    outputs:
+      sha_short:
+        description: Short commit SHA for tagging
+        value: ${{ jobs.ci.outputs.sha_short }}
 
 jobs:
   ci:
     runs-on: ubuntu-latest
+    outputs:
+      sha_short: ${{ steps.sha.outputs.sha_short }}
     steps:
       - uses: actions/checkout@v4
+
+      - id: sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
       - name: Typecheck
         run: npm run typecheck
+
       - name: Test
         run: npm run test
