@@ -52,7 +52,7 @@
     "recharts": "^3.8.0",
     "showdown": "^2.1.0",
     "sonner": "^1.7.0",
-    "tailwind-merge": "^2.6.0",
+    "tailwind-merge": "^3.5.0",
     "tailwindcss-animate": "^1.0.7",
     "turndown": "^7.2.2"
   },
