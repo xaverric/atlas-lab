@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.31.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ inputs.image }}
           format: table
@@ -31,7 +31,7 @@ jobs:
           output: trivy-results.txt
 
       - name: Run Trivy (SARIF for GitHub Security)
-        uses: aquasecurity/trivy-action@0.31.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ inputs.image }}
           format: sarif
@@ -46,7 +46,7 @@ jobs:
           category: trivy-${{ inputs.service_name }}
 
       - name: Generate SBOM (CycloneDX)
-        uses: aquasecurity/trivy-action@0.31.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ inputs.image }}
           format: cyclonedx
