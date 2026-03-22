@@ -10,7 +10,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigin, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(createAuditMiddleware('atlas-dms', auditMongoUri));
 app.use(routes);
 app.use(errorHandler);

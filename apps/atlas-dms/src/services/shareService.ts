@@ -97,17 +97,19 @@ const resolveShareContent = async (share: any) => {
 };
 
 export const revoke = async (id: string, ownerId: string) => {
-  const share = await shareTokenDao.findByToken(id).catch(() => null);
-  const shareById = share || await shareTokenDao.deleteById(id);
-  if (!shareById) throw new ApiError(404, 'Share token not found');
+  let share = await shareTokenDao.findByToken(id).catch(() => null);
+  if (!share) {
+    share = await shareTokenDao.findById(id);
+  }
+  if (!share) throw new ApiError(404, 'Share token not found');
 
-  if ((shareById as any).type === 'folder' && (shareById as any).folderId) {
-    const folder = await folderDao.findById((shareById as any).folderId.toString());
+  if ((share as any).type === 'folder' && (share as any).folderId) {
+    const folder = await folderDao.findById((share as any).folderId.toString());
     if (folder && folder.ownerId !== ownerId) throw new ApiError(403, 'Access denied');
-  } else if ((shareById as any).documentId) {
-    const doc = await documentDao.findById((shareById as any).documentId.toString());
+  } else if ((share as any).documentId) {
+    const doc = await documentDao.findById((share as any).documentId.toString());
     if (doc && doc.ownerId !== ownerId) throw new ApiError(403, 'Access denied');
   }
 
-  await shareTokenDao.deleteById((shareById as any).id || id);
+  await shareTokenDao.deleteById((share as any).id || id);
 };

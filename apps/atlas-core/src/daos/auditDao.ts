@@ -1,3 +1,5 @@
+// Schema must match packages/server-common/src/middleware/audit.ts
+// This DAO provides read-only query access to audit logs written by the audit middleware.
 import mongoose from 'mongoose';
 
 const auditLogSchema = new mongoose.Schema(

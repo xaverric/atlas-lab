@@ -9,9 +9,10 @@ export const config = {
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
     port: Number(process.env.REDIS_PORT) || 6379,
+    password: process.env.REDIS_PASSWORD || undefined,
   },
   notifyUrl: process.env.NOTIFY_URL || 'http://localhost:4003',
-  internalKey: process.env.INTERNAL_KEY || 'dev-internal-key',
+  internalKey: process.env.INTERNAL_KEY || (() => { console.warn('WARNING: INTERNAL_KEY not set, using dev default'); return 'dev-internal-key'; })(),
   maxRunsPerJob: Number(process.env.MAX_RUNS_PER_JOB) || 100,
   allowShellExec: process.env.ALLOW_SHELL_EXEC === 'true',
 };

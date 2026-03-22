@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { auth, internalAuth } from '../middleware/auth.js';
+import { requireRole } from '@atlas/server-common';
 import * as notifyController from '../controllers/notifyController.js';
 import * as preferenceController from '../controllers/preferenceController.js';
 import * as templateController from '../controllers/templateController.js';
@@ -37,8 +38,8 @@ router.delete('/preferences/rules/:id', auth, preferenceController.deleteRule);
 
 // templates
 router.get('/templates', auth, templateController.list);
-router.post('/templates', auth, templateController.create);
-router.patch('/templates/:id', auth, templateController.update);
-router.delete('/templates/:id', auth, templateController.remove);
+router.post('/templates', auth, requireRole('admin'), templateController.create);
+router.patch('/templates/:id', auth, requireRole('admin'), templateController.update);
+router.delete('/templates/:id', auth, requireRole('admin'), templateController.remove);
 
 export default router;

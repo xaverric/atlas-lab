@@ -7,8 +7,14 @@ RUN npm ci --workspace=@atlas/gui
 COPY packages/core/ packages/core/
 COPY apps/atlas-gui/ apps/atlas-gui/
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_DMS_URL
+ARG NEXT_PUBLIC_SCHEDULER_URL
+ARG NEXT_PUBLIC_NOTIFY_URL
+ARG NEXT_PUBLIC_NOTES_URL
+ARG NEXT_PUBLIC_TRACKER_URL
 ARG NEXT_PUBLIC_OIDC_AUTHORITY
 ARG NEXT_PUBLIC_OIDC_CLIENT_ID
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
 RUN npm -w @atlas/gui run build
 
 FROM node:22-alpine
@@ -16,6 +22,7 @@ WORKDIR /app
 COPY --from=builder /app/apps/atlas-gui/.next/standalone ./
 COPY --from=builder /app/apps/atlas-gui/.next/static apps/atlas-gui/.next/static
 COPY --from=builder /app/apps/atlas-gui/public apps/atlas-gui/public
+USER node
 EXPOSE 3000
 ENV PORT=3000
 CMD ["node", "apps/atlas-gui/server.js"]

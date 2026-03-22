@@ -19,7 +19,7 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: your@email.com
+      email: jilek.daniel@gmail.com
       storage: /acme/acme.json
       httpChallenge:
         entryPoint: web

@@ -17,16 +17,6 @@ const resolveBaseUrl = (path: string): string => {
   return API_URL;
 };
 
-const getAuthHeaders = async (): Promise<Record<string, string>> => {
-  const um = getUserManager();
-  const user = await um.getUser();
-  const headers: Record<string, string> = {};
-  if (user?.access_token) {
-    headers['Authorization'] = `Bearer ${user.access_token}`;
-  }
-  return headers;
-};
-
 export const api = async <T = unknown>(path: string, options: RequestInit = {}): Promise<T> => {
   const um = getUserManager();
   let user;
@@ -72,14 +62,30 @@ export const api = async <T = unknown>(path: string, options: RequestInit = {}):
 };
 
 export const uploadFile = async <T = unknown>(path: string, formData: FormData): Promise<T> => {
+  const um = getUserManager();
+  let user;
+  try { user = await um.getUser(); } catch { user = null; }
   const baseUrl = resolveBaseUrl(path);
-  const authHeaders = await getAuthHeaders();
 
-  const res = await fetch(`${baseUrl}${path}`, {
-    method: 'POST',
-    headers: authHeaders,
-    body: formData,
-  });
+  const headers: Record<string, string> = {};
+  if (user?.access_token) {
+    headers['Authorization'] = `Bearer ${user.access_token}`;
+  }
+
+  let res = await fetch(`${baseUrl}${path}`, { method: 'POST', headers, body: formData });
+
+  if (res.status === 401 && user) {
+    try {
+      const refreshed = await um.signinSilent();
+      if (refreshed?.access_token) {
+        headers['Authorization'] = `Bearer ${refreshed.access_token}`;
+        res = await fetch(`${baseUrl}${path}`, { method: 'POST', headers, body: formData });
+      }
+    } catch {
+      await um.signoutRedirect();
+      throw new Error('Session expired');
+    }
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: res.statusText }));

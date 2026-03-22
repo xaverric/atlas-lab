@@ -21,7 +21,8 @@ export const getUserManager = () => {
       userStore: new WebStorageStateStore({ store: window.localStorage }),
     });
   }
-  return userManager!;
+  if (!userManager) throw new Error('UserManager not available — ensure this is called in a browser context');
+  return userManager;
 };
 
 export async function loginWithCredentials(username: string, password: string): Promise<User> {

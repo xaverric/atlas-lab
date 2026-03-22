@@ -1,3 +1,5 @@
+name: atlas-lab
+
 services:
   traefik:
     image: traefik:v3
@@ -25,6 +27,12 @@ services:
       KC_HEALTH_ENABLED: "true"
       KEYCLOAK_ADMIN: ${KC_ADMIN_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.keycloak.rule=Host(`${KC_HOSTNAME}`)"
@@ -47,9 +55,10 @@ services:
   atlas-core:
     image: ghcr.io/${GITHUB_REPO}/atlas-core:latest
     environment:
-      MONGO_URI: mongodb://mongodb:27017/atlas
+      MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
       CORS_ORIGIN: https://${ATLAS_DOMAIN}
+      INTERNAL_KEY: ${INTERNAL_KEY}
       PORT: 4000
     labels:
       - "traefik.enable=true"
@@ -57,20 +66,23 @@ services:
       - "traefik.http.routers.atlas-core.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-core.loadbalancer.server.port=4000"
     depends_on:
-      - mongodb
-      - keycloak
+      mongodb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     restart: unless-stopped
 
   atlas-dms:
     image: ghcr.io/${GITHUB_REPO}/atlas-dms:latest
     environment:
-      MONGO_URI: mongodb://mongodb:27017/atlas-dms
+      MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-dms?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
       CORS_ORIGIN: https://${ATLAS_DOMAIN}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_PUBLIC_URL: https://s3.${ATLAS_DOMAIN}
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      INTERNAL_KEY: ${INTERNAL_KEY}
       PORT: 4001
     labels:
       - "traefik.enable=true"
@@ -78,18 +90,23 @@ services:
       - "traefik.http.routers.atlas-dms.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-dms.loadbalancer.server.port=4001"
     depends_on:
-      - mongodb
-      - keycloak
-      - minio
+      mongodb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      minio:
+        condition: service_started
     restart: unless-stopped
 
   atlas-scheduler:
     image: ghcr.io/${GITHUB_REPO}/atlas-scheduler:latest
     environment:
-      MONGO_URI: mongodb://mongodb:27017/atlas-scheduler
+      MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-scheduler?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
       CORS_ORIGIN: https://${ATLAS_DOMAIN}
       REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      INTERNAL_KEY: ${INTERNAL_KEY}
       PORT: 4002
     labels:
       - "traefik.enable=true"
@@ -97,9 +114,12 @@ services:
       - "traefik.http.routers.atlas-scheduler.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-scheduler.loadbalancer.server.port=4002"
     depends_on:
-      - mongodb
-      - keycloak
-      - redis
+      mongodb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
 
   signal-cli:
@@ -113,10 +133,11 @@ services:
   atlas-notify:
     image: ghcr.io/${GITHUB_REPO}/atlas-notify:latest
     environment:
-      MONGO_URI: mongodb://mongodb:27017/atlas-notify
+      MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-notify?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
       CORS_ORIGIN: https://${ATLAS_DOMAIN}
       REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       INTERNAL_KEY: ${INTERNAL_KEY}
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
@@ -134,19 +155,23 @@ services:
       - "traefik.http.routers.atlas-notify.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-notify.loadbalancer.server.port=4003"
     depends_on:
-      - mongodb
-      - keycloak
-      - redis
+      mongodb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
 
   atlas-notes:
     image: ghcr.io/${GITHUB_REPO}/atlas-notes:latest
     environment:
-      MONGO_URI: mongodb://mongodb:27017/atlas-notes
+      MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-notes?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
       CORS_ORIGIN: https://${ATLAS_DOMAIN}
       QDRANT_URL: http://qdrant:6333
       OLLAMA_URL: http://ollama:11434
+      INTERNAL_KEY: ${INTERNAL_KEY}
       PORT: 4004
     labels:
       - "traefik.enable=true"
@@ -154,29 +179,61 @@ services:
       - "traefik.http.routers.atlas-notes.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-notes.loadbalancer.server.port=4004"
     depends_on:
-      - mongodb
-      - keycloak
-      - qdrant
-      - ollama
+      mongodb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+
+  atlas-tracker:
+    image: ghcr.io/${GITHUB_REPO}/atlas-tracker:latest
+    environment:
+      MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-tracker?authSource=admin
+      KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
+      CORS_ORIGIN: https://${ATLAS_DOMAIN}
+      INTERNAL_KEY: ${INTERNAL_KEY}
+      PORT: 4006
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.atlas-tracker.rule=Host(`tracker.${ATLAS_DOMAIN}`)"
+      - "traefik.http.routers.atlas-tracker.tls.certresolver=letsencrypt"
+      - "traefik.http.services.atlas-tracker.loadbalancer.server.port=4006"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     restart: unless-stopped
 
   qdrant:
     image: qdrant/qdrant
     volumes:
       - qdrant-data:/qdrant/storage
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     restart: unless-stopped
 
   ollama:
     image: ollama/ollama
     volumes:
       - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 4G
     restart: unless-stopped
 
   atlas-mcp:
     image: ghcr.io/${GITHUB_REPO}/atlas-mcp:latest
     environment:
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
-      CORS_ORIGIN: "*"
+      CORS_ORIGIN: "https://${ATLAS_DOMAIN}"
       CORE_URL: http://atlas-core:4000
       DMS_URL: http://atlas-dms:4001
       SCHEDULER_URL: http://atlas-scheduler:4002
@@ -190,8 +247,10 @@ services:
       - "traefik.http.routers.atlas-mcp.tls.certresolver=letsencrypt"
       - "traefik.http.services.atlas-mcp.loadbalancer.server.port=4005"
     depends_on:
-      - keycloak
-      - atlas-core
+      keycloak:
+        condition: service_healthy
+      atlas-core:
+        condition: service_started
     restart: unless-stopped
 
   atlas-gui:
@@ -237,12 +296,26 @@ services:
 
   mongodb:
     image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-atlas}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - mongo-data:/data/db
     restart: unless-stopped
 
   redis:
     image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - redis-data:/data
     restart: unless-stopped
@@ -260,11 +333,13 @@ services:
       - "traefik.http.routers.minio-s3.tls.certresolver=letsencrypt"
       - "traefik.http.routers.minio-s3.service=minio-s3"
       - "traefik.http.services.minio-s3.loadbalancer.server.port=9000"
-      # Console
+      # Console — restricted to private networks
       - "traefik.http.routers.minio-console.rule=Host(`storage.${ATLAS_DOMAIN}`)"
       - "traefik.http.routers.minio-console.tls.certresolver=letsencrypt"
       - "traefik.http.routers.minio-console.service=minio-console"
       - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
+      - "traefik.http.routers.minio-console.middlewares=minio-ipwhitelist"
+      - "traefik.http.middlewares.minio-ipwhitelist.ipallowlist.sourcerange=127.0.0.1/32,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
     volumes:
       - minio-data:/data
     restart: unless-stopped

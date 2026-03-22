@@ -13,6 +13,8 @@ export const create = (data: {
 
 export const findByToken = (token: string) => ShareToken.findOne({ token });
 
+export const findById = (id: string) => ShareToken.findById(id);
+
 export const findByDocumentId = (documentId: string) =>
   ShareToken.find({ documentId }).sort({ createdAt: -1 });
 

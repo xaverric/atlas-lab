@@ -29,18 +29,23 @@ export const createEventBus = (config: EventBusConfig): EventBus => {
           const envelope = JSON.parse(raw) as EventEnvelope;
           for (const s of subscriptions) {
             if (matchPattern(s.pattern, envelope.event)) {
-              Promise.resolve(s.handler(envelope)).catch(() => {});
+              Promise.resolve(s.handler(envelope)).catch((err) => {
+                console.error('[event-bus] Handler error for ' + s.pattern + ':', err);
+              });
             }
           }
-        } catch {}
+        } catch (err) {
+          console.error('[event-bus] Failed to parse event:', err);
+        }
       });
-    } catch {
+    } catch (err) {
+      console.error('[event-bus] Connection failed:', err);
       connected = false;
     }
   };
 
-  pub.on('error', () => { connected = false; });
-  sub.on('error', () => { connected = false; });
+  pub.on('error', (err) => { console.error('[event-bus] Publisher error:', err); connected = false; });
+  sub.on('error', (err) => { console.error('[event-bus] Subscriber error:', err); connected = false; });
   pub.on('ready', () => { connected = true; });
 
   connect();
@@ -57,7 +62,9 @@ export const createEventBus = (config: EventBusConfig): EventBus => {
       };
       try {
         await pub.publish(CHANNEL, JSON.stringify(envelope));
-      } catch {}
+      } catch (err) {
+        console.error('[event-bus] Publish failed:', err);
+      }
     },
 
     subscribe(pattern, handler) {

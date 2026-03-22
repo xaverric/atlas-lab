@@ -1,5 +1,6 @@
 import TurndownService from 'turndown';
 import Showdown from 'showdown';
+import DOMPurify from 'dompurify';
 import { api } from './api';
 
 const turndown = new TurndownService({
@@ -57,7 +58,8 @@ export const htmlToMarkdown = (html: string): string => {
 
 export const markdownToHtml = (md: string): string => {
   if (!md) return '';
-  return showdown.makeHtml(md);
+  const raw = showdown.makeHtml(md);
+  return typeof window !== 'undefined' ? DOMPurify.sanitize(raw) : raw;
 };
 
 const ATTACHMENT_PATTERN = /!\[([^\]]*)\]\(attachment:([a-f0-9]{24})\)/g;

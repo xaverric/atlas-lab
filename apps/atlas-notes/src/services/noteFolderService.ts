@@ -3,6 +3,8 @@ import * as noteFolderDao from '../daos/noteFolderDao.js';
 import * as noteDao from '../daos/noteDao.js';
 import { Note } from '../models/Note.js';
 
+const MAX_FOLDER_DEPTH = 20;
+
 export const create = async (name: string, ownerId: string, parentId?: string | null, isAdmin = false) => {
   if (parentId) {
     const parent = await noteFolderDao.findById(parentId, ownerId, isAdmin);
@@ -29,7 +31,9 @@ export const getById = async (id: string, ownerId: string, isAdmin = false) => {
   let current = folder;
   breadcrumb.unshift({ id: current.id, name: current.name });
 
-  while (current.parentId) {
+  let depth = 0;
+  while (current.parentId && depth < MAX_FOLDER_DEPTH) {
+    depth++;
     const parent = await noteFolderDao.findById(current.parentId.toString());
     if (!parent) break;
     breadcrumb.unshift({ id: parent.id, name: parent.name });
@@ -108,14 +112,16 @@ export const getByIdPublic = async (id: string) => {
   if (!isPublic) throw new ApiError(404, 'Folder not found');
 
   const breadcrumb = [];
-  let current = folder;
-  breadcrumb.unshift({ id: current.id, name: current.name });
+  let current2 = folder;
+  breadcrumb.unshift({ id: current2.id, name: current2.name });
 
-  while (current.parentId) {
-    const parent = await noteFolderDao.findById(current.parentId.toString());
+  let depth2 = 0;
+  while (current2.parentId && depth2 < MAX_FOLDER_DEPTH) {
+    depth2++;
+    const parent = await noteFolderDao.findById(current2.parentId.toString());
     if (!parent) break;
     breadcrumb.unshift({ id: parent.id, name: parent.name });
-    current = parent;
+    current2 = parent;
   }
 
   return { ...folder.toJSON(), breadcrumb };

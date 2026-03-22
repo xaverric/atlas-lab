@@ -9,8 +9,9 @@ export const config = {
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
     port: Number(process.env.REDIS_PORT) || 6379,
+    password: process.env.REDIS_PASSWORD || undefined,
   },
-  internalKey: process.env.INTERNAL_KEY || 'dev-internal-key',
+  internalKey: process.env.INTERNAL_KEY || (() => { console.warn('WARNING: INTERNAL_KEY not set, using dev default'); return 'dev-internal-key'; })(),
   smtp: {
     host: process.env.SMTP_HOST || '',
     port: Number(process.env.SMTP_PORT) || 587,
@@ -23,9 +24,9 @@ export const config = {
     botUsername: process.env.TELEGRAM_BOT_USERNAME || 'AtlasNotifyBot',
   },
   vapid: {
-    publicKey: process.env.VAPID_PUBLIC_KEY || 'BNVWRoH13xKSl0OEpJ4TTCA_nWv6uWjh-ekKU9o-cunsiW-AX06NGW4s9B3XfVHlRrhllc3zEx-mziowbzTtcsw',
-    privateKey: process.env.VAPID_PRIVATE_KEY || 'uwKrOsMRYvGKVo0BFqpdVEFrk6QPprTyS0Qf2jxtopc',
-    subject: process.env.VAPID_SUBJECT || 'mailto:jilek.daniel@gmail.com',
+    publicKey: process.env.VAPID_PUBLIC_KEY || '',
+    privateKey: process.env.VAPID_PRIVATE_KEY || '',
+    subject: process.env.VAPID_SUBJECT || '',
   },
   twilio: {
     accountSid: process.env.TWILIO_ACCOUNT_SID || '',

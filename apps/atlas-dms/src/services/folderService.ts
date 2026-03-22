@@ -1,6 +1,8 @@
 import { ApiError } from '@atlas/core';
 import * as folderDao from '../daos/folderDao.js';
 import * as documentDao from '../daos/documentDao.js';
+
+const MAX_FOLDER_DEPTH = 20;
 import { Document } from '../models/Document.js';
 import { publishNotification } from './publishNotification.js';
 
@@ -42,7 +44,9 @@ export const getById = async (id: string, ownerId: string, isAdmin = false) => {
   let current = folder;
   breadcrumb.unshift({ id: current.id, name: current.name });
 
-  while (current.parentId) {
+  let depth = 0;
+  while (current.parentId && depth < MAX_FOLDER_DEPTH) {
+    depth++;
     const parent = await folderDao.findById(current.parentId.toString());
     if (!parent) break;
     breadcrumb.unshift({ id: parent.id, name: parent.name });
@@ -87,7 +91,9 @@ export const setPublic = async (folderId: string, isPublic: boolean, ownerId: st
 
 export const isPublicFolder = async (folderId: string): Promise<boolean> => {
   let current = await folderDao.findById(folderId);
-  while (current) {
+  let depth = 0;
+  while (current && depth < MAX_FOLDER_DEPTH) {
+    depth++;
     if (current.isPublic) return true;
     if (!current.parentId) return false;
     current = await folderDao.findById(current.parentId.toString());
@@ -99,7 +105,9 @@ export type PublicPermission = 'view' | 'edit' | 'full';
 
 export const resolvePublicPermission = async (folderId: string): Promise<PublicPermission | null> => {
   let current = await folderDao.findById(folderId);
-  while (current) {
+  let depth = 0;
+  while (current && depth < MAX_FOLDER_DEPTH) {
+    depth++;
     if (current.isPublic) return (current as any).publicPermission || 'view';
     if (!current.parentId) return null;
     current = await folderDao.findById(current.parentId.toString());
@@ -176,11 +184,12 @@ export const getPublicFolderTree = async (id: string): Promise<any[]> => {
   return buildSubtree(folder.ownerId, id);
 };
 
-const buildSubtree = async (ownerId: string, parentId: string): Promise<any[]> => {
+const buildSubtree = async (ownerId: string, parentId: string, depth = 0): Promise<any[]> => {
+  if (depth >= MAX_FOLDER_DEPTH) return [];
   const children = await folderDao.listByParent(ownerId, parentId);
   const tree = [];
   for (const child of children) {
-    const subtree = await buildSubtree(ownerId, child.id);
+    const subtree = await buildSubtree(ownerId, child.id, depth + 1);
     tree.push({ ...child.toJSON(), children: subtree });
   }
   return tree;

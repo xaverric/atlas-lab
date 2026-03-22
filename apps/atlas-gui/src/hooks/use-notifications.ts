@@ -15,6 +15,7 @@ interface Notification {
   read: boolean;
   createdAt: string;
   priority?: string;
+  data?: { url?: string; [key: string]: unknown };
 }
 
 export function useNotifications() {

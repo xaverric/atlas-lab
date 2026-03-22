@@ -8,5 +8,5 @@ export const config = {
   },
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   notifyUrl: process.env.NOTIFY_URL || 'http://localhost:4003',
-  internalKey: process.env.INTERNAL_KEY || 'dev-internal-key',
+  internalKey: process.env.INTERNAL_KEY || (() => { console.warn('WARNING: INTERNAL_KEY not set, using dev default'); return 'dev-internal-key'; })(),
 };

@@ -13,6 +13,8 @@ interface NotificationContextValue {
     body?: string;
     read: boolean;
     createdAt: string;
+    priority?: string;
+    data?: { url?: string; [key: string]: unknown };
   }>;
   markRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;

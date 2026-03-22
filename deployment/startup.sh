@@ -106,12 +106,17 @@ fi
 step "Starting databases (keycloak-db, mongodb, redis, minio, qdrant, ollama)"
 $COMPOSE up -d keycloak-db mongodb redis minio qdrant ollama
 
-wait_for_port 27017 "MongoDB"
-wait_for_port 5432  "Keycloak DB"
-wait_for_port 6379  "Redis"
-wait_for_port 9000  "MinIO"
-wait_for_port 6333  "Qdrant"
-wait_for_port 11434 "Ollama"
+if [ "$MODE" != "prod" ]; then
+  wait_for_port 27017 "MongoDB"
+  wait_for_port 5432  "Keycloak DB"
+  wait_for_port 6379  "Redis"
+  wait_for_port 9000  "MinIO"
+  wait_for_port 6333  "Qdrant"
+  wait_for_port 11434 "Ollama"
+else
+  step "Waiting for services to start (using Docker healthchecks)"
+  sleep 10
+fi
 
 step "Starting Keycloak (realm import on first boot — may take up to 3 min)"
 $COMPOSE up -d keycloak

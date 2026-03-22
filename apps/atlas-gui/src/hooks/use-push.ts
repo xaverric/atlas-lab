@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { isSupported, getPermission, requestPushPermission, subscribeToPush, sendSubscriptionToServer } from '@/lib/push';
 
-const VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BNVWRoH13xKSl0OEpJ4TTCA_nWv6uWjh-ekKU9o-cunsiW-AX06NGW4s9B3XfVHlRrhllc3zEx-mziowbzTtcsw';
+const VAPID_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
 
 export function usePush() {
   const [supported, setSupported] = useState(false);

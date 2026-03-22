@@ -67,17 +67,17 @@ export function NotificationBell() {
                   key={n.id}
                   onClick={() => {
                     if (!n.read) markRead(n.id);
-                    const url = (n as any).data?.url;
+                    const url = n.data?.url;
                     if (url) { setOpen(false); window.location.href = url; }
                   }}
-                  className={`w-full text-left px-3 py-2.5 border-b last:border-0 hover:bg-muted/50 transition-colors ${!n.read ? 'bg-muted/30' : ''} ${(n as any).data?.url ? 'cursor-pointer' : ''}`}
+                  className={`w-full text-left px-3 py-2.5 border-b last:border-0 hover:bg-muted/50 transition-colors ${!n.read ? 'bg-muted/30' : ''} ${n.data?.url ? 'cursor-pointer' : ''}`}
                 >
                   <div className="flex items-start gap-2">
                     {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-info" />}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1">
                         <p className="truncate text-sm font-medium">{n.title || n.subject || n.event || 'Notification'}</p>
-                        {(n as any).data?.url && <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground" />}
+                        {n.data?.url && <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground" />}
                       </div>
                       {n.body && <p className="truncate text-xs text-muted-foreground">{n.body}</p>}
                       <p className="mt-0.5 text-xs text-muted-foreground">{timeAgo(n.createdAt)}</p>

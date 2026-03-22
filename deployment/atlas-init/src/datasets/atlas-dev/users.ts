@@ -4,7 +4,7 @@ export const users = [
     email: "jilek.daniel@gmail.com",
     firstName: "Daniel",
     lastName: "Jílek",
-    password: "qiko9hRS",
+    password: process.env.DEV_USER_PASSWORD || 'changeme',
   },
 ];
 

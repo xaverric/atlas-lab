@@ -15,7 +15,7 @@ const noteRevisionSchema = new Schema({
 noteRevisionSchema.index({ noteId: 1, createdAt: -1 });
 noteRevisionSchema.set('toJSON', {
   virtuals: true,
-  transform: (_doc: any, ret: any) => { ret.id = ret._id; delete ret.__v; return ret; },
+  transform: (_doc: any, ret: any) => { ret.id = ret._id; delete ret._id; delete ret.__v; return ret; },
 });
 
 export const NoteRevision = model('NoteRevision', noteRevisionSchema);

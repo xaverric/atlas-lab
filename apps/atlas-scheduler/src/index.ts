@@ -12,7 +12,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigin, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(createAuditMiddleware('atlas-scheduler', auditMongoUri));
 app.use(routes);
 app.use(errorHandler);

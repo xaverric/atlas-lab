@@ -46,6 +46,8 @@ export const javascriptExecutor: Executor = {
         }
       : { get: async () => undefined, set: async () => {}, remove: async () => {} };
 
+    // NOTE: Node.js vm is not a security sandbox. JavaScript execution
+    // is gated behind admin role. Do not expose to untrusted users.
     const sandbox = {
       console,
       env: { ...env },
@@ -70,7 +72,6 @@ export const javascriptExecutor: Executor = {
       Promise,
       URL,
       URLSearchParams,
-      Buffer,
       TextEncoder,
       TextDecoder,
       __result: undefined as unknown,

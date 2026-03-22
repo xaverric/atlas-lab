@@ -5,3 +5,5 @@ export { requireRole } from './middleware/require-role.js';
 export { connectDB } from './config/db.js';
 export { createLogger } from './config/logger.js';
 export { createAuditMiddleware, logAuditEvent, type AuditEvent } from './middleware/audit.js';
+export { resolveOwner } from './middleware/resolve-owner.js';
+export { createPublishNotification } from './services/publish-notification.js';
