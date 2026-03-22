@@ -8,3 +8,11 @@ dist/
 .DS_Store
 .turbo
 coverage/
+test-results/
+
+# AI/agent tooling — local only
+.claude/
+.agents/
+.superpowers/
+__pycache__/
+*.pyc

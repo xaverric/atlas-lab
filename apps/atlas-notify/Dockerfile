@@ -1,4 +1,7 @@
 FROM node:22-alpine
+LABEL org.opencontainers.image.source="https://github.com/xaverric/atlas-lab"
+LABEL org.opencontainers.image.description="Atlas Lab — atlas-notify"
+LABEL org.opencontainers.image.vendor="xaverric"
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/core/package.json packages/core/

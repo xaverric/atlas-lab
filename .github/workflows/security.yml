@@ -31,7 +31,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Run Trivy vulnerability scanner
+      - name: Trivy — vulnerability table
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ inputs.image }}
@@ -40,7 +40,7 @@ jobs:
           severity: CRITICAL,HIGH,MEDIUM
           output: trivy-results.txt
 
-      - name: Run Trivy (SARIF for GitHub Security)
+      - name: Trivy — SARIF for GitHub Security tab
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ inputs.image }}
@@ -48,7 +48,7 @@ jobs:
           output: trivy.sarif
           severity: CRITICAL,HIGH,MEDIUM
 
-      - name: Upload Trivy SARIF to GitHub Security
+      - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         continue-on-error: true
@@ -56,25 +56,58 @@ jobs:
           sarif_file: trivy.sarif
           category: trivy-${{ inputs.service_name }}
 
-      - name: Generate SBOM (CycloneDX)
+      - name: Trivy — SBOM (CycloneDX)
         uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ inputs.image }}
           format: cyclonedx
           output: sbom.json
 
-      - name: Check for critical vulnerabilities
-        id: critical
+      - name: Trivy — JSON for detailed parsing
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          image-ref: ${{ inputs.image }}
+          format: json
+          output: trivy.json
+          severity: CRITICAL,HIGH,MEDIUM
+
+      - name: Vulnerability summary
+        id: summary
         env:
           SERVICE: ${{ inputs.service_name }}
+          IMAGE: ${{ inputs.image }}
         run: |
-          CRITICAL_COUNT=$(grep -c "CRITICAL" trivy-results.txt 2>/dev/null || echo "0")
-          echo "count=$CRITICAL_COUNT" >> "$GITHUB_OUTPUT"
-          if [ "$CRITICAL_COUNT" -gt "0" ]; then
-            echo "## CRITICAL vulnerabilities found in ${SERVICE}" >> "$GITHUB_STEP_SUMMARY"
-            cat trivy-results.txt >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "## No critical vulnerabilities in ${SERVICE}" >> "$GITHUB_STEP_SUMMARY"
+          CRITICAL=$(grep -c '"Severity": "CRITICAL"' trivy.json 2>/dev/null || echo "0")
+          HIGH=$(grep -c '"Severity": "HIGH"' trivy.json 2>/dev/null || echo "0")
+          MEDIUM=$(grep -c '"Severity": "MEDIUM"' trivy.json 2>/dev/null || echo "0")
+
+          echo "critical=$CRITICAL" >> "$GITHUB_OUTPUT"
+          echo "high=$HIGH" >> "$GITHUB_OUTPUT"
+
+          echo "### Security Report: ${SERVICE}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Severity | Count |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|----------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| CRITICAL | ${CRITICAL} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| HIGH | ${HIGH} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| MEDIUM | ${MEDIUM} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$CRITICAL" -gt "0" ]; then
+            echo "**ACTION REQUIRED:** Critical vulnerabilities found. Update base image or affected packages." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            grep "CRITICAL" trivy-results.txt >> "$GITHUB_STEP_SUMMARY" || true
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "$CRITICAL" -gt "0" ] || [ "$HIGH" -gt "0" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Remediation steps:**" >> "$GITHUB_STEP_SUMMARY"
+            echo "1. Check if \`node:22-alpine\` has a newer patch: \`docker pull node:22-alpine\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "2. Run \`npm audit fix\` to update vulnerable npm packages" >> "$GITHUB_STEP_SUMMARY"
+            echo "3. Review Trivy results artifact for full details" >> "$GITHUB_STEP_SUMMARY"
+            echo "4. Check Docker Scout on Docker Hub for recommendations" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload scan artifacts
@@ -84,10 +117,11 @@ jobs:
           name: security-${{ inputs.service_name }}
           path: |
             trivy-results.txt
+            trivy.json
             sbom.json
           retention-days: 90
 
-      - name: Docker Scout CVEs
+      - name: Docker Scout — CVE analysis
         uses: docker/scout-action@v1
         if: always()
         with:
@@ -95,3 +129,11 @@ jobs:
           image: ${{ inputs.image }}
           only-severities: critical,high
           summary: true
+
+      - name: Docker Scout — recommendations
+        uses: docker/scout-action@v1
+        if: always()
+        continue-on-error: true
+        with:
+          command: recommendations
+          image: ${{ inputs.image }}
