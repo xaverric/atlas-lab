@@ -3,7 +3,7 @@
 [![Pipeline](https://github.com/xaverric/atlas-lab/actions/workflows/pipeline.yml/badge.svg)](https://github.com/xaverric/atlas-lab/actions/workflows/pipeline.yml)
 [![Nightly](https://github.com/xaverric/atlas-lab/actions/workflows/nightly.yml/badge.svg)](https://github.com/xaverric/atlas-lab/actions/workflows/nightly.yml)
 [![Release](https://github.com/xaverric/atlas-lab/actions/workflows/release.yml/badge.svg)](https://github.com/xaverric/atlas-lab/actions/workflows/release.yml)
-[![Reports](https://img.shields.io/badge/reports-security%20%26%20tests-blue)](https://xaverric.github.io/atlas-lab/)
+[![Security Report](https://img.shields.io/badge/security-report-blue)](https://xaverric.github.io/atlas-lab/)
 
 Personal platform — file storage, notes, job scheduler, notifications, and more. Monorepo with 8 microservices, Next.js frontend, and full Docker infrastructure.
 
