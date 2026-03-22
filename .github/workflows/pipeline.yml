@@ -39,7 +39,7 @@ jobs:
           - { name: atlas-mcp, dockerfile: apps/atlas-mcp/Dockerfile }
           - { name: atlas-gui, dockerfile: apps/atlas-gui/Dockerfile }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: docker/setup-buildx-action@v3
 
