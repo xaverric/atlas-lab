@@ -1,20 +1,10 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import { connectDB, errorHandler, createAuditMiddleware, logAuditEvent } from '@atlas/server-common';
+import { connectDB, logAuditEvent } from '@atlas/server-common';
 import { config } from './config/index.js';
-import routes from './routes/index.js';
 import { ensureCollection } from './services/vectorService.js';
+import { createApp } from './app.js';
 
 const auditMongoUri = process.env.AUDIT_MONGODB_URI || 'mongodb://localhost:27017/atlas-audit';
-const app = express();
-
-app.use(helmet());
-app.use(cors({ origin: config.corsOrigin, credentials: true }));
-app.use(express.json({ limit: '2mb' }));
-app.use(createAuditMiddleware('atlas-notes', auditMongoUri));
-app.use(routes);
-app.use(errorHandler);
+const app = createApp();
 
 const start = async () => {
   await connectDB(config.mongoUri);
@@ -22,14 +12,8 @@ const start = async () => {
   app.listen(config.port, () => {
     console.log(`atlas-notes running on port ${config.port}`);
     logAuditEvent(auditMongoUri, {
-      service: 'atlas-notes',
-      action: 'service.started',
-      category: 'system',
-      details: {
-        version: process.env.APP_VERSION || 'dev',
-        nodeVersion: process.version,
-        uptime: process.uptime(),
-      },
+      service: 'atlas-notes', action: 'service.started', category: 'system',
+      details: { version: process.env.APP_VERSION || 'dev', nodeVersion: process.version, uptime: process.uptime() },
     });
   });
 };

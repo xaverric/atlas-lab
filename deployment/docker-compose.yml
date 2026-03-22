@@ -53,7 +53,7 @@ services:
     restart: unless-stopped
 
   atlas-core:
-    image: ghcr.io/${GITHUB_REPO}/atlas-core:latest
+    image: xaverric/atlas-lab-atlas-core:latest
     environment:
       MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
@@ -73,7 +73,7 @@ services:
     restart: unless-stopped
 
   atlas-dms:
-    image: ghcr.io/${GITHUB_REPO}/atlas-dms:latest
+    image: xaverric/atlas-lab-atlas-dms:latest
     environment:
       MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-dms?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
@@ -99,7 +99,7 @@ services:
     restart: unless-stopped
 
   atlas-scheduler:
-    image: ghcr.io/${GITHUB_REPO}/atlas-scheduler:latest
+    image: xaverric/atlas-lab-atlas-scheduler:latest
     environment:
       MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-scheduler?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
@@ -131,7 +131,7 @@ services:
     restart: unless-stopped
 
   atlas-notify:
-    image: ghcr.io/${GITHUB_REPO}/atlas-notify:latest
+    image: xaverric/atlas-lab-atlas-notify:latest
     environment:
       MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-notify?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
@@ -164,7 +164,7 @@ services:
     restart: unless-stopped
 
   atlas-notes:
-    image: ghcr.io/${GITHUB_REPO}/atlas-notes:latest
+    image: xaverric/atlas-lab-atlas-notes:latest
     environment:
       MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-notes?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
@@ -190,7 +190,7 @@ services:
     restart: unless-stopped
 
   atlas-tracker:
-    image: ghcr.io/${GITHUB_REPO}/atlas-tracker:latest
+    image: xaverric/atlas-lab-atlas-tracker:latest
     environment:
       MONGO_URI: mongodb://${MONGO_USER:-atlas}:${MONGO_PASSWORD}@mongodb:27017/atlas-tracker?authSource=admin
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
@@ -230,7 +230,7 @@ services:
     restart: unless-stopped
 
   atlas-mcp:
-    image: ghcr.io/${GITHUB_REPO}/atlas-mcp:latest
+    image: xaverric/atlas-lab-atlas-mcp:latest
     environment:
       KEYCLOAK_ISSUER: https://${KC_HOSTNAME}/realms/atlas
       CORS_ORIGIN: "https://${ATLAS_DOMAIN}"
@@ -254,7 +254,7 @@ services:
     restart: unless-stopped
 
   atlas-gui:
-    image: ghcr.io/${GITHUB_REPO}/atlas-gui:latest
+    image: xaverric/atlas-lab-atlas-gui:latest
     environment:
       NEXT_PUBLIC_API_URL: https://api.${ATLAS_DOMAIN}
       NEXT_PUBLIC_DMS_URL: https://dms.${ATLAS_DOMAIN}

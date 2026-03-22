@@ -1,7 +1,11 @@
 {
   "name": "atlas-lab",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "deployment/atlas-init"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "deployment/atlas-init"
+  ],
   "scripts": {
     "dev:core": "npm -w @atlas/server run dev",
     "dev:dms": "npm -w @atlas/dms run dev",
@@ -20,9 +24,17 @@
     "start:local": "bash deployment/startup.sh local",
     "start:local:reset": "bash deployment/startup.sh local --reset",
     "start:prod": "bash deployment/startup.sh prod",
-    "start:prod:reset": "bash deployment/startup.sh prod --reset"
+    "start:prod:reset": "bash deployment/startup.sh prod --reset",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "engines": {
     "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/supertest": "^7.2.0",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.0"
   }
 }
