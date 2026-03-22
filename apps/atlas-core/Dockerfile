@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:25-alpine
 
 LABEL org.opencontainers.image.source="https://github.com/xaverric/atlas-lab"
 LABEL org.opencontainers.image.description="Atlas Lab — atlas-core"
