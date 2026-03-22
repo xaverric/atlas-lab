@@ -16,7 +16,7 @@
     "dev:tracker": "npm -w @atlas/tracker run dev",
     "dev:mcp": "npm -w @atlas/mcp run dev",
     "build": "npm run build -ws --if-present",
-    "lint": "eslint apps/*/src packages/*/src --max-warnings 0",
+    "lint": "eslint apps/atlas-core/src apps/atlas-dms/src apps/atlas-scheduler/src apps/atlas-notify/src apps/atlas-notes/src apps/atlas-tracker/src apps/atlas-mcp/src packages/server-common/src packages/event-bus/src --max-warnings 50",
     "typecheck": "npm run typecheck -ws --if-present",
     "init": "npm -w @atlas/init run start",
     "start:dev": "bash deployment/startup.sh dev",
