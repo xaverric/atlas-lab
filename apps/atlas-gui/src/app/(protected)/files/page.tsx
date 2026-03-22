@@ -400,8 +400,8 @@ export default function FilesPage() {
   const hasContent = folders.length > 0 || docs.length > 0;
   const hasFilters = filters.search || filters.mimeType || filters.dateFrom || filters.dateTo || filters.tags.length > 0;
   const totalPages = Math.ceil(total / 20);
-  const folderIsPublic = (currentFolder as any)?.effectivePublic ?? currentFolder?.isPublic ?? false;
-  const folderPublicInherited = (currentFolder as any)?.publicInherited ?? false;
+  const folderIsPublic = currentFolder?.effectivePublic ?? currentFolder?.isPublic ?? false;
+  const folderPublicInherited = currentFolder?.publicInherited ?? false;
 
   const bc = currentFolder?.breadcrumb || [];
   const parentCrumbs = bc.slice(0, -1);
@@ -449,14 +449,15 @@ export default function FilesPage() {
           {currentFolder && (
             <div className="flex items-center gap-2 shrink-0">
               <button
-                onClick={(e) => { e.stopPropagation(); handleToggleFolderPublic(folderId!, !folderIsPublic); }}
+                onClick={(e) => { e.stopPropagation(); !folderPublicInherited && handleToggleFolderPublic(folderId!, !folderIsPublic); }}
                 className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
+                  folderPublicInherited ? 'text-amber-500 cursor-default' :
                   folderIsPublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-muted'
                 }`}
-                title={folderIsPublic ? 'Make private' : 'Make public'}
+                title={folderPublicInherited ? 'Public (inherited from parent folder)' : folderIsPublic ? 'Make private' : 'Make public'}
               >
-                {folderIsPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                {folderIsPublic ? (currentFolder.publicPermission || 'public') : 'private'}
+                {folderPublicInherited ? <Link2 className="h-3 w-3" /> : folderIsPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                {folderPublicInherited ? `${currentFolder.publicPermission || 'public'} (inherited)` : folderIsPublic ? (currentFolder.publicPermission || 'public') : 'private'}
               </button>
               {folderIsPublic && (
                 <select
