@@ -1,6 +1,7 @@
 import express from 'express';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import cors from 'cors';
+import helmet from 'helmet';
 import { randomUUID } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -67,6 +68,7 @@ const createMcpServer = () => {
 };
 
 const app = express();
+app.use(helmet());
 app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
