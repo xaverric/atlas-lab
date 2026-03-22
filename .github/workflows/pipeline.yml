@@ -8,6 +8,11 @@ on:
     branches: [main]
     paths-ignore: ['docs/**', '*.md', 'LICENSE']
 
+permissions:
+  checks: write
+  contents: read
+  security-events: write
+
 concurrency:
   group: pipeline-${{ github.ref }}
   cancel-in-progress: true
@@ -16,9 +21,6 @@ jobs:
   ci:
     uses: ./.github/workflows/ci.yml
     secrets: inherit
-    permissions:
-      checks: write
-      contents: read
 
   build:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -68,9 +70,6 @@ jobs:
       image: xaverric/atlas-lab-atlas-core:dev
       service_name: atlas-core
     secrets: inherit
-    permissions:
-      security-events: write
-      contents: read
 
   security-dms:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -80,9 +79,6 @@ jobs:
       image: xaverric/atlas-lab-atlas-dms:dev
       service_name: atlas-dms
     secrets: inherit
-    permissions:
-      security-events: write
-      contents: read
 
   security-scheduler:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -92,9 +88,6 @@ jobs:
       image: xaverric/atlas-lab-atlas-scheduler:dev
       service_name: atlas-scheduler
     secrets: inherit
-    permissions:
-      security-events: write
-      contents: read
 
   security-notify:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -104,9 +97,6 @@ jobs:
       image: xaverric/atlas-lab-atlas-notify:dev
       service_name: atlas-notify
     secrets: inherit
-    permissions:
-      security-events: write
-      contents: read
 
   security-notes:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -116,9 +106,6 @@ jobs:
       image: xaverric/atlas-lab-atlas-notes:dev
       service_name: atlas-notes
     secrets: inherit
-    permissions:
-      security-events: write
-      contents: read
 
   security-gui:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -128,9 +115,6 @@ jobs:
       image: xaverric/atlas-lab-atlas-gui:dev
       service_name: atlas-gui
     secrets: inherit
-    permissions:
-      security-events: write
-      contents: read
 
   security-mcp:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -140,9 +124,6 @@ jobs:
       image: xaverric/atlas-lab-atlas-mcp:dev
       service_name: atlas-mcp
     secrets: inherit
-    permissions:
-      security-events: write
-      contents: read
 
   security-tracker:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -152,6 +133,3 @@ jobs:
       image: xaverric/atlas-lab-atlas-tracker:dev
       service_name: atlas-tracker
     secrets: inherit
-    permissions:
-      security-events: write
-      contents: read
