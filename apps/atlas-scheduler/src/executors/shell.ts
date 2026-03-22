@@ -26,7 +26,7 @@ export const shellExecutor: Executor = {
 
     if (cwd) {
       const resolved = path.resolve(cwd);
-      if (!ALLOWED_CWD_ROOTS.some(root => resolved.startsWith(root))) {
+      if (!ALLOWED_CWD_ROOTS.some(root => resolved === root || resolved.startsWith(root + '/'))) {
         ctx?.logger.error(`Shell cwd "${cwd}" is outside allowed directories`);
         return Promise.resolve({ exitCode: 1, error: `Working directory "${cwd}" is not allowed. Allowed: ${ALLOWED_CWD_ROOTS.join(', ')}` });
       }

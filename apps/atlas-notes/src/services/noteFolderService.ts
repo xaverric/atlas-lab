@@ -112,16 +112,16 @@ export const getByIdPublic = async (id: string) => {
   if (!isPublic) throw new ApiError(404, 'Folder not found');
 
   const breadcrumb = [];
-  let current2 = folder;
-  breadcrumb.unshift({ id: current2.id, name: current2.name });
+  let current = folder;
+  breadcrumb.unshift({ id: current.id, name: current.name });
 
-  let depth2 = 0;
-  while (current2.parentId && depth2 < MAX_FOLDER_DEPTH) {
-    depth2++;
-    const parent = await noteFolderDao.findById(current2.parentId.toString());
+  let depth = 0;
+  while (current.parentId && depth < MAX_FOLDER_DEPTH) {
+    depth++;
+    const parent = await noteFolderDao.findById(current.parentId.toString());
     if (!parent) break;
     breadcrumb.unshift({ id: parent.id, name: parent.name });
-    current2 = parent;
+    current = parent;
   }
 
   return { ...folder.toJSON(), breadcrumb };

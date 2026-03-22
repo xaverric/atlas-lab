@@ -13,7 +13,7 @@ let eventBus: EventBus | null = null;
 
 export const setEventBus = (bus: EventBus | null) => { eventBus = bus; };
 
-const connection = { host: config.redis.host, port: config.redis.port };
+const connection = { host: config.redis.host, port: config.redis.port, password: config.redis.password };
 const queue = new Queue('atlas-scheduler', { connection });
 
 const createRunLogger = (runId: string): RunLogger => ({

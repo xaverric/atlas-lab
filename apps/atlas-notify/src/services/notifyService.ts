@@ -6,7 +6,7 @@ import * as preferenceDao from '../daos/preferenceDao.js';
 import { resolve } from './templateResolver.js';
 import * as sseManager from './sseManager.js';
 
-const connection = { host: config.redis.host, port: config.redis.port };
+const connection = { host: config.redis.host, port: config.redis.port, password: config.redis.password };
 const queue = new Queue('atlas-notify', { connection });
 
 export const send = async (userId: string, templateKey: string, variables: Record<string, string> = {}) => {

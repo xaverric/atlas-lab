@@ -3,7 +3,7 @@ import { config } from '../config/index.js';
 import { getDeliverer } from '../channels/registry.js';
 import * as notificationDao from '../daos/notificationDao.js';
 
-const connection = { host: config.redis.host, port: config.redis.port };
+const connection = { host: config.redis.host, port: config.redis.port, password: config.redis.password };
 
 export const worker = new Worker('atlas-notify', async (job) => {
   const { notificationId, deliveryIndex, channelType, channelConfig } = job.data;

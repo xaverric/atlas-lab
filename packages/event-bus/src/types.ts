@@ -11,6 +11,7 @@ export type EventHandler = (envelope: EventEnvelope) => void | Promise<void>;
 export interface EventBusConfig {
   host: string;
   port: number;
+  password?: string;
 }
 
 export interface EventBus {

@@ -1,10 +1,10 @@
 import { ApiError } from '@atlas/core';
 import * as folderDao from '../daos/folderDao.js';
 import * as documentDao from '../daos/documentDao.js';
-
-const MAX_FOLDER_DEPTH = 20;
 import { Document } from '../models/Document.js';
 import { publishNotification } from './publishNotification.js';
+
+const MAX_FOLDER_DEPTH = 20;
 
 export const create = async (name: string, ownerId: string, parentId?: string | null, isAdmin = false) => {
   let folder;

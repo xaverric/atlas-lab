@@ -10,7 +10,7 @@ interface Subscription {
 }
 
 export const createEventBus = (config: EventBusConfig): EventBus => {
-  const connectionOpts = { host: config.host, port: config.port, lazyConnect: true, maxRetriesPerRequest: null };
+  const connectionOpts = { host: config.host, port: config.port, password: config.password, lazyConnect: true, maxRetriesPerRequest: null };
 
   const pub = new Redis({ ...connectionOpts, enableReadyCheck: false });
   const sub = new Redis({ ...connectionOpts, enableReadyCheck: false });
