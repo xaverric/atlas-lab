@@ -71,6 +71,13 @@ services:
       keycloak:
         condition: service_healthy
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
 
   atlas-dms:
     image: xaverric/atlas-lab-atlas-dms:latest
@@ -97,6 +104,13 @@ services:
       minio:
         condition: service_started
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
 
   atlas-scheduler:
     image: xaverric/atlas-lab-atlas-scheduler:latest
@@ -121,6 +135,13 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
 
   signal-cli:
     image: bbernhard/signal-cli-rest-api:latest
@@ -162,6 +183,13 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
 
   atlas-notes:
     image: xaverric/atlas-lab-atlas-notes:latest
@@ -188,6 +216,13 @@ services:
       ollama:
         condition: service_started
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
 
   atlas-tracker:
     image: xaverric/atlas-lab-atlas-tracker:latest
@@ -208,6 +243,13 @@ services:
       keycloak:
         condition: service_healthy
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
 
   qdrant:
     image: qdrant/qdrant
@@ -252,6 +294,13 @@ services:
       atlas-core:
         condition: service_started
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
 
   atlas-gui:
     image: xaverric/atlas-lab-atlas-gui:latest
@@ -272,6 +321,13 @@ services:
     depends_on:
       - atlas-core
     restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
 
   n8n:
     image: n8nio/n8n:latest
