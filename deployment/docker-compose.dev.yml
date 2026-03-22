@@ -100,7 +100,7 @@ services:
   atlas-scheduler:
     image: node:22-alpine
     working_dir: /app
-    command: npm -w @atlas/scheduler run dev
+    command: sh -c "apk add --no-cache docker-cli > /dev/null 2>&1 && npm -w @atlas/scheduler run dev"
     profiles: [backend]
     volumes:
       - ..:/app
