@@ -15,6 +15,7 @@ concurrency:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
+    secrets: inherit
     permissions:
       checks: write
       contents: read
@@ -66,6 +67,7 @@ jobs:
     with:
       image: xaverric/atlas-lab-atlas-core:dev
       service_name: atlas-core
+    secrets: inherit
     permissions:
       security-events: write
       contents: read
@@ -77,6 +79,7 @@ jobs:
     with:
       image: xaverric/atlas-lab-atlas-dms:dev
       service_name: atlas-dms
+    secrets: inherit
     permissions:
       security-events: write
       contents: read
@@ -88,6 +91,7 @@ jobs:
     with:
       image: xaverric/atlas-lab-atlas-scheduler:dev
       service_name: atlas-scheduler
+    secrets: inherit
     permissions:
       security-events: write
       contents: read
@@ -99,6 +103,7 @@ jobs:
     with:
       image: xaverric/atlas-lab-atlas-notify:dev
       service_name: atlas-notify
+    secrets: inherit
     permissions:
       security-events: write
       contents: read
@@ -110,6 +115,7 @@ jobs:
     with:
       image: xaverric/atlas-lab-atlas-notes:dev
       service_name: atlas-notes
+    secrets: inherit
     permissions:
       security-events: write
       contents: read
@@ -121,6 +127,7 @@ jobs:
     with:
       image: xaverric/atlas-lab-atlas-gui:dev
       service_name: atlas-gui
+    secrets: inherit
     permissions:
       security-events: write
       contents: read
@@ -132,6 +139,7 @@ jobs:
     with:
       image: xaverric/atlas-lab-atlas-mcp:dev
       service_name: atlas-mcp
+    secrets: inherit
     permissions:
       security-events: write
       contents: read
@@ -143,6 +151,7 @@ jobs:
     with:
       image: xaverric/atlas-lab-atlas-tracker:dev
       service_name: atlas-tracker
+    secrets: inherit
     permissions:
       security-events: write
       contents: read
