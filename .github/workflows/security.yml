@@ -77,12 +77,12 @@ jobs:
           SERVICE: ${{ inputs.service_name }}
           IMAGE: ${{ inputs.image }}
         run: |
-          CRITICAL=$(grep -c '"Severity": "CRITICAL"' trivy.json 2>/dev/null || echo "0")
-          HIGH=$(grep -c '"Severity": "HIGH"' trivy.json 2>/dev/null || echo "0")
-          MEDIUM=$(grep -c '"Severity": "MEDIUM"' trivy.json 2>/dev/null || echo "0")
+          CRITICAL=$(grep -o '"Severity": "CRITICAL"' trivy.json 2>/dev/null | wc -l | tr -d ' ')
+          HIGH=$(grep -o '"Severity": "HIGH"' trivy.json 2>/dev/null | wc -l | tr -d ' ')
+          MEDIUM=$(grep -o '"Severity": "MEDIUM"' trivy.json 2>/dev/null | wc -l | tr -d ' ')
 
-          echo "critical=$CRITICAL" >> "$GITHUB_OUTPUT"
-          echo "high=$HIGH" >> "$GITHUB_OUTPUT"
+          echo "critical=${CRITICAL}" >> "$GITHUB_OUTPUT"
+          echo "high=${HIGH}" >> "$GITHUB_OUTPUT"
 
           echo "### Security Report: ${SERVICE}" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -93,7 +93,7 @@ jobs:
           echo "| MEDIUM | ${MEDIUM} |" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
-          if [ "$CRITICAL" -gt "0" ]; then
+          if [ "${CRITICAL:-0}" -gt "0" ]; then
             echo "**ACTION REQUIRED:** Critical vulnerabilities found. Update base image or affected packages." >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
@@ -101,7 +101,7 @@ jobs:
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          if [ "$CRITICAL" -gt "0" ] || [ "$HIGH" -gt "0" ]; then
+          if [ "${CRITICAL:-0}" -gt "0" ] || [ "${HIGH:-0}" -gt "0" ]; then
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "**Remediation steps:**" >> "$GITHUB_STEP_SUMMARY"
             echo "1. Check if \`node:22-alpine\` has a newer patch: \`docker pull node:22-alpine\`" >> "$GITHUB_STEP_SUMMARY"
