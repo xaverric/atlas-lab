@@ -64,81 +64,22 @@ jobs:
           sbom: true
           provenance: true
 
-  security-core:
+  security:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [atlas-core, atlas-dms, atlas-scheduler, atlas-notify, atlas-notes, atlas-gui, atlas-mcp, atlas-tracker]
     uses: ./.github/workflows/security.yml
     with:
-      image: xaverric/atlas-lab-atlas-core:dev
-      service_name: atlas-core
-    secrets: inherit
-
-  security-dms:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
-    uses: ./.github/workflows/security.yml
-    with:
-      image: xaverric/atlas-lab-atlas-dms:dev
-      service_name: atlas-dms
-    secrets: inherit
-
-  security-scheduler:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
-    uses: ./.github/workflows/security.yml
-    with:
-      image: xaverric/atlas-lab-atlas-scheduler:dev
-      service_name: atlas-scheduler
-    secrets: inherit
-
-  security-notify:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
-    uses: ./.github/workflows/security.yml
-    with:
-      image: xaverric/atlas-lab-atlas-notify:dev
-      service_name: atlas-notify
-    secrets: inherit
-
-  security-notes:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
-    uses: ./.github/workflows/security.yml
-    with:
-      image: xaverric/atlas-lab-atlas-notes:dev
-      service_name: atlas-notes
-    secrets: inherit
-
-  security-gui:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
-    uses: ./.github/workflows/security.yml
-    with:
-      image: xaverric/atlas-lab-atlas-gui:dev
-      service_name: atlas-gui
-    secrets: inherit
-
-  security-mcp:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
-    uses: ./.github/workflows/security.yml
-    with:
-      image: xaverric/atlas-lab-atlas-mcp:dev
-      service_name: atlas-mcp
-    secrets: inherit
-
-  security-tracker:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
-    uses: ./.github/workflows/security.yml
-    with:
-      image: xaverric/atlas-lab-atlas-tracker:dev
-      service_name: atlas-tracker
+      image: xaverric/atlas-lab-${{ matrix.service }}:dev
+      service_name: ${{ matrix.service }}
     secrets: inherit
 
   publish-reports:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push' && always()
-    needs: [ci, security-core, security-dms, security-scheduler, security-notify, security-notes, security-gui, security-mcp, security-tracker]
+    needs: [ci, security]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
