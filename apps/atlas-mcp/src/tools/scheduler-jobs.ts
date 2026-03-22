@@ -8,11 +8,11 @@ const API = '/api/v1/scheduler/jobs';
 export const registerSchedulerJobTools = (server: McpServer) => {
   server.tool(
     'scheduler_create_job',
-    'Create a scheduled job. Supports webhook, javascript, shell, git, and n8n execution types',
+    'Create a scheduled job. Supports webhook and javascript execution types',
     {
       name: z.string().describe('Job name (1-200 chars)'),
       description: z.string().optional().describe('Job description'),
-      executionType: z.enum(['webhook', 'javascript', 'shell', 'git', 'n8n']).describe('Executor type'),
+      executionType: z.enum(['webhook', 'javascript']).describe('Executor type'),
       enabled: z.boolean().optional().describe('Whether job is enabled (default true)'),
       schedule: z.object({
         type: z.enum(['cron', 'once']).describe('Schedule type'),
@@ -20,7 +20,7 @@ export const registerSchedulerJobTools = (server: McpServer) => {
         timezone: z.string().optional().describe('Timezone (default UTC)'),
         runAt: z.string().optional().describe('ISO datetime (required if type=once)'),
       }).describe('Schedule configuration'),
-      config: z.record(z.unknown()).describe('Executor-specific config (webhook: url/method/headers/body/auth, shell: command/args/env, javascript: code/env, git: operation/repoUrl/branch, n8n: webhookUrl/payload)'),
+      config: z.record(z.unknown()).describe('Executor-specific config (webhook: url/method/headers/body/auth, javascript: code)'),
       timeoutMs: z.number().optional().describe('Timeout in ms (1000-600000, default 30000)'),
       tags: z.array(z.string()).optional().describe('Job tags'),
       retryPolicy: z.object({
@@ -47,7 +47,7 @@ export const registerSchedulerJobTools = (server: McpServer) => {
     {
       page: z.number().optional().describe('Page number'),
       limit: z.number().optional().describe('Items per page'),
-      executionType: z.enum(['webhook', 'javascript', 'shell', 'git', 'n8n']).optional().describe('Filter by type'),
+      executionType: z.enum(['webhook', 'javascript']).optional().describe('Filter by type'),
       enabled: z.boolean().optional().describe('Filter by enabled status'),
       tags: z.string().optional().describe('Comma-separated tags'),
       search: z.string().optional().describe('Search in job names'),

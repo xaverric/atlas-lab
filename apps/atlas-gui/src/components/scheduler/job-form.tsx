@@ -14,7 +14,7 @@ interface NotificationRule { trigger: string; channel: string; config: Record<st
 export interface JobFormData {
   name: string;
   description: string;
-  executionType: 'webhook' | 'javascript' | 'shell' | 'git' | 'n8n';
+  executionType: 'webhook' | 'javascript';
   enabled: boolean;
   group: string;
   tags: string;
@@ -39,19 +39,6 @@ export interface JobFormData {
   webhookEvalRules: EvaluationRule[];
   jsCode: string;
   jsEnv: KeyValuePair[];
-  shellCommand: string;
-  shellArgs: string;
-  shellCwd: string;
-  shellEnv: KeyValuePair[];
-  gitOperation: string;
-  gitRepoUrl: string;
-  gitBranch: string;
-  gitSshPrivateKey: string;
-  gitWorkDir: string;
-  gitCommitMessage: string;
-  gitRemote: string;
-  n8nWebhookUrl: string;
-  n8nPayload: string;
   notifications: NotificationRule[];
 }
 
@@ -63,9 +50,6 @@ const defaultFormData: JobFormData = {
   webhookAuthType: 'none', webhookAuthToken: '', webhookAuthUsername: '', webhookAuthPassword: '',
   webhookAuthHeaderName: '', webhookAuthHeaderValue: '', webhookEvalRules: [],
   jsCode: '', jsEnv: [],
-  shellCommand: '', shellArgs: '', shellCwd: '', shellEnv: [],
-  gitOperation: 'pull', gitRepoUrl: '', gitBranch: 'main', gitSshPrivateKey: '', gitWorkDir: '', gitCommitMessage: '', gitRemote: 'origin',
-  n8nWebhookUrl: '', n8nPayload: '',
   notifications: [],
 };
 
@@ -104,28 +88,6 @@ export const formToPayload = (form: JobFormData) => {
     config = {
       code: form.jsCode,
       ...(form.jsEnv.length > 0 ? { env: kvToRecord(form.jsEnv) } : {}),
-    };
-  } else if (form.executionType === 'shell') {
-    config = {
-      command: form.shellCommand,
-      ...(form.shellArgs ? { args: form.shellArgs.split(/\s+/).filter(Boolean) } : {}),
-      ...(form.shellCwd ? { cwd: form.shellCwd } : {}),
-      ...(form.shellEnv.length > 0 ? { env: kvToRecord(form.shellEnv) } : {}),
-    };
-  } else if (form.executionType === 'git') {
-    config = {
-      operation: form.gitOperation,
-      repoUrl: form.gitRepoUrl,
-      branch: form.gitBranch || 'main',
-      remote: form.gitRemote || 'origin',
-      ...(form.gitSshPrivateKey ? { sshPrivateKey: form.gitSshPrivateKey } : {}),
-      ...(form.gitWorkDir ? { workDir: form.gitWorkDir } : {}),
-      ...(form.gitCommitMessage ? { commitMessage: form.gitCommitMessage } : {}),
-    };
-  } else if (form.executionType === 'n8n') {
-    config = {
-      webhookUrl: form.n8nWebhookUrl,
-      ...(form.n8nPayload ? { payload: JSON.parse(form.n8nPayload) } : {}),
     };
   }
 
@@ -197,23 +159,6 @@ export const jobToFormData = (job: Record<string, unknown>): JobFormData => {
     const env = (config.env || {}) as Record<string, string>;
     base.jsCode = (config.code as string) || '';
     base.jsEnv = Object.entries(env).map(([key, value]) => ({ key, value }));
-  } else if (executionType === 'shell') {
-    const env = (config.env || {}) as Record<string, string>;
-    base.shellCommand = (config.command as string) || '';
-    base.shellArgs = ((config.args || []) as string[]).join(' ');
-    base.shellCwd = (config.cwd as string) || '';
-    base.shellEnv = Object.entries(env).map(([key, value]) => ({ key, value }));
-  } else if (executionType === 'git') {
-    base.gitOperation = (config.operation as string) || 'pull';
-    base.gitRepoUrl = (config.repoUrl as string) || '';
-    base.gitBranch = (config.branch as string) || 'main';
-    base.gitSshPrivateKey = (config.sshPrivateKey as string) || '';
-    base.gitWorkDir = (config.workDir as string) || '';
-    base.gitCommitMessage = (config.commitMessage as string) || '';
-    base.gitRemote = (config.remote as string) || 'origin';
-  } else if (executionType === 'n8n') {
-    base.n8nWebhookUrl = (config.webhookUrl as string) || '';
-    base.n8nPayload = config.payload ? JSON.stringify(config.payload, null, 2) : '';
   }
 
   return base;
@@ -299,9 +244,6 @@ export function JobForm({ initialData, onSubmit, submitLabel, saving }: JobFormP
           {([
             ['webhook', 'Webhook'],
             ['javascript', 'JavaScript'],
-            ['shell', 'Shell'],
-            ['git', 'Git'],
-            ['n8n', 'n8n'],
           ] as const).map(([type, label]) => (
             <button
               key={type}
@@ -392,97 +334,6 @@ export function JobForm({ initialData, onSubmit, submitLabel, saving }: JobFormP
           </div>
         )}
 
-        {form.executionType === 'shell' && (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Command</label>
-              <input value={form.shellCommand} onChange={(e) => set('shellCommand', e.target.value)} placeholder="/usr/bin/curl" required className={input} />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Arguments</label>
-              <input value={form.shellArgs} onChange={(e) => set('shellArgs', e.target.value)} placeholder="-s https://example.com" className={input} />
-              <p className="mt-1 text-xs text-muted-foreground">Space-separated</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Working Directory</label>
-              <input value={form.shellCwd} onChange={(e) => set('shellCwd', e.target.value)} placeholder="/tmp" className={input} />
-            </div>
-            <KeyValueEditor label="Environment Variables" pairs={form.shellEnv} onChange={(p) => set('shellEnv', p)} keyPlaceholder="VAR_NAME" valuePlaceholder="value" />
-            <p className="text-xs text-warning">Shell execution must be enabled on the server (ALLOW_SHELL_EXEC=true)</p>
-          </div>
-        )}
-
-        {form.executionType === 'git' && (
-          <div className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="text-sm font-medium">Operation</label>
-                <select value={form.gitOperation} onChange={(e) => set('gitOperation', e.target.value)} className={input}>
-                  <option value="clone">Clone</option>
-                  <option value="pull">Pull</option>
-                  <option value="push">Push</option>
-                  <option value="sync">Sync (Pull + Push)</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Branch</label>
-                <input value={form.gitBranch} onChange={(e) => set('gitBranch', e.target.value)} placeholder="main" className={input} />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Repository URL</label>
-              <input value={form.gitRepoUrl} onChange={(e) => set('gitRepoUrl', e.target.value)} placeholder="git@github.com:user/repo.git" required className={input} />
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="text-sm font-medium">Working Directory</label>
-                <input value={form.gitWorkDir} onChange={(e) => set('gitWorkDir', e.target.value)} placeholder="/data/repos/my-repo" className={input} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Remote</label>
-                <input value={form.gitRemote} onChange={(e) => set('gitRemote', e.target.value)} placeholder="origin" className={input} />
-              </div>
-            </div>
-            {(form.gitOperation === 'push' || form.gitOperation === 'sync') && (
-              <div>
-                <label className="text-sm font-medium">Commit Message</label>
-                <input value={form.gitCommitMessage} onChange={(e) => set('gitCommitMessage', e.target.value)} placeholder="Automated commit" className={input} />
-              </div>
-            )}
-            <div>
-              <label className="text-sm font-medium">SSH Private Key</label>
-              <textarea
-                value={form.gitSshPrivateKey}
-                onChange={(e) => set('gitSshPrivateKey', e.target.value)}
-                rows={4}
-                className={`${input} font-mono text-xs`}
-                placeholder="-----BEGIN OPENSSH PRIVATE KEY-----"
-              />
-              <p className="mt-1 text-xs text-muted-foreground">Optional. Required for private repos over SSH.</p>
-            </div>
-            <p className="text-xs text-warning">Git execution must be enabled on the server (ALLOW_SHELL_EXEC=true)</p>
-          </div>
-        )}
-
-        {form.executionType === 'n8n' && (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Webhook URL</label>
-              <input value={form.n8nWebhookUrl} onChange={(e) => set('n8nWebhookUrl', e.target.value)} placeholder="https://n8n.example.com/webhook/..." required className={input} />
-              <p className="mt-1 text-xs text-muted-foreground">The n8n webhook trigger URL for your workflow.</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Payload (JSON)</label>
-              <textarea
-                value={form.n8nPayload}
-                onChange={(e) => set('n8nPayload', e.target.value)}
-                rows={4}
-                className={`${input} font-mono`}
-                placeholder='{"key": "value"}'
-              />
-            </div>
-          </div>
-        )}
       </section>
 
       {/* Schedule */}
