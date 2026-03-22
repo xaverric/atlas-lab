@@ -3,10 +3,10 @@ name: Pipeline
 on:
   push:
     branches: [main, 'feature/*']
-    paths-ignore: ['docs/**', '*.md', 'LICENSE']
+    paths-ignore: ['docs/**', 'LICENSE']
   pull_request:
     branches: [main]
-    paths-ignore: ['docs/**', '*.md', 'LICENSE']
+    paths-ignore: ['docs/**', 'LICENSE']
 
 permissions:
   checks: write
