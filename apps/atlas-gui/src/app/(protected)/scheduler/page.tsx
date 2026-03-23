@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { Plus, Play, Trash2, Search, ChevronDown, ChevronRight } from 'lucide-react';
+import { Play, Trash2, Search, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { StatusBadge } from '@/components/scheduler/status-badge';
@@ -186,16 +186,6 @@ export default function SchedulerListPage() {
 
   return (
     <div className="px-6 py-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <Link
-          href="/scheduler/jobs/new"
-          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="h-4 w-4" />
-          New Job
-        </Link>
-      </div>
-
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-48">

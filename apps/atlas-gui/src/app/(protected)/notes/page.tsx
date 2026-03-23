@@ -4,8 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Plus, FolderPlus, Folder, FileText, RefreshCw,
-  Eye, Pencil, Trash2, Globe, Lock, ChevronRight, Home,
+  Folder, FileText,
+  Eye, Pencil, Trash2, Globe, Lock,
   ArrowUp, ArrowDown, Info,
 } from 'lucide-react';
 import { Link as LinkIcon, FolderInput } from 'lucide-react';
@@ -308,25 +308,10 @@ export default function NotesPage() {
 
   const totalPages = Math.ceil(total / 20);
   const displayNotes = searchResults ? searchResults.map((r) => r.note) : notes;
-  const folderIsPublic = currentFolder?.visibility === 'public';
 
   if (noteId) {
-    const bc = currentFolder?.breadcrumb || [];
     return (
-      <div className="flex h-[calc(100vh-4rem)] flex-col">
-        <div className="shrink-0 border-b px-6 py-2">
-          <nav className="flex items-center gap-1 text-sm">
-            <button onClick={() => navigateToFolder(null)} className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
-              <Home className="h-3.5 w-3.5" /> Notes
-            </button>
-            {bc.map((b) => (
-              <span key={b.id} className="flex items-center gap-1">
-                <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                <button onClick={() => navigateToFolder(b.id)} className="text-muted-foreground hover:text-foreground">{b.name}</button>
-              </span>
-            ))}
-          </nav>
-        </div>
+      <div className="flex h-full flex-col">
         <NoteDetail
           noteId={noteId}
           onBack={() => navigateToFolder(folderId)}
@@ -336,82 +321,8 @@ export default function NotesPage() {
     );
   }
 
-  const bc = currentFolder?.breadcrumb || [];
-  const parentCrumbs = bc.slice(0, -1);
-  const currentCrumb = bc.length > 0 ? bc[bc.length - 1] : null;
-
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden">
-      {/* Toolbar */}
-      <div className="shrink-0 flex items-center justify-between gap-4 px-6 py-2.5 border-b">
-        <div className="flex items-center gap-2 min-w-0">
-          <nav className="flex items-center gap-1 text-sm min-w-0">
-            <button onClick={() => navigateToFolder(null)} className={`flex items-center gap-1 shrink-0 ${folderId ? 'text-muted-foreground hover:text-foreground' : 'font-medium text-foreground'}`}>
-              <Home className="h-3.5 w-3.5" />
-            </button>
-            {parentCrumbs.map((b) => (
-              <span key={b.id} className="flex items-center gap-1 shrink-0">
-                <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                <button onClick={() => navigateToFolder(b.id)} className="text-muted-foreground hover:text-foreground">{b.name}</button>
-              </span>
-            ))}
-            {currentCrumb && (
-              <span className="flex items-center gap-1 shrink-0">
-                <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                <span className="font-medium">{currentCrumb.name}</span>
-              </span>
-            )}
-          </nav>
-          {currentFolder && (
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={(e) => { e.stopPropagation(); handleToggleFolderPublic(folderId!, !folderIsPublic); }}
-                className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
-                  folderIsPublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-muted'
-                }`}
-                title={folderIsPublic ? 'Make private' : 'Make public'}
-              >
-                {folderIsPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                {folderIsPublic ? (currentFolder.publicPermission || 'public') : 'private'}
-              </button>
-              {folderIsPublic && (
-                <select
-                  value={currentFolder.publicPermission || 'view'}
-                  onChange={(e) => { e.stopPropagation(); handleFolderPermission(folderId!, e.target.value); }}
-                  className="rounded border bg-background px-1 py-0.5 text-[10px]"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <option value="view">view</option>
-                  <option value="edit">edit</option>
-                  <option value="full">full</option>
-                </select>
-              )}
-            </div>
-          )}
-          {folderMeta && (
-            <span className="text-xs text-muted-foreground shrink-0">
-              {folderMeta.noteCount} notes · {folderMeta.subfolderCount} folders · {formatSize(folderMeta.totalSize)}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {folderId && currentFolder && (
-            <button onClick={() => setInfoModal({ type: 'folder', id: folderId })} className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground" title="Folder info">
-              <Info className="h-4 w-4" />
-            </button>
-          )}
-          <button onClick={reload} className="rounded-md border p-2 text-muted-foreground hover:bg-accent hover:text-foreground" title="Refresh">
-            <RefreshCw className="h-4 w-4" />
-          </button>
-          <button onClick={() => setShowNewFolder(true)} className="flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm hover:bg-accent">
-            <FolderPlus className="h-4 w-4" /> Folder
-          </button>
-          <Link href={`/notes/new${folderId ? `?folderId=${folderId}` : ''}`} className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-            <Plus className="h-4 w-4" /> New Note
-          </Link>
-        </div>
-      </div>
-
+    <div className="flex h-full flex-col overflow-hidden">
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         <SearchBar onSearch={handleSearch} />

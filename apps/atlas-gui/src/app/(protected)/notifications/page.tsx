@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Settings, Check, CheckCheck, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
@@ -32,14 +33,30 @@ interface ListResponse {
   limit: number;
 }
 
+type FilterValue = 'all' | 'unread' | 'read';
+
 export default function NotificationsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [view, setView] = useViewMode('notifications-view', 'list');
-  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [sendingTest, setSendingTest] = useState(false);
   const { markRead, markAllRead } = useNotificationContext();
+
+  const filter: FilterValue = (['all', 'unread', 'read'] as const).includes(
+    searchParams.get('filter') as FilterValue
+  )
+    ? (searchParams.get('filter') as FilterValue)
+    : 'all';
+
+  const setFilter = (value: FilterValue) => {
+    const params = new URLSearchParams();
+    if (value !== 'all') params.set('filter', value);
+    const qs = params.toString();
+    router.push(`/notifications${qs ? `?${qs}` : ''}`);
+  };
 
   const load = async (p: number) => {
     try {
