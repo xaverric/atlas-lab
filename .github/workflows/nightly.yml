@@ -5,6 +5,11 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
+permissions:
+  checks: write
+  contents: read
+  security-events: write
+
 concurrency:
   group: nightly
   cancel-in-progress: true
@@ -12,6 +17,7 @@ concurrency:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
+    secrets: inherit
 
   build:
     needs: ci
@@ -52,3 +58,15 @@ jobs:
             xaverric/atlas-lab-${{ matrix.service.name }}:nightly-${{ steps.date.outputs.tag }}
           cache-from: type=gha,scope=${{ matrix.service.name }}
           cache-to: type=gha,scope=${{ matrix.service.name }},mode=max
+
+  security:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [atlas-core, atlas-dms, atlas-scheduler, atlas-notify, atlas-notes, atlas-gui, atlas-mcp, atlas-tracker]
+    uses: ./.github/workflows/security.yml
+    with:
+      image: xaverric/atlas-lab-${{ matrix.service }}:nightly
+      service_name: ${{ matrix.service }}
+    secrets: inherit
