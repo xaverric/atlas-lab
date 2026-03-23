@@ -76,7 +76,7 @@ function FilesPanel() {
   return (
     <SectionPanel>
       <PanelHeader title="Files">
-        <PanelAction primary title="Upload" onClick={() => router.push('/files')}><Upload /></PanelAction>
+        <PanelAction primary title="Upload" onClick={() => router.push('/files/upload')}><Upload /></PanelAction>
       </PanelHeader>
       <PanelScroll>
         <PanelGroup label="Folders">
