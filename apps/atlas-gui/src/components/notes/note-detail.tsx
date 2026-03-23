@@ -358,26 +358,22 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
             </div>
           </div>
 
-          <div className="px-12">
-            <div className="mx-auto max-w-3xl">
-              <TiptapEditor
-                content={html}
-                onChange={setHtml}
-                isMarkdown={isMarkdown}
-                onToggleMarkdown={toggleMarkdown}
-                onInsertImage={() => setShowFilePicker(true)}
-              >
-                {isMarkdown && (
-                  <CodeMirrorEditor
-                    value={markdownContent}
-                    onChange={setMarkdownContent}
-                    language="markdown"
-                    minHeight="400px"
-                  />
-                )}
-              </TiptapEditor>
-            </div>
-          </div>
+          <TiptapEditor
+            content={html}
+            onChange={setHtml}
+            isMarkdown={isMarkdown}
+            onToggleMarkdown={toggleMarkdown}
+            onInsertImage={() => setShowFilePicker(true)}
+          >
+            {isMarkdown && (
+              <CodeMirrorEditor
+                value={markdownContent}
+                onChange={setMarkdownContent}
+                language="markdown"
+                minHeight="400px"
+              />
+            )}
+          </TiptapEditor>
 
           <div className="px-12 py-4">
             <div className="mx-auto max-w-3xl">

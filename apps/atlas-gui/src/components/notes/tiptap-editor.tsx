@@ -79,15 +79,23 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
 
   return (
     <div>
-      <div className="sticky top-0 z-10 border-b bg-background/92 backdrop-blur-sm">
-        <EditorToolbar
-          editor={editor}
-          isMarkdown={isMarkdown}
-          onToggleMarkdown={onToggleMarkdown}
-          onInsertImage={onInsertImage}
-        />
+      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur-sm px-12">
+        <div className="mx-auto max-w-3xl">
+          <EditorToolbar
+            editor={editor}
+            isMarkdown={isMarkdown}
+            onToggleMarkdown={onToggleMarkdown}
+            onInsertImage={onInsertImage}
+          />
+        </div>
       </div>
-      {isMarkdown && children ? children : <EditorContent editor={editor} />}
+      {isMarkdown && children ? children : (
+        <div className="px-12">
+          <div className="mx-auto max-w-3xl">
+            <EditorContent editor={editor} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

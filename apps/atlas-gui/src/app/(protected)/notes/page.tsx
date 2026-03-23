@@ -349,7 +349,7 @@ export default function NotesPage() {
         )}
 
         {selectedIds.size > 0 && (
-          <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 rounded-xl border bg-muted/50 px-3 py-2 text-sm">
             <span>{selectedIds.size} selected</span>
             <button onClick={handleBulkDelete} className="rounded-md bg-destructive px-3 py-1.5 text-xs text-destructive-foreground">Delete</button>
             <button onClick={() => setSelectedIds(new Set())} className="rounded-md border px-3 py-1.5 text-xs">Clear</button>
@@ -358,25 +358,25 @@ export default function NotesPage() {
 
         {/* Unified list */}
         {(folders.length > 0 || displayNotes.length > 0) ? (
-          <div className="overflow-x-auto rounded-lg border bg-card">
+          <div className="overflow-x-auto rounded-xl border bg-card overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
-                  <th className="px-4 py-3 w-10">
+                <tr className="border-b bg-muted/50 text-left">
+                  <th className="px-4 py-3 w-10 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     <input type="checkbox" checked={displayNotes.length > 0 && displayNotes.every((n) => selectedIds.has(n.id))} onChange={handleSelectAll} className="rounded border-input" />
                   </th>
-                  <th className="px-4 py-3 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('title')}>
+                  <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('title')}>
                     Name {sort.field === 'title' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-3 w-20 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('contentSize')}>
+                  <th className="px-4 py-3 w-20 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('contentSize')}>
                     Size {sort.field === 'contentSize' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-3 w-28">Attachments</th>
-                  <th className="px-4 py-3 w-36">Visibility</th>
-                  <th className="px-4 py-3 w-28 cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('updatedAt')}>
+                  <th className="px-4 py-3 w-28 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Attachments</th>
+                  <th className="px-4 py-3 w-36 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Visibility</th>
+                  <th className="px-4 py-3 w-28 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground" onClick={() => handleSort('updatedAt')}>
                     Updated {sort.field === 'updatedAt' && (sort.order === 'asc' ? <ArrowUp className="inline h-3 w-3 ml-0.5" /> : <ArrowDown className="inline h-3 w-3 ml-0.5" />)}
                   </th>
-                  <th className="px-4 py-3 w-16" />
+                  <th className="px-4 py-3 w-16 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" />
                 </tr>
               </thead>
               <tbody>
