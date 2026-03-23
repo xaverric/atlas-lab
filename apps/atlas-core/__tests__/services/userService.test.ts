@@ -27,5 +27,42 @@ describe('userService', () => {
       await userService.findOrCreateFromToken({ sub: 'kc-2', email: 'new@test.com', name: 'New' } as any);
       expect(userDao.create).toHaveBeenCalledWith({ keycloakId: 'kc-2', email: 'new@test.com', name: 'New' });
     });
+
+    it('falls back to preferred_username when name is missing', async () => {
+      vi.mocked(userDao.findByKeycloakId).mockResolvedValue(null as any);
+      vi.mocked(userDao.create).mockResolvedValue({ id: '3' } as any);
+      await userService.findOrCreateFromToken({ sub: 'kc-3', email: 'u@test.com', preferred_username: 'uname' } as any);
+      expect(userDao.create).toHaveBeenCalledWith({ keycloakId: 'kc-3', email: 'u@test.com', name: 'uname' });
+    });
+
+    it('uses empty strings when email and name are missing', async () => {
+      vi.mocked(userDao.findByKeycloakId).mockResolvedValue(null as any);
+      vi.mocked(userDao.create).mockResolvedValue({ id: '4' } as any);
+      await userService.findOrCreateFromToken({ sub: 'kc-4' } as any);
+      expect(userDao.create).toHaveBeenCalledWith({ keycloakId: 'kc-4', email: '', name: '' });
+    });
+  });
+
+  describe('updatePreferences', () => {
+    it('returns updated user on valid update', async () => {
+      const user = { id: 'u1', keycloakId: 'kc-1', preferences: {} };
+      const updated = { ...user, preferences: { theme: 'dark' } };
+      vi.mocked(userDao.findByKeycloakId).mockResolvedValue(user as any);
+      vi.mocked(userDao.updateById).mockResolvedValue(updated as any);
+
+      const result = await userService.updatePreferences('kc-1', { theme: 'dark' });
+
+      expect(userDao.findByKeycloakId).toHaveBeenCalledWith('kc-1');
+      expect(userDao.updateById).toHaveBeenCalledWith('u1', { preferences: { theme: 'dark' } });
+      expect(result).toEqual(updated);
+    });
+
+    it('throws 404 when user not found', async () => {
+      vi.mocked(userDao.findByKeycloakId).mockResolvedValue(null as any);
+
+      await expect(userService.updatePreferences('nonexistent', { theme: 'light' }))
+        .rejects.toThrow('User not found');
+      expect(userDao.updateById).not.toHaveBeenCalled();
+    });
   });
 });
