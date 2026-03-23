@@ -349,7 +349,7 @@ export default function SchedulerListPage() {
             })}
             {jobs.length === 0 && (
               <tr>
-                <td colSpan={7} className="p-6 text-center text-muted-foreground">No jobs yet</td>
+                <td colSpan={7} className="py-16 text-center text-muted-foreground">No jobs yet</td>
               </tr>
             )}
           </tbody>

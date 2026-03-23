@@ -254,10 +254,10 @@ function NotesPanel() {
   useEffect(() => {
     api<{ data: NoteFolder[] }>('/api/v1/notes/folders')
       .then((res) => setFolders(res.data))
-      .catch(() => {});
+      .catch((err) => console.error('NotesPanel: failed to load folders', err));
     api<{ data: RecentNote[] }>('/api/v1/notes?limit=5&sortBy=updatedAt&sortOrder=desc')
       .then((res) => setRecentNotes(res.data))
-      .catch(() => {});
+      .catch((err) => console.error('NotesPanel: failed to load recent notes', err));
   }, []);
 
   const navigateToFolder = (id: string | null) => {

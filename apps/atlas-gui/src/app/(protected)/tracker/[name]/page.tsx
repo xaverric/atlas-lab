@@ -255,7 +255,7 @@ function DataTab({ endpoint }: { endpoint: TrackerEndpoint }) {
             ))}
             {entries.length === 0 && (
               <tr>
-                <td colSpan={schemaProperties.length + 2} className="p-6 text-center text-muted-foreground">
+                <td colSpan={schemaProperties.length + 2} className="py-16 text-center text-muted-foreground">
                   No data entries yet
                 </td>
               </tr>

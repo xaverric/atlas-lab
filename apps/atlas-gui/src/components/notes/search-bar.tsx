@@ -18,30 +18,28 @@ export function SearchBar({ onSearch }: SearchBarProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={semantic ? 'Semantic search...' : 'Search notes...'}
-          className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm"
-        />
-      </div>
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 rounded-xl border bg-card px-3 py-2">
+      <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={semantic ? 'Semantic search...' : 'Search notes...'}
+        className="w-full bg-transparent py-0.5 text-sm outline-none placeholder:text-muted-foreground"
+      />
       <button
         type="button"
         onClick={() => setSemantic(!semantic)}
         title={semantic ? 'Semantic search (AI)' : 'Text search'}
         className={cn(
-          'rounded-md border p-2 transition-colors',
-          semantic ? 'border-primary bg-primary/10 text-primary' : 'hover:bg-accent',
+          'shrink-0 rounded-md p-1.5 transition-colors',
+          semantic ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
         )}
       >
         <Sparkles className="h-4 w-4" />
       </button>
       <button
         type="submit"
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
       >
         Search
       </button>

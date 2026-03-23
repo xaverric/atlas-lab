@@ -282,7 +282,7 @@ export default function JobDetailPage() {
                 </tr>
               ))}
               {runs.length === 0 && (
-                <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">No runs yet</td></tr>
+                <tr><td colSpan={6} className="py-16 text-center text-muted-foreground">No runs yet</td></tr>
               )}
             </tbody>
           </table>

@@ -206,15 +206,15 @@ export default function AuditPage() {
         <div className="rounded-xl border bg-card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 text-left">
+              <tr className="border-b bg-muted/50 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="w-8 px-4 py-3"></th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Timestamp</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Service</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Action</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">User</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Resource</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Duration</th>
+                <th className="px-4 py-3">Timestamp</th>
+                <th className="px-4 py-3">Service</th>
+                <th className="px-4 py-3">Action</th>
+                <th className="px-4 py-3">User</th>
+                <th className="px-4 py-3">Resource</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Duration</th>
               </tr>
             </thead>
             <tbody>

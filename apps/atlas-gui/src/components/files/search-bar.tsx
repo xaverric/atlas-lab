@@ -66,19 +66,19 @@ export function SearchBar({ filters, onChange, availableTags, className }: Searc
   return (
     <div className={cn('space-y-3', className)}>
       <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative flex-1 flex items-center gap-2 rounded-xl border bg-card px-3">
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             type="text"
             value={localSearch}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search documents..."
-            className="w-full rounded-md border border-input bg-background pl-9 pr-3 py-2 text-sm"
+            className="w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
           />
           {localSearch && (
             <button
               onClick={() => handleSearchChange('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="shrink-0 text-muted-foreground hover:text-foreground"
             >
               <X className="h-3 w-3" />
             </button>

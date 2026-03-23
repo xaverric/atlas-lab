@@ -80,12 +80,12 @@ export default function TrackerListPage() {
         <div className="rounded-xl border bg-card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 text-left">
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Name</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Visibility</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Schema Fields</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Retention</th>
-                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Updated</th>
+              <tr className="border-b bg-muted/50 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Visibility</th>
+                <th className="px-4 py-3">Schema Fields</th>
+                <th className="px-4 py-3">Retention</th>
+                <th className="px-4 py-3">Updated</th>
                 <th className="px-4 py-3 w-16" />
               </tr>
             </thead>
@@ -139,7 +139,7 @@ export default function TrackerListPage() {
               ))}
               {endpoints.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-6 text-center text-muted-foreground">
+                  <td colSpan={6} className="py-16 text-center text-muted-foreground">
                     No tracker endpoints yet. Create one to start collecting data.
                   </td>
                 </tr>

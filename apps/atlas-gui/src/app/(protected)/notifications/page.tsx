@@ -244,7 +244,9 @@ export default function NotificationsPage() {
           ))}
 
           {notifications.length === 0 && (
-            <p className="py-12 text-center text-muted-foreground">No notifications yet</p>
+            <div className="flex items-center justify-center py-16 text-muted-foreground">
+              <p>No notifications yet</p>
+            </div>
           )}
         </div>
 
