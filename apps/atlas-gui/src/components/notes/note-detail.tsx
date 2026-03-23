@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, Trash2, Pencil, X, Link, Clock, Info, Globe, Lock } from 'lucide-react';
 import { ItemInfoModal } from './item-info-modal';
 import { toast } from 'sonner';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import { api } from '@/lib/api';
 import { TiptapEditor } from '@/components/notes/tiptap-editor';
 import { NoteViewer } from '@/components/notes/note-viewer';
@@ -66,6 +67,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
   const [showHistory, setShowHistory] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const editorRef = useRef<{ insertImage: (url: string, docId: string, alt: string) => void; insertLink: (url: string, docId: string, text: string) => void } | null>(null);
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   const toggleMarkdown = () => {
     if (isMarkdown) {
@@ -159,7 +161,8 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Delete this note?')) return;
+    const ok = await confirm({ title: 'Delete note?', description: 'This cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await api(`/api/v1/notes/${noteId}`, { method: 'DELETE' });
       toast.success('Note deleted');
@@ -302,6 +305,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
         {showInfo && (
           <ItemInfoModal type="note" itemId={noteId} onClose={() => setShowInfo(false)} onUpdate={() => loadNote()} />
         )}
+        {ConfirmDialogElement}
       </>
     );
   }
@@ -405,6 +409,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
       {showInfo && (
         <ItemInfoModal type="note" itemId={noteId} onClose={() => setShowInfo(false)} onUpdate={() => loadNote()} />
       )}
+      {ConfirmDialogElement}
     </>
   );
 }

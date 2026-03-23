@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { FileIcon } from '@/components/files/file-icon';
 import { formatSize } from '@/lib/utils';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 
 export interface Attachment {
   documentId: string;
@@ -24,6 +25,7 @@ interface AttachmentPanelProps {
 export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: AttachmentPanelProps) {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loading, setLoading] = useState(true);
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   const loadAttachments = useCallback(async () => {
     try {
@@ -50,7 +52,8 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
   };
 
   const handleRemove = async (att: Attachment) => {
-    if (!confirm(`Remove "${att.filename}" from this note?`)) return;
+    const ok = await confirm({ title: 'Remove attachment?', description: `Remove "${att.filename}" from this note?`, confirmLabel: 'Remove', variant: 'destructive' });
+    if (!ok) return;
     try {
       await api(`/api/v1/notes/${noteId}/attachments/${att.documentId}`, { method: 'DELETE' });
       toast.success('Attachment removed');
@@ -72,6 +75,8 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
   }
 
   return (
+    <>
+    {ConfirmDialogElement}
     <div className="rounded-md border">
       <div className="flex items-center justify-between border-b px-4 py-2.5">
         <div className="flex items-center gap-2 text-sm font-medium">
@@ -139,5 +144,6 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
         </ul>
       )}
     </div>
+    </>
   );
 }

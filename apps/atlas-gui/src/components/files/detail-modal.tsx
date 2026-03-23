@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import { FileIcon, canPreview } from '@/components/files/file-icon';
 import { MoveDialog } from '@/components/files/move-dialog';
 import { formatSize, formatDateTime } from '@/lib/utils';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 
 interface Document {
   id: string;
@@ -48,6 +49,7 @@ export function DetailModal({ documentId, onClose, onUpdate }: DetailModalProps)
   const [editingTags, setEditingTags] = useState(false);
   const [editTags, setEditTags] = useState('');
   const [showFolderPicker, setShowFolderPicker] = useState(false);
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   useEffect(() => {
     api<{ data: Document }>(`/api/v1/files/documents/${documentId}`)
@@ -87,7 +89,8 @@ export function DetailModal({ documentId, onClose, onUpdate }: DetailModalProps)
   };
 
   const handleDelete = async () => {
-    if (!confirm('Delete this document?')) return;
+    const ok = await confirm({ title: 'Delete document?', description: 'This action cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await api(`/api/v1/files/documents/${documentId}`, { method: 'DELETE' });
       toast.success('Document deleted');
@@ -369,6 +372,7 @@ export function DetailModal({ documentId, onClose, onUpdate }: DetailModalProps)
           />
         )}
       </div>
+      {ConfirmDialogElement}
     </div>
   );
 }

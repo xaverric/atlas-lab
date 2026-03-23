@@ -23,6 +23,8 @@ import { UploadModal } from '@/components/files/upload-modal';
 import { DetailModal } from '@/components/files/detail-modal';
 import { FileItemInfoModal } from '@/components/files/item-info-modal';
 import { NoteContextMenu } from '@/components/notes/context-menu';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
+import { usePromptDialog } from '@/components/shared/prompt-dialog';
 
 interface FolderItem {
   id: string;
@@ -86,6 +88,9 @@ export default function FilesPage() {
   const [detailDocId, setDetailDocId] = useState<string | null>(null);
   const [infoModal, setInfoModal] = useState<InfoModalState | null>(null);
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: { icon: any; label: string; action: () => void; destructive?: boolean }[] } | null>(null);
+
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
+  const { prompt, PromptDialogElement } = usePromptDialog();
 
   const [filters, setFilters] = useState({
     search: '',
@@ -250,7 +255,8 @@ export default function FilesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this document?')) return;
+    const ok = await confirm({ title: 'Delete document?', description: 'This action cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await api(`/api/v1/files/documents/${id}`, { method: 'DELETE' });
       toast.success('Document deleted');
@@ -259,7 +265,8 @@ export default function FilesPage() {
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Delete ${selectedIds.size} document(s)?`)) return;
+    const ok = await confirm({ title: `Delete ${selectedIds.size} document(s)?`, description: 'This action cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await api('/api/v1/files/documents/bulk-delete', {
         method: 'POST', body: JSON.stringify({ ids: [...selectedIds] }),
@@ -371,11 +378,11 @@ export default function FilesPage() {
       x: e.clientX, y: e.clientY,
       items: [
         { icon: Eye, label: 'Open', action: () => navigateToFolder(folder.id) },
-        { icon: Pencil, label: 'Rename', action: () => { const name = prompt('Rename folder:', folder.name); if (name?.trim()) handleRenameFolder(folder.id, name.trim()); } },
+        { icon: Pencil, label: 'Rename', action: async () => { const name = await prompt({ title: 'Rename folder', defaultValue: folder.name }); if (name?.trim()) handleRenameFolder(folder.id, name.trim()); } },
         { icon: isFolderPublic ? Lock : Globe, label: isFolderPublic ? 'Make Private' : 'Make Public', action: () => handleToggleFolderPublic(folder.id, !isFolderPublic) },
         ...(isFolderPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => copyFolderLink(folder.id) }] : []),
         { icon: Info, label: 'Info', action: () => setInfoModal({ type: 'folder', id: folder.id }) },
-        { icon: FolderInput, label: 'Move to...', action: () => { const target = prompt('Move to folder ID (or empty for root):'); if (target !== null) { api(`/api/v1/files/folders/${folder.id}`, { method: 'PATCH', body: JSON.stringify({ parentId: target || null }) }).then(() => { toast.success('Moved'); loadFolders(); }).catch(() => toast.error('Failed to move')); } } },
+        { icon: FolderInput, label: 'Move to...', action: async () => { const target = await prompt({ title: 'Move to folder ID', description: 'Leave empty for root.', defaultValue: '', placeholder: 'Folder ID' }); if (target !== null) { api(`/api/v1/files/folders/${folder.id}`, { method: 'PATCH', body: JSON.stringify({ parentId: target || null }) }).then(() => { toast.success('Moved'); loadFolders(); }).catch(() => toast.error('Failed to move')); } } },
         { icon: Trash2, label: 'Delete', action: () => handleDeleteFolder(folder.id), destructive: true },
       ],
     });
@@ -654,6 +661,9 @@ export default function FilesPage() {
           onUpdate={reload}
         />
       )}
+
+      {ConfirmDialogElement}
+      {PromptDialogElement}
     </div>
   );
 }

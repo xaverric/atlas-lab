@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import Link from 'next/link';
 import { Plus, Trash2, Globe, Lock } from 'lucide-react';
 import { toast } from 'sonner';
@@ -33,6 +34,7 @@ function relativeTime(date: string): string {
 export default function TrackerListPage() {
   const [endpoints, setEndpoints] = useState<TrackerEndpoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   const load = useCallback(async () => {
     try {
@@ -48,7 +50,8 @@ export default function TrackerListPage() {
   useEffect(() => { load(); }, [load]);
 
   const handleDelete = async (name: string) => {
-    if (!confirm(`Delete endpoint "${name}"? All stored data will be lost.`)) return;
+    const ok = await confirm({ title: `Delete endpoint "${name}"?`, description: 'All stored data will be lost. This action cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await api(`/api/v1/tracker/endpoints/${name}`, { method: 'DELETE' });
       toast.success('Endpoint deleted');
@@ -61,7 +64,7 @@ export default function TrackerListPage() {
   if (loading) return <p className="text-muted-foreground">Loading...</p>;
 
   return (
-    <div className="px-6 py-5 space-y-4">
+    <>{ConfirmDialogElement}<div className="px-6 py-5 space-y-4">
       <div className="flex items-center justify-between">
         <Link
           href="/tracker/new"
@@ -133,6 +136,6 @@ export default function TrackerListPage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </div></>
   );
 }

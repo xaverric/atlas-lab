@@ -16,6 +16,8 @@ import { SearchBar } from '@/components/notes/search-bar';
 import { NoteDetail } from '@/components/notes/note-detail';
 import { NoteContextMenu } from '@/components/notes/context-menu';
 import { ItemInfoModal } from '@/components/notes/item-info-modal';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
+import { usePromptDialog } from '@/components/shared/prompt-dialog';
 
 interface FolderItem {
   id: string;
@@ -86,6 +88,8 @@ export default function NotesPage() {
   const [sort, setSort] = useState({ field: 'updatedAt', order: 'desc' as 'asc' | 'desc' });
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; items: { icon: any; label: string; action: () => void; destructive?: boolean }[] } | null>(null);
   const [infoModal, setInfoModal] = useState<InfoModalState | null>(null);
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
+  const { prompt, PromptDialogElement } = usePromptDialog();
 
   const loadFolderDetail = useCallback(async () => {
     if (!folderId) { setCurrentFolder(null); return; }
@@ -262,7 +266,8 @@ export default function NotesPage() {
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Delete ${selectedIds.size} note(s)?`)) return;
+    const ok = await confirm({ title: 'Delete notes?', description: `Delete ${selectedIds.size} note(s)? This cannot be undone.`, confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await Promise.all([...selectedIds].map((id) => api(`/api/v1/notes/${id}`, { method: 'DELETE' })));
       toast.success(`${selectedIds.size} note(s) deleted`);
@@ -279,11 +284,11 @@ export default function NotesPage() {
       x: e.clientX, y: e.clientY,
       items: [
         { icon: Eye, label: 'Open', action: () => navigateToFolder(folder.id) },
-        { icon: Pencil, label: 'Rename', action: () => { const name = prompt('Rename folder:', folder.name); if (name?.trim()) handleRenameFolder(folder.id, name.trim()); } },
+        { icon: Pencil, label: 'Rename', action: async () => { const name = await prompt({ title: 'Rename folder', defaultValue: folder.name }); if (name?.trim()) handleRenameFolder(folder.id, name.trim()); } },
         { icon: isPublic ? Lock : Globe, label: isPublic ? 'Make Private' : 'Make Public', action: () => handleToggleFolderPublic(folder.id, !isPublic) },
         ...(isPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => copyFolderLink(folder.id) }] : []),
         { icon: Info, label: 'Info', action: () => setInfoModal({ type: 'folder', id: folder.id }) },
-        { icon: FolderInput, label: 'Move to...', action: () => { const target = prompt('Move to folder ID (or empty for root):'); if (target !== null) { api(`/api/v1/notes/folders/${folder.id}`, { method: 'PATCH', body: JSON.stringify({ parentId: target || null }) }).then(() => { toast.success('Moved'); loadFolders(); }).catch(() => toast.error('Failed to move')); } } },
+        { icon: FolderInput, label: 'Move to...', action: async () => { const target = await prompt({ title: 'Move to folder', description: 'Enter folder ID or leave empty for root', defaultValue: '' }); if (target !== null) { api(`/api/v1/notes/folders/${folder.id}`, { method: 'PATCH', body: JSON.stringify({ parentId: target || null }) }).then(() => { toast.success('Moved'); loadFolders(); }).catch(() => toast.error('Failed to move')); } } },
         { icon: Trash2, label: 'Delete', action: () => handleDeleteFolder(folder.id), destructive: true },
       ],
     });
@@ -296,12 +301,12 @@ export default function NotesPage() {
       x: e.clientX, y: e.clientY,
       items: [
         { icon: Eye, label: 'Open', action: () => navigateToNote(note.id) },
-        { icon: Pencil, label: 'Rename', action: () => { const title = prompt('Rename note:', note.title); if (title?.trim()) { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ title: title.trim() }) }).then(() => { toast.success('Renamed'); loadNotes(page); }).catch(() => toast.error('Failed to rename')); } } },
+        { icon: Pencil, label: 'Rename', action: async () => { const title = await prompt({ title: 'Rename note', defaultValue: note.title }); if (title?.trim()) { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ title: title.trim() }) }).then(() => { toast.success('Renamed'); loadNotes(page); }).catch(() => toast.error('Failed to rename')); } } },
         { icon: note.isPublic ? Lock : Globe, label: note.isPublic ? 'Make Private' : 'Make Public', action: () => handleToggleNotePublic(note.id, !note.isPublic) },
         ...(note.isPublic ? [{ icon: LinkIcon, label: 'Copy Public Link', action: () => copyNoteLink(note.id) }] : []),
         { icon: Info, label: 'Info', action: () => setInfoModal({ type: 'note', id: note.id }) },
-        { icon: FolderInput, label: 'Move to...', action: () => { const target = prompt('Move to folder ID (or empty for root):'); if (target !== null) { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ folderId: target || null }) }).then(() => { toast.success('Moved'); loadNotes(page); }).catch(() => toast.error('Failed to move')); } } },
-        { icon: Trash2, label: 'Delete', action: () => { if (confirm('Delete this note?')) { api(`/api/v1/notes/${note.id}`, { method: 'DELETE' }).then(() => { toast.success('Deleted'); loadNotes(page); }).catch(() => toast.error('Failed')); } }, destructive: true },
+        { icon: FolderInput, label: 'Move to...', action: async () => { const target = await prompt({ title: 'Move to folder', description: 'Enter folder ID or leave empty for root', defaultValue: '' }); if (target !== null) { api(`/api/v1/notes/${note.id}`, { method: 'PATCH', body: JSON.stringify({ folderId: target || null }) }).then(() => { toast.success('Moved'); loadNotes(page); }).catch(() => toast.error('Failed to move')); } } },
+        { icon: Trash2, label: 'Delete', action: async () => { const ok = await confirm({ title: 'Delete note?', description: 'This cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' }); if (ok) { api(`/api/v1/notes/${note.id}`, { method: 'DELETE' }).then(() => { toast.success('Deleted'); loadNotes(page); }).catch(() => toast.error('Failed')); } }, destructive: true },
       ],
     });
   };
@@ -539,6 +544,9 @@ export default function NotesPage() {
           onUpdate={reload}
         />
       )}
+
+      {ConfirmDialogElement}
+      {PromptDialogElement}
     </div>
   );
 }

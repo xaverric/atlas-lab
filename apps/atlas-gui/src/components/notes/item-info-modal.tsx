@@ -5,6 +5,7 @@ import { X, Copy, Globe, Lock, Pencil, Trash2, Check, Loader2 } from 'lucide-rea
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { formatSize, formatDate } from '@/lib/utils';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 
 type PublicPermission = 'view' | 'edit' | 'full';
 
@@ -50,6 +51,7 @@ export function ItemInfoModal({ type, itemId, onClose, onUpdate }: ItemInfoModal
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -161,7 +163,8 @@ export function ItemInfoModal({ type, itemId, onClose, onUpdate }: ItemInfoModal
 
   const handleDelete = async () => {
     const label = type === 'folder' ? 'folder' : 'note';
-    if (!confirm(`Delete this ${label}?`)) return;
+    const ok = await confirm({ title: `Delete ${label}?`, description: 'This cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       const endpoint = type === 'folder'
         ? `/api/v1/notes/folders/${itemId}`
@@ -189,6 +192,7 @@ export function ItemInfoModal({ type, itemId, onClose, onUpdate }: ItemInfoModal
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      {ConfirmDialogElement}
       <div className="relative w-full max-w-md rounded-lg bg-background shadow-lg border">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-5 py-3">

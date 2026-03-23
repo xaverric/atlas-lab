@@ -3,6 +3,7 @@
 import type { Editor } from '@tiptap/react';
 import { Bold, Italic, Strikethrough, Code, Heading1, Heading2, Heading3, List, ListOrdered, ListChecks, CodeSquare, Link, Image as ImageIcon, Minus, Quote } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePromptDialog } from '@/components/shared/prompt-dialog';
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -12,10 +13,12 @@ interface EditorToolbarProps {
 }
 
 export function EditorToolbar({ editor, isMarkdown, onToggleMarkdown, onInsertImage }: EditorToolbarProps) {
+  const { prompt, PromptDialogElement } = usePromptDialog();
+
   if (!editor) return null;
 
-  const setLink = () => {
-    const url = window.prompt('URL');
+  const setLink = async () => {
+    const url = await prompt({ title: 'Insert link', placeholder: 'https://...' });
     if (!url) return;
     editor.chain().focus().setLink({ href: url }).run();
   };
@@ -43,33 +46,36 @@ export function EditorToolbar({ editor, isMarkdown, onToggleMarkdown, onInsertIm
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 border-b bg-muted/30 p-1">
-      {buttons.map((btn, i) => {
-        if (!btn) return <div key={i} className="mx-1 h-6 w-px bg-border" />;
-        const Icon = btn.icon;
-        return (
+    <>
+      {PromptDialogElement}
+      <div className="flex flex-wrap items-center gap-0.5 border-b bg-muted/30 p-1">
+        {buttons.map((btn, i) => {
+          if (!btn) return <div key={i} className="mx-1 h-6 w-px bg-border" />;
+          const Icon = btn.icon;
+          return (
+            <button
+              key={btn.title}
+              type="button"
+              onClick={btn.action}
+              title={btn.title}
+              className={cn(
+                'rounded p-1.5 text-sm transition-colors hover:bg-accent',
+                btn.active && 'bg-accent text-accent-foreground',
+              )}
+            >
+              <Icon className="h-4 w-4" />
+            </button>
+          );
+        })}
+        {onToggleMarkdown && (
           <button
-            key={btn.title}
-            type="button"
-            onClick={btn.action}
-            title={btn.title}
-            className={cn(
-              'rounded p-1.5 text-sm transition-colors hover:bg-accent',
-              btn.active && 'bg-accent text-accent-foreground',
-            )}
+            onClick={onToggleMarkdown}
+            className={cn('ml-auto rounded-md px-3 py-1 text-xs font-medium transition-colors', isMarkdown ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent')}
           >
-            <Icon className="h-4 w-4" />
+            {isMarkdown ? 'WYSIWYG' : 'Markdown'}
           </button>
-        );
-      })}
-      {onToggleMarkdown && (
-        <button
-          onClick={onToggleMarkdown}
-          className={cn('ml-auto rounded-md px-3 py-1 text-xs font-medium transition-colors', isMarkdown ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent')}
-        >
-          {isMarkdown ? 'WYSIWYG' : 'Markdown'}
-        </button>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }

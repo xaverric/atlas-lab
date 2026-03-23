@@ -8,6 +8,7 @@ import {
   Pencil, ChevronRight, Home, X,
 } from 'lucide-react';
 import { FileIcon, canPreview } from '@/components/files/file-icon';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 
 type Permission = 'view' | 'edit' | 'full';
 
@@ -91,6 +92,7 @@ export default function PublicFilesPage() {
   const [renameValue, setRenameValue] = useState('');
   const [renamingFolder, setRenamingFolder] = useState<SubfolderItem | null>(null);
   const [renameFolderValue, setRenameFolderValue] = useState('');
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   const permission: Permission = folder?.publicPermission || 'view';
 
@@ -143,7 +145,8 @@ export default function PublicFilesPage() {
   };
 
   const handleDeleteDoc = async (docId: string) => {
-    if (!confirm('Delete this document?')) return;
+    const ok = await confirm({ title: 'Delete document?', description: 'This action cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await publicApi(`/public/files/documents/${docId}`, { method: 'DELETE' });
       loadFolder();
@@ -188,7 +191,8 @@ export default function PublicFilesPage() {
   };
 
   const handleDeleteFolder = async (fId: string) => {
-    if (!confirm('Delete this folder? It must be empty.')) return;
+    const ok = await confirm({ title: 'Delete folder?', description: 'The folder must be empty. This action cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await publicApi(`/public/files/folders/${fId}`, { method: 'DELETE' });
       loadFolder();
@@ -480,6 +484,7 @@ export default function PublicFilesPage() {
         Powered by Atlas File Storage
       </footer>
     </div>
+    {ConfirmDialogElement}
     </div>
   );
 }

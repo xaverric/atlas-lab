@@ -5,6 +5,7 @@ import { X, RotateCcw, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 
 interface Revision {
   id: string;
@@ -48,6 +49,7 @@ function groupByDate(revisions: Revision[]): { label: string; items: Revision[] 
 export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDrawerProps) {
   const [revisions, setRevisions] = useState<Revision[]>([]);
   const [loading, setLoading] = useState(false);
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   const fetchRevisions = useCallback(async () => {
     setLoading(true);
@@ -73,7 +75,8 @@ export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDra
   }, [isOpen, onClose]);
 
   const handleRestore = async (rev: Revision) => {
-    if (!confirm('Restore this version? Current content will be replaced.')) return;
+    const ok = await confirm({ title: 'Restore version?', description: 'Current content will be replaced with this version.', confirmLabel: 'Restore' });
+    if (!ok) return;
     try {
       await api(`/api/v1/notes/${noteId}/revisions/${rev.id}/restore`, { method: 'POST' });
       toast.success('Version restored');
@@ -94,6 +97,7 @@ export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDra
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+      {ConfirmDialogElement}
       <div
         className="relative w-full max-w-md max-h-[80vh] rounded-xl border bg-card shadow-xl flex flex-col"
         onClick={(e) => e.stopPropagation()}

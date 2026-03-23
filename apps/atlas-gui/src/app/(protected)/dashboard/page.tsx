@@ -12,6 +12,7 @@ import { TrackerTableWidget } from '@/components/dashboard/tracker-widget';
 import { FolderWidget } from '@/components/dashboard/folder-widget';
 import { AddWidgetDialog } from '@/components/dashboard/add-widget-dialog';
 import { toast } from 'sonner';
+import { PageHeader } from '@/components/shared/page-header';
 import type { User } from '@atlas/core';
 
 export default function DashboardPage() {
@@ -114,8 +115,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-end">
+    <div className="flex h-full flex-col">
+      <PageHeader title="Dashboard">
         <button
           onClick={() => setDialogOpen(true)}
           className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
@@ -123,39 +124,41 @@ export default function DashboardPage() {
           <Plus className="h-4 w-4" />
           Add Widget
         </button>
-      </div>
+      </PageHeader>
 
-      {widgets.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {widgets.map((widget) => (
-            <WidgetCard
-              key={widget.id}
-              widgetId={widget.id}
-              title={widget.title}
-              size={widget.size}
-              onRemove={() => handleRemove(widget.id)}
-              onResize={() => handleResize(widget.id)}
-              isDragOver={dragOverId === widget.id}
-              onDragOver={() => setDragOverId(widget.id)}
-              onDragLeave={() => setDragOverId(null)}
-              onDrop={(e) => handleDrop(widget.id, e)}
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        {widgets.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {widgets.map((widget) => (
+              <WidgetCard
+                key={widget.id}
+                widgetId={widget.id}
+                title={widget.title}
+                size={widget.size}
+                onRemove={() => handleRemove(widget.id)}
+                onResize={() => handleResize(widget.id)}
+                isDragOver={dragOverId === widget.id}
+                onDragOver={() => setDragOverId(widget.id)}
+                onDragLeave={() => setDragOverId(null)}
+                onDrop={(e) => handleDrop(widget.id, e)}
+              >
+                {renderWidgetContent(widget)}
+              </WidgetCard>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
+            <p className="text-muted-foreground mb-3">No widgets yet. Add your first widget.</p>
+            <button
+              onClick={() => setDialogOpen(true)}
+              className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
-              {renderWidgetContent(widget)}
-            </WidgetCard>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
-          <p className="text-muted-foreground mb-3">No widgets yet. Add your first widget.</p>
-          <button
-            onClick={() => setDialogOpen(true)}
-            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4" />
-            Add Widget
-          </button>
-        </div>
-      )}
+              <Plus className="h-4 w-4" />
+              Add Widget
+            </button>
+          </div>
+        )}
+      </div>
 
       <AddWidgetDialog
         open={dialogOpen}

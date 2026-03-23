@@ -4,8 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { StorageChart } from '@/components/system/storage-chart';
 import {
-  Cpu, MemoryStick, Clock, Server, Activity,
-  User, Mail, Shield, Database, RefreshCw,
+  Server, Database, RefreshCw,
 } from 'lucide-react';
 import type { User as UserType } from '@atlas/core';
 
@@ -59,26 +58,40 @@ const SERVICES: { name: string; url: string }[] = [
   { name: 'Notifications', url: '/api/v1/notifications?limit=1' },
 ];
 
-function getGaugeColor(pct: number): string {
-  if (pct < 50) return '#40a02b';
-  if (pct < 75) return '#df8e1d';
-  return '#d20f39';
+function getGaugeLevel(pct: number): 'success' | 'warning' | 'destructive' {
+  if (pct < 50) return 'success';
+  if (pct < 80) return 'warning';
+  return 'destructive';
 }
 
-function GaugeBar({ value, max, label, detail, color }: {
-  value: number; max: number; label: string; detail: string; color: string;
+const levelColors: Record<string, string> = {
+  success: 'bg-success',
+  warning: 'bg-warning',
+  destructive: 'bg-destructive',
+};
+
+const badgeColors: Record<string, string> = {
+  success: 'bg-success/10 text-success',
+  warning: 'bg-warning/10 text-warning',
+  destructive: 'bg-destructive/10 text-destructive',
+};
+
+function GaugeCard({ label, pct, detail }: {
+  label: string; pct: number; detail: string;
 }) {
-  const pct = max > 0 ? (value / max) * 100 : 0;
+  const level = getGaugeLevel(pct);
   return (
-    <div className="rounded-lg border bg-card p-5 space-y-3">
+    <div className="rounded-xl border bg-card p-5 shadow-sm space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">{label}</span>
-        <span className="text-2xl font-bold">{pct.toFixed(1)}%</span>
+        <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${badgeColors[level]}`}>
+          {pct.toFixed(0)}%
+        </span>
       </div>
-      <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+      <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
         <div
-          className="h-full rounded-full transition-all duration-500"
-          style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: color }}
+          className={`h-full rounded-full transition-all duration-500 ${levelColors[level]}`}
+          style={{ width: `${Math.min(pct, 100)}%` }}
         />
       </div>
       <p className="text-xs text-muted-foreground">{detail}</p>
@@ -141,12 +154,21 @@ export default function SettingsPage() {
 
   const cpuPct = parseFloat(resources?.cpu.usagePercent || '0');
   const memPct = parseFloat(resources?.memory.usagePercent || '0');
+  const heapPct = resources
+    ? (resources.process.heapUsed / resources.process.heapTotal) * 100
+    : 0;
+
+  const initials = profile?.name
+    ? profile.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    : '?';
+
+  const allHealthy = services.every(s => s.status === 'ok');
 
   return (
-    <div className="px-6 py-5 space-y-6">
+    <div className="px-8 py-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">System Dashboard</h1>
+        <h1 className="text-xl font-semibold">Settings</h1>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsLive(prev => !prev)}
@@ -169,113 +191,88 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Resource gauges */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <GaugeBar
-          value={cpuPct}
-          max={100}
-          label="CPU Usage"
-          detail={resources ? `${resources.cpu.model} - ${resources.cpu.cores} cores` : 'Loading...'}
-          color={getGaugeColor(cpuPct)}
-        />
-        <GaugeBar
-          value={memPct}
-          max={100}
-          label="Memory Usage"
-          detail={resources ? `${resources.memory.usedFormatted} / ${resources.memory.totalFormatted}` : 'Loading...'}
-          color={getGaugeColor(memPct)}
-        />
-        <div className="rounded-lg border bg-card p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Uptime</span>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+      {/* Profile card */}
+      <div className="rounded-xl border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground text-xl font-bold">
+            {initials}
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">System</span>
-              <span className="text-lg font-bold">{resources?.system.uptimeFormatted || '-'}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Atlas Core</span>
-              <span className="text-lg font-bold">{resources?.process.uptimeFormatted || '-'}</span>
-            </div>
+          <div>
+            <div className="text-base font-semibold">{profile?.name || 'Loading...'}</div>
+            <div className="text-sm text-muted-foreground">{profile?.email || '-'}</div>
+            <span className="mt-1 inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+              {profile?.role || 'user'}
+            </span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Heap: {resources?.process.heapUsedFormatted || '-'} | RSS: {resources?.process.rssFormatted || '-'}
-          </p>
         </div>
       </div>
 
-      {/* Service health + Profile + System info */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Service health */}
-        <div className="rounded-lg border bg-card p-6 space-y-4 lg:col-span-1">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-info/10 text-info">
-              <Activity className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="font-medium">Service Health</h3>
-              <p className="text-xs text-muted-foreground">
-                {services.filter(s => s.status === 'ok').length}/{services.length} online
-              </p>
-            </div>
-          </div>
-          <div className="space-y-3 pt-1">
-            {services.map(svc => (
-              <div key={svc.name} className="flex items-center justify-between text-sm">
-                <span>{svc.name}</span>
-                <span className={`flex items-center gap-1.5 text-xs font-medium ${
-                  svc.status === 'ok' ? 'text-success' : svc.status === 'error' ? 'text-destructive' : 'text-muted-foreground'
-                }`}>
-                  {svc.status === 'ok' && svc.responseTime !== undefined && (
-                    <span className="text-muted-foreground mr-1">{svc.responseTime}ms</span>
-                  )}
-                  <span className={`h-2 w-2 rounded-full ${
-                    svc.status === 'ok' ? 'bg-success' : svc.status === 'error' ? 'bg-destructive' : 'bg-muted-foreground animate-pulse'
-                  }`} />
-                  {svc.status === 'ok' ? 'Online' : svc.status === 'error' ? 'Offline' : 'Checking'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Resource gauges */}
+      <div className="grid grid-cols-3 gap-4">
+        <GaugeCard
+          label="CPU"
+          pct={cpuPct}
+          detail={resources ? `${resources.cpu.model}, ${resources.cpu.cores} cores` : 'Loading...'}
+        />
+        <GaugeCard
+          label="Memory"
+          pct={memPct}
+          detail={resources ? `${resources.memory.usedFormatted} / ${resources.memory.totalFormatted}` : 'Loading...'}
+        />
+        <GaugeCard
+          label="Heap"
+          pct={heapPct}
+          detail={resources ? `${resources.process.heapUsedFormatted} / ${formatBytes(resources.process.heapTotal)}` : 'Loading...'}
+        />
+      </div>
 
-        {/* Profile */}
-        <div className="rounded-lg border bg-card p-6 space-y-4 lg:col-span-1">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <User className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="font-medium">{profile?.name || 'Loading...'}</h3>
-              <p className="text-sm text-muted-foreground">{profile?.role || 'user'}</p>
-            </div>
-          </div>
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center gap-3 text-sm">
-              <Mail className="h-4 w-4 text-muted-foreground" />
-              <span>{profile?.email || '-'}</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span>Role: <span className="font-medium">{profile?.role || 'user'}</span></span>
-            </div>
-          </div>
+      {/* Service Health */}
+      <div className="rounded-xl border bg-card shadow-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <span className="text-sm font-medium">Service Health</span>
+          <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
+            allHealthy ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
+          }`}>
+            {allHealthy ? 'All healthy' : `${services.filter(s => s.status === 'ok').length}/${services.length} online`}
+          </span>
         </div>
+        <div className="px-6">
+          {services.map((svc, i) => (
+            <div
+              key={svc.name}
+              className={`flex items-center justify-between py-3 ${
+                i < services.length - 1 ? 'border-b' : ''
+              }`}
+            >
+              <span className="flex items-center gap-2 text-[13px] font-medium">
+                <span className={`h-1.5 w-1.5 rounded-full ${
+                  svc.status === 'ok' ? 'bg-success' : svc.status === 'error' ? 'bg-destructive' : 'bg-muted-foreground animate-pulse'
+                }`} />
+                {svc.name}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {svc.status === 'ok' && svc.responseTime !== undefined
+                  ? `${svc.responseTime}ms`
+                  : svc.status === 'error' ? 'Offline' : 'Checking...'}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-        {/* System info */}
-        <div className="rounded-lg border bg-card p-6 space-y-4 lg:col-span-1">
+      {/* System Info + Storage */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10 text-warning">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/10 text-warning">
               <Server className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="font-medium">System Info</h3>
+              <h3 className="text-sm font-medium">System Info</h3>
               <p className="text-xs text-muted-foreground">Host & runtime</p>
             </div>
           </div>
-          <div className="space-y-3 pt-2 text-sm">
+          <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Hostname</span>
               <span className="font-mono text-xs">{resources?.system.hostname || '-'}</span>
@@ -289,26 +286,32 @@ export default function SettingsPage() {
               <span className="font-mono text-xs">{resources?.system.nodeVersion || '-'}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">CPU Cores</span>
-              <span className="font-mono text-xs">{resources?.system.cpuCount || '-'}</span>
+              <span className="text-muted-foreground">Uptime</span>
+              <span className="font-mono text-xs">{resources?.system.uptimeFormatted || '-'}</span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Storage — full width */}
-      <div className="rounded-lg border bg-card p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10 text-success">
-            <Database className="h-5 w-5" />
+        <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10 text-success">
+              <Database className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-medium">Storage Usage</h3>
+              <p className="text-xs text-muted-foreground">Disk space breakdown</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-medium">Storage Usage</h3>
-            <p className="text-sm text-muted-foreground">Disk space breakdown across all services</p>
-          </div>
+          <StorageChart />
         </div>
-        <StorageChart />
       </div>
     </div>
   );
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 }

@@ -5,6 +5,7 @@ import { X, Copy, Globe, Lock, Pencil, Trash2, Check, Loader2, Download } from '
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { formatSize, formatDate } from '@/lib/utils';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 
 type PublicPermission = 'view' | 'edit' | 'full';
 
@@ -48,6 +49,7 @@ export function FileItemInfoModal({ type, itemId, onClose, onUpdate }: FileItemI
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -158,7 +160,8 @@ export function FileItemInfoModal({ type, itemId, onClose, onUpdate }: FileItemI
 
   const handleDelete = async () => {
     const label = type === 'folder' ? 'folder' : 'document';
-    if (!confirm(`Delete this ${label}?`)) return;
+    const ok = await confirm({ title: `Delete this ${label}?`, description: 'This action cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       const endpoint = type === 'folder'
         ? `/api/v1/files/folders/${itemId}`
@@ -346,6 +349,7 @@ export function FileItemInfoModal({ type, itemId, onClose, onUpdate }: FileItemI
           </div>
         )}
       </div>
+      {ConfirmDialogElement}
     </div>
   );
 }

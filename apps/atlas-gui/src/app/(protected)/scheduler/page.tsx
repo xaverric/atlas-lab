@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import Link from 'next/link';
 import { Play, Trash2, Search, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
@@ -96,6 +97,7 @@ export default function SchedulerListPage() {
   const [enabledFilter, setEnabledFilter] = useState('');
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [selectedGroups, setSelectedGroups] = useState<Set<string>>(new Set());
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   const load = useCallback(async (p: number) => {
     try {
@@ -174,7 +176,8 @@ export default function SchedulerListPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this job?')) return;
+    const ok = await confirm({ title: 'Delete job?', description: 'This action cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await api(`/api/v1/scheduler/jobs/${id}`, { method: 'DELETE' });
       toast.success('Job deleted');
@@ -185,7 +188,7 @@ export default function SchedulerListPage() {
   };
 
   return (
-    <div className="px-6 py-5 space-y-4">
+    <>{ConfirmDialogElement}<div className="px-6 py-5 space-y-4">
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-48">
@@ -352,6 +355,6 @@ export default function SchedulerListPage() {
           <button onClick={() => load(page + 1)} disabled={page * 20 >= total} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Next</button>
         </div>
       )}
-    </div>
+    </div></>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Play, Pencil, Trash2, BarChart3 } from 'lucide-react';
@@ -80,6 +81,7 @@ export default function JobDetailPage() {
   const [runsTotal, setRunsTotal] = useState(0);
   const [runsPage, setRunsPage] = useState(1);
   const [pinned, setPinned] = useState(false);
+  const { confirm, ConfirmDialogElement } = useConfirmDialog();
 
   useEffect(() => { setPinned(dashboardStore.hasItem(id)); }, [id]);
 
@@ -123,7 +125,8 @@ export default function JobDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm('Delete this job?')) return;
+    const ok = await confirm({ title: 'Delete job?', description: 'This action cannot be undone.', confirmLabel: 'Delete', variant: 'destructive' });
+    if (!ok) return;
     try {
       await api(`/api/v1/scheduler/jobs/${id}`, { method: 'DELETE' });
       toast.success('Job deleted');
@@ -136,7 +139,7 @@ export default function JobDetailPage() {
   if (!job) return <p className="text-muted-foreground">Loading...</p>;
 
   return (
-    <div className="space-y-6">
+    <>{ConfirmDialogElement}<div className="space-y-6">
       <button onClick={() => router.push('/scheduler')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back to Jobs
       </button>
@@ -291,6 +294,6 @@ export default function JobDetailPage() {
           </div>
         )}
       </div>
-    </div>
+    </div></>
   );
 }
