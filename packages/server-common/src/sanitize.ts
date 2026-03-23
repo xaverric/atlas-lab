@@ -1,21 +1,21 @@
 /* eslint-disable no-control-regex */
-const HTML_TAG_RE = /<[^>]*>/g;
 const SCRIPT_RE = /javascript:|data:|vbscript:/gi;
 const NULL_BYTE_RE = /\x00/g;
 const CONTROL_CHAR_RE = /[\x00-\x08\x0B\x0C\x0E-\x1F]/g;
 
-const stripTagsLoop = (str: string): string => {
-  let prev = str;
-  let result = str.replace(HTML_TAG_RE, '');
-  while (result !== prev) {
-    prev = result;
-    result = result.replace(HTML_TAG_RE, '');
+const stripTags = (str: string): string => {
+  let out = '';
+  let inTag = false;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '<') { inTag = true; continue; }
+    if (str[i] === '>') { inTag = false; continue; }
+    if (!inTag) out += str[i];
   }
-  return result;
+  return out;
 };
 
 export const stripHtml = (input: string): string =>
-  stripTagsLoop(
+  stripTags(
     input
       .replace(NULL_BYTE_RE, '')
       .replace(CONTROL_CHAR_RE, '')
