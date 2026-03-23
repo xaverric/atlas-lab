@@ -38,6 +38,7 @@ export function PanelSearch({ placeholder = 'Search...', value, onChange }: Pane
       <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
       <input
         type="text"
+        data-panel-search
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}

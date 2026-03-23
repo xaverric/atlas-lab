@@ -38,12 +38,18 @@ const systemItems: NavItem[] = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-function RailButton({ item, isActive, showBadge }: { item: NavItem; isActive: boolean; showBadge: boolean }) {
+function RailButton({ item, isActive, showBadge, onNavigate }: {
+  item: NavItem;
+  isActive: boolean;
+  showBadge: boolean;
+  onNavigate?: () => void;
+}) {
   const Icon = item.icon;
 
   return (
     <Link
       href={item.href}
+      onClick={onNavigate}
       className={cn(
         'group relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors',
         isActive
@@ -63,9 +69,59 @@ function RailButton({ item, isActive, showBadge }: { item: NavItem; isActive: bo
   );
 }
 
-export function ServiceRail() {
+function HorizontalNavButton({ item, isActive, showBadge, onNavigate }: {
+  item: NavItem;
+  isActive: boolean;
+  showBadge: boolean;
+  onNavigate?: () => void;
+}) {
+  const Icon = item.icon;
+
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      className={cn(
+        'relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+        isActive
+          ? 'bg-primary text-primary-foreground'
+          : 'text-muted-foreground hover:bg-black/[0.06] hover:text-foreground',
+      )}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      <span>{item.label}</span>
+      {showBadge && (
+        <span className="h-2 w-2 rounded-full bg-destructive" />
+      )}
+    </Link>
+  );
+}
+
+interface ServiceRailProps {
+  horizontal?: boolean;
+  onNavigate?: () => void;
+}
+
+export function ServiceRail({ horizontal, onNavigate }: ServiceRailProps = {}) {
   const pathname = usePathname();
   const { unreadCount } = useNotificationContext();
+
+  if (horizontal) {
+    const allItems = [...mainItems, ...systemItems];
+    return (
+      <nav className="flex flex-row flex-wrap gap-1 border-b p-3">
+        {allItems.map((item) => (
+          <HorizontalNavButton
+            key={item.href}
+            item={item}
+            isActive={pathname.startsWith(item.href)}
+            showBadge={!!item.badge && unreadCount > 0}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </nav>
+    );
+  }
 
   return (
     <aside className="relative z-10 flex h-full w-[52px] flex-col items-center border-r border-rail-border bg-rail-background py-3">
@@ -90,6 +146,7 @@ export function ServiceRail() {
             item={item}
             isActive={pathname.startsWith(item.href)}
             showBadge={!!item.badge && unreadCount > 0}
+            onNavigate={onNavigate}
           />
         ))}
       </nav>
@@ -103,6 +160,7 @@ export function ServiceRail() {
             item={item}
             isActive={pathname.startsWith(item.href)}
             showBadge={false}
+            onNavigate={onNavigate}
           />
         ))}
       </div>
