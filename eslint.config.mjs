@@ -21,6 +21,7 @@ export default tseslint.config(
       '@typescript-eslint/no-namespace': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
       'no-empty': ['error', { allowEmptyCatch: true }],
+      'complexity': ['warn', { max: 15 }],
       'security/detect-object-injection': 'off',
     },
   },
