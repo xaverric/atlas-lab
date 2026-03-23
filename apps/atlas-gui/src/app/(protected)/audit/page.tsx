@@ -5,6 +5,7 @@ import { RefreshCw, ChevronDown, ChevronRight, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { getStatusClasses } from '@/lib/status-colors';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface AuditEvent {
   id: string;
@@ -112,7 +113,7 @@ export default function AuditPage() {
   };
 
   const statusBadge = (status: string) => (
-    <span className={`rounded px-1.5 py-0.5 text-xs ${getStatusClasses(status)}`}>{status}</span>
+    <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${getStatusClasses(status)}`}>{status}</span>
   );
 
   const formatTimestamp = (ts: string) =>
@@ -122,136 +123,139 @@ export default function AuditPage() {
     });
 
   return (
-    <div className="px-6 py-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2 text-sm">
-          <RefreshCw className={`h-4 w-4 ${autoRefresh ? 'animate-spin' : ''}`} />
-          <input
-            type="checkbox"
-            checked={autoRefresh}
-            onChange={(e) => setAutoRefresh(e.target.checked)}
-            className="rounded"
-          />
+    <div className="flex h-full flex-col">
+      <PageHeader title="Audit Log">
+        <button
+          onClick={() => setAutoRefresh((v) => !v)}
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+            autoRefresh
+              ? 'bg-primary text-primary-foreground'
+              : 'border bg-background text-muted-foreground hover:bg-muted'
+          }`}
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${autoRefresh ? 'animate-spin' : ''}`} />
           Auto-refresh
-        </label>
-      </div>
-
-      <div className="flex flex-wrap gap-3">
-        <select
-          value={filters.service}
-          onChange={(e) => setFilters((f) => ({ ...f, service: e.target.value }))}
-          className="rounded-md border bg-background px-2 py-1.5 text-sm"
-        >
-          {SERVICES.map((s) => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
-
-        <input
-          value={filters.action}
-          onChange={(e) => setFilters((f) => ({ ...f, action: e.target.value }))}
-          placeholder="Action"
-          className="rounded-md border bg-background px-3 py-1.5 text-sm w-40"
-        />
-
-        <input
-          type="date"
-          value={filters.from}
-          onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
-          className="rounded-md border bg-background px-2 py-1.5 text-sm"
-          title="From date"
-        />
-        <input
-          type="date"
-          value={filters.to}
-          onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
-          className="rounded-md border bg-background px-2 py-1.5 text-sm"
-          title="To date"
-        />
-
-        <select
-          value={filters.status}
-          onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
-          className="rounded-md border bg-background px-2 py-1.5 text-sm"
-        >
-          {STATUSES.map((s) => (
-            <option key={s.value} value={s.value}>{s.label}</option>
-          ))}
-        </select>
-
-        <input
-          value={filters.userId}
-          onChange={(e) => setFilters((f) => ({ ...f, userId: e.target.value }))}
-          placeholder="User ID"
-          className="rounded-md border bg-background px-3 py-1.5 text-sm w-40"
-        />
-
-        <button
-          onClick={applyFilters}
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          Apply
         </button>
-        <button
-          onClick={clearFilters}
-          className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
-        >
-          Clear
-        </button>
-      </div>
+      </PageHeader>
 
-      <div className="rounded-lg border bg-card">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
-              <th className="w-8 px-4 py-3"></th>
-              <th className="px-4 py-3">Timestamp</th>
-              <th className="px-4 py-3">Service</th>
-              <th className="px-4 py-3">Action</th>
-              <th className="px-4 py-3">User</th>
-              <th className="px-4 py-3">Resource</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Duration</th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((ev) => (
-              <EventRow
-                key={ev.id}
-                event={ev}
-                expanded={expandedId === ev.id}
-                onToggle={() => setExpandedId(expandedId === ev.id ? null : ev.id)}
-                statusBadge={statusBadge}
-                formatTimestamp={formatTimestamp}
-              />
+      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={filters.service}
+            onChange={(e) => setFilters((f) => ({ ...f, service: e.target.value }))}
+            className="rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors focus:border-primary focus:text-foreground"
+          >
+            {SERVICES.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
             ))}
-            {events.length === 0 && (
-              <tr>
-                <td colSpan={8} className="p-6 text-center text-muted-foreground">No audit events found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          </select>
 
-      <div className="flex items-center justify-center gap-2 pt-2">
-        <button
-          onClick={() => load(offset - LIMIT)}
-          disabled={offset <= 0}
-          className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span className="text-sm text-muted-foreground">
-          {offset + 1}-{Math.min(offset + LIMIT, total)} of {total}
-        </span>
-        <button
-          onClick={() => load(offset + LIMIT)}
-          disabled={offset + LIMIT >= total}
-          className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
-        >
-          Next
-        </button>
+          <input
+            value={filters.action}
+            onChange={(e) => setFilters((f) => ({ ...f, action: e.target.value }))}
+            placeholder="Action"
+            className="rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground placeholder:text-muted-foreground/60 w-36 transition-colors focus:border-primary focus:text-foreground"
+          />
+
+          <input
+            type="date"
+            value={filters.from}
+            onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
+            className="rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors focus:border-primary focus:text-foreground"
+            title="From date"
+          />
+          <input
+            type="date"
+            value={filters.to}
+            onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
+            className="rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors focus:border-primary focus:text-foreground"
+            title="To date"
+          />
+
+          <select
+            value={filters.status}
+            onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
+            className="rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors focus:border-primary focus:text-foreground"
+          >
+            {STATUSES.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
+
+          <input
+            value={filters.userId}
+            onChange={(e) => setFilters((f) => ({ ...f, userId: e.target.value }))}
+            placeholder="User ID"
+            className="rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground placeholder:text-muted-foreground/60 w-36 transition-colors focus:border-primary focus:text-foreground"
+          />
+
+          <button
+            onClick={applyFilters}
+            className="rounded-full bg-primary px-3.5 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Apply
+          </button>
+          <button
+            onClick={clearFilters}
+            className="rounded-full border px-3.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+          >
+            Clear
+          </button>
+        </div>
+
+        <div className="rounded-xl border bg-card overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-muted/50 text-left">
+                <th className="w-8 px-4 py-3"></th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Timestamp</th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Service</th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Action</th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">User</th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Resource</th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              {events.map((ev) => (
+                <EventRow
+                  key={ev.id}
+                  event={ev}
+                  expanded={expandedId === ev.id}
+                  onToggle={() => setExpandedId(expandedId === ev.id ? null : ev.id)}
+                  statusBadge={statusBadge}
+                  formatTimestamp={formatTimestamp}
+                />
+              ))}
+              {events.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="p-6 text-center text-muted-foreground">No audit events found</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="flex items-center justify-center gap-2 pt-1">
+          <button
+            onClick={() => load(offset - LIMIT)}
+            disabled={offset <= 0}
+            className="rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="text-xs text-muted-foreground">
+            {offset + 1}-{Math.min(offset + LIMIT, total)} of {total}
+          </span>
+          <button
+            onClick={() => load(offset + LIMIT)}
+            disabled={offset + LIMIT >= total}
+            className="rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -279,19 +283,19 @@ function EventRow({
         <td className="px-4 py-3">
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </td>
-        <td className="px-4 py-3 whitespace-nowrap">{formatTimestamp(event.timestamp)}</td>
+        <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-muted-foreground">{formatTimestamp(event.timestamp)}</td>
         <td className="px-4 py-3">
-          <span className="rounded bg-muted px-1.5 py-0.5 text-xs">{event.service}</span>
+          <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{event.service}</span>
         </td>
         <td className="px-4 py-3 font-medium">{event.action}</td>
-        <td className="px-4 py-3 text-muted-foreground truncate max-w-[140px]">
+        <td className="px-4 py-3 text-xs text-muted-foreground truncate max-w-[140px]">
           {event.userName || event.userId || '-'}
         </td>
-        <td className="px-4 py-3 text-muted-foreground truncate max-w-[140px]">
+        <td className="px-4 py-3 text-xs text-muted-foreground truncate max-w-[140px]">
           {event.resourceType ? `${event.resourceType}${event.resourceId ? `:${event.resourceId}` : ''}` : '-'}
         </td>
         <td className="px-4 py-3">{statusBadge(event.status)}</td>
-        <td className="px-4 py-3 text-muted-foreground">
+        <td className={`px-4 py-3 text-xs ${event.duration != null && event.duration > 1000 ? 'font-medium text-destructive' : 'text-muted-foreground'}`}>
           {event.duration != null ? `${event.duration}ms` : '-'}
         </td>
       </tr>

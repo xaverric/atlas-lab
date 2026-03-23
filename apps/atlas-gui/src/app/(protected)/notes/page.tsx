@@ -16,6 +16,7 @@ import { SearchBar } from '@/components/notes/search-bar';
 import { NoteDetail } from '@/components/notes/note-detail';
 import { NoteContextMenu } from '@/components/notes/context-menu';
 import { ItemInfoModal } from '@/components/notes/item-info-modal';
+import { PageHeader } from '@/components/shared/page-header';
 import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import { usePromptDialog } from '@/components/shared/prompt-dialog';
 
@@ -328,8 +329,9 @@ export default function NotesPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
+      <PageHeader title={currentFolder?.name || 'All Notes'} />
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4">
         <SearchBar onSearch={handleSearch} />
 
         {showNewFolder && (

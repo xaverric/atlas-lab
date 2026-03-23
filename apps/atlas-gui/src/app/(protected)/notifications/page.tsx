@@ -6,9 +6,9 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Settings, Check, CheckCheck, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
-import { ViewToggle, useViewMode } from '@/components/shared/view-toggle';
 import { useNotificationContext } from '@/contexts/notification-context';
 import { getStatusClasses } from '@/lib/status-colors';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface Notification {
   id: string;
@@ -35,13 +35,18 @@ interface ListResponse {
 
 type FilterValue = 'all' | 'unread' | 'read';
 
+const filterOptions: { value: FilterValue; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'unread', label: 'Unread' },
+  { value: 'read', label: 'Read' },
+];
+
 export default function NotificationsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [view, setView] = useViewMode('notifications-view', 'list');
   const [sendingTest, setSendingTest] = useState(false);
   const { markRead, markAllRead } = useNotificationContext();
 
@@ -97,150 +102,160 @@ export default function NotificationsPage() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
+  const deliveryLabel = (status: string) => {
+    if (status === 'sent') return 'delivered';
+    return status;
+  };
+
   const channelBadges = (n: Notification) => {
     if (n.deliveries?.length) {
       return n.deliveries.map((d) => (
-        <span key={d.channelType} className={`rounded px-1.5 py-0.5 text-xs ${d.status === 'sent' ? getStatusClasses('delivered') : d.status === 'failed' ? getStatusClasses('failed') : 'bg-muted text-muted-foreground'}`}>
-          {d.channelType}
+        <span
+          key={d.channelType}
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+            d.status === 'sent'
+              ? getStatusClasses('delivered')
+              : d.status === 'failed'
+                ? getStatusClasses('failed')
+                : 'bg-muted text-muted-foreground'
+          }`}
+        >
+          {d.channelType}: {deliveryLabel(d.status)}
         </span>
       ));
     }
     if (n.channel) {
-      return <span className="rounded bg-muted px-1.5 py-0.5 text-xs">{n.channel}</span>;
+      return <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{n.channel}</span>;
     }
     return null;
   };
 
-  return (
-    <div className="px-6 py-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as typeof filter)}
-            className="rounded-md border bg-background px-2 py-1.5 text-sm"
-          >
-            <option value="all">All</option>
-            <option value="unread">Unread</option>
-            <option value="read">Read</option>
-          </select>
-          <button
-            onClick={handleMarkAllRead}
-            className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
-            title="Mark all read"
-          >
-            <CheckCheck className="h-4 w-4" />
-          </button>
-          <ViewToggle view={view} onChange={setView} />
-          <button
-            onClick={sendTest}
-            disabled={sendingTest}
-            className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
-            title="Send a test notification"
-          >
-            <Send className="h-4 w-4" />
-            {sendingTest ? 'Sending...' : 'Send Test'}
-          </button>
-          <Link
-            href="/notifications/preferences"
-            className="flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
-          >
-            <Settings className="h-4 w-4" />
-            Preferences
-          </Link>
-        </div>
-      </div>
+  const formatTime = (iso: string) => {
+    const date = new Date(iso);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
 
-      {view === 'grid' ? (
-        <div className="space-y-3">
+  return (
+    <div className="flex h-full flex-col">
+      <PageHeader title="Notifications">
+        <button
+          onClick={handleMarkAllRead}
+          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+          title="Mark all read"
+        >
+          <CheckCheck className="h-4 w-4" />
+          Mark all read
+        </button>
+        <button
+          onClick={sendTest}
+          disabled={sendingTest}
+          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
+          title="Send a test notification"
+        >
+          <Send className="h-4 w-4" />
+          {sendingTest ? 'Sending...' : 'Send Test'}
+        </button>
+        <Link
+          href="/notifications/preferences"
+          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted"
+        >
+          <Settings className="h-4 w-4" />
+          Preferences
+        </Link>
+      </PageHeader>
+
+      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4">
+        <div className="flex items-center gap-1.5">
+          {filterOptions.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setFilter(opt.value)}
+              className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+                filter === opt.value
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-2">
           {notifications.map((n) => (
-            <div key={n.id} className={`rounded-lg border p-4 ${!n.read ? 'border-info/30 bg-info/5' : ''}`}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    {!n.read && <span className="h-2 w-2 rounded-full bg-info" />}
-                    {channelBadges(n)}
-                    {n.event && <span className="text-xs text-muted-foreground">{n.event}</span>}
-                  </div>
-                  <p className="mt-2 font-medium">{n.title || n.subject || n.event || 'Notification'}</p>
-                  {n.body && <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{n.body}</p>}
-                  {n.error && <p className="mt-1 text-sm text-destructive">{n.error}</p>}
-                </div>
-                <div className="flex items-center gap-2">
-                  {!n.read && (
-                    <button onClick={() => handleMarkRead(n.id)} className="rounded p-1 hover:bg-muted" title="Mark read">
-                      <Check className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(n.createdAt).toLocaleString()}
+            <div
+              key={n.id}
+              className={`group flex items-start gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-accent/50 ${
+                !n.read ? 'border-l-[3px] border-l-primary' : ''
+              }`}
+            >
+              <div className="mt-1.5 flex-shrink-0">
+                {!n.read ? (
+                  <span className="block h-2 w-2 rounded-full bg-primary" />
+                ) : (
+                  <span className="block h-2 w-2" />
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-semibold leading-snug">
+                  {n.title || n.subject || n.event || 'Notification'}
+                </p>
+                {n.body && (
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-muted-foreground line-clamp-2">
+                    {n.body}
+                  </p>
+                )}
+                {n.error && (
+                  <p className="mt-0.5 text-[13px] text-destructive">{n.error}</p>
+                )}
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  {channelBadges(n)}
+                  <span className="text-[12px] text-muted-foreground">
+                    {formatTime(n.createdAt)}
                   </span>
+                  {n.event && (
+                    <span className="text-[12px] text-muted-foreground/60">
+                      {n.event}
+                    </span>
+                  )}
                 </div>
               </div>
+
+              {!n.read && (
+                <button
+                  onClick={() => handleMarkRead(n.id)}
+                  className="flex-shrink-0 rounded p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
+                  title="Mark read"
+                >
+                  <Check className="h-4 w-4 text-muted-foreground" />
+                </button>
+              )}
             </div>
           ))}
+
           {notifications.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">No notifications yet</p>
+            <p className="py-12 text-center text-muted-foreground">No notifications yet</p>
           )}
         </div>
-      ) : (
-        <div className="rounded-lg border bg-card">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
-                <th className="w-8 px-4 py-3"></th>
-                <th className="px-4 py-3">Channels</th>
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Event</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="w-10 px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {notifications.map((n) => (
-                <tr key={n.id} className={`border-b last:border-b-0 hover:bg-accent/50 transition-colors ${!n.read ? 'bg-info/5' : ''}`}>
-                  <td className="px-4 py-3">
-                    {!n.read && <span className="block h-2 w-2 rounded-full bg-info" />}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-1">{channelBadges(n)}</div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="max-w-md">
-                      <p className="truncate font-medium">{n.title || n.subject || 'Notification'}</p>
-                      {n.body && <p className="truncate text-xs text-muted-foreground">{n.body}</p>}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">{n.event || n.templateKey}</td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                    {new Date(n.createdAt).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3">
-                    {!n.read && (
-                      <button onClick={() => handleMarkRead(n.id)} className="rounded p-1 hover:bg-muted" title="Mark read">
-                        <Check className="h-3.5 w-3.5" />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {notifications.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="p-6 text-center text-muted-foreground">No notifications yet</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
 
-      {total > 20 && (
-        <div className="flex items-center justify-center gap-2 pt-2">
-          <button onClick={() => load(page - 1)} disabled={page <= 1} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Previous</button>
-          <span className="text-sm text-muted-foreground">Page {page} of {Math.ceil(total / 20)}</span>
-          <button onClick={() => load(page + 1)} disabled={page * 20 >= total} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Next</button>
-        </div>
-      )}
+        {total > 20 && (
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <button onClick={() => load(page - 1)} disabled={page <= 1} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Previous</button>
+            <span className="text-sm text-muted-foreground">Page {page} of {Math.ceil(total / 20)}</span>
+            <button onClick={() => load(page + 1)} disabled={page * 20 >= total} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Next</button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

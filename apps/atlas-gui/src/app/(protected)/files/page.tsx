@@ -25,6 +25,7 @@ import { FileItemInfoModal } from '@/components/files/item-info-modal';
 import { NoteContextMenu } from '@/components/notes/context-menu';
 import { useConfirmDialog } from '@/components/shared/confirm-dialog';
 import { usePromptDialog } from '@/components/shared/prompt-dialog';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface FolderItem {
   id: string;
@@ -417,6 +418,8 @@ export default function FilesPage() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      <PageHeader title={currentFolder?.name || 'All Files'} />
+
       {dragging && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-primary/5 border-2 border-dashed border-primary rounded-lg pointer-events-none">
           <div className="rounded-lg bg-background px-8 py-6 shadow-lg text-center">
@@ -430,7 +433,7 @@ export default function FilesPage() {
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4">
         <SearchBar
           filters={filters}
           onChange={setFilters}
@@ -459,10 +462,10 @@ export default function FilesPage() {
 
         {/* Unified table: folders + files */}
         {hasContent ? (
-          <div className="overflow-x-auto rounded-lg border bg-card">
+          <div className="overflow-x-auto rounded-xl border bg-card overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+                <tr className="border-b bg-muted/50 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   <th className="px-4 py-3 w-10">
                     <input type="checkbox" checked={docs.length > 0 && docs.every((d) => selectedIds.has(d.id))} onChange={handleSelectAll} className="rounded border-input" />
                   </th>
@@ -576,7 +579,9 @@ export default function FilesPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{doc.mimeType.split('/').pop()}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{doc.mimeType.split('/').pop()}</span>
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">{formatSize(doc.size)}</td>
                     <td className="px-4 py-3 text-muted-foreground text-[10px]">inherited</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDate(doc.createdAt)}</td>

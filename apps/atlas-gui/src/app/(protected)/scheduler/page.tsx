@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState, useCallback, useMemo } from 'react';
 import { useConfirmDialog } from '@/components/shared/confirm-dialog';
+import { PageHeader } from '@/components/shared/page-header';
 import Link from 'next/link';
 import { Play, Trash2, Search, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
@@ -188,7 +189,9 @@ export default function SchedulerListPage() {
   };
 
   return (
-    <>{ConfirmDialogElement}<div className="px-6 py-5 space-y-4">
+    <>{ConfirmDialogElement}<div className="flex h-full flex-col">
+      <PageHeader title="Scheduler" />
+      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-4">
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-48">
@@ -249,10 +252,10 @@ export default function SchedulerListPage() {
       )}
 
       {/* Table */}
-      <div className="rounded-lg border bg-card">
+      <div className="rounded-xl border bg-card overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+            <tr className="border-b bg-muted/50 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Type</th>
               <th className="px-4 py-3">Schedule</th>
@@ -301,9 +304,14 @@ export default function SchedulerListPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">{job.executionType}</span>
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          job.executionType === 'webhook' ? 'bg-info/15 text-info' :
+                          job.executionType === 'javascript' ? 'bg-primary/15 text-primary' :
+                          job.executionType === 'shell' ? 'bg-warning/15 text-warning' :
+                          'bg-muted text-muted-foreground'
+                        }`}>{job.executionType}</span>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground font-mono">
+                      <td className="px-4 py-3 text-muted-foreground font-mono text-xs">
                         {formatSchedule(job.schedule)}
                       </td>
                       <td className="px-4 py-3">
@@ -355,6 +363,6 @@ export default function SchedulerListPage() {
           <button onClick={() => load(page + 1)} disabled={page * 20 >= total} className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50">Next</button>
         </div>
       )}
-    </div></>
+    </div></div></>
   );
 }

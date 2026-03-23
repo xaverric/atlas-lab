@@ -209,7 +209,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
     return (
       <>
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-4xl space-y-4 px-6 py-6">
+          <div className="mx-auto max-w-4xl space-y-6 px-12 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <button onClick={onBack} className="rounded-md p-1 hover:bg-accent">
@@ -313,7 +313,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
   return (
     <>
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-4xl space-y-4 px-6 py-6">
+        <div className="mx-auto max-w-4xl space-y-6 px-12 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button onClick={cancelEdit} className="rounded-md p-1 hover:bg-accent">

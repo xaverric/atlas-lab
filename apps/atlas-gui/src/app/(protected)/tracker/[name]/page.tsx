@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { PageHeader } from '@/components/shared/page-header';
 import { ArrowLeft, Trash2, Plus, Copy, Globe, Lock, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
@@ -47,54 +48,51 @@ export default function EndpointDetailPage() {
       .catch(() => toast.error('Endpoint not found'));
   }, [name]);
 
-  if (!endpoint) return <p className="text-muted-foreground">Loading...</p>;
+  if (!endpoint) return <p className="p-8 text-muted-foreground">Loading...</p>;
 
   return (
-    <div className="space-y-6">
-      <button
-        onClick={() => router.push('/tracker')}
-        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" /> Back to Tracker
-      </button>
+    <div className="flex h-full flex-col">
+      <PageHeader title={endpoint.displayName}>
+        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+          endpoint.visibility === 'public'
+            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+            : 'bg-muted text-muted-foreground'
+        }`}>
+          {endpoint.visibility === 'public' ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+          {endpoint.visibility}
+        </span>
+        <button
+          onClick={() => router.push('/tracker')}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back
+        </button>
+      </PageHeader>
 
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{endpoint.displayName}</h1>
-            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-              endpoint.visibility === 'public'
-                ? 'bg-info/10 text-info'
-                : 'bg-muted text-muted-foreground'
-            }`}>
-              {endpoint.visibility === 'public' ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-              {endpoint.visibility}
-            </span>
-          </div>
-          {endpoint.description && <p className="mt-1 text-muted-foreground">{endpoint.description}</p>}
-          <p className="mt-1 text-xs text-muted-foreground font-mono">{endpoint.name}</p>
+      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+        {endpoint.description && <p className="text-muted-foreground">{endpoint.description}</p>}
+        <p className="text-xs text-muted-foreground font-mono">{endpoint.name}</p>
+
+        <div className="flex gap-1 border-b">
+          {(['data', 'settings', 'api'] as Tab[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                tab === t
+                  ? 'border-primary text-foreground'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {t === 'data' ? 'Data' : t === 'settings' ? 'Settings' : 'API Info'}
+            </button>
+          ))}
         </div>
-      </div>
 
-      <div className="flex gap-1 border-b">
-        {(['data', 'settings', 'api'] as Tab[]).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              tab === t
-                ? 'border-primary text-foreground'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {t === 'data' ? 'Data' : t === 'settings' ? 'Settings' : 'API Info'}
-          </button>
-        ))}
+        {tab === 'data' && <DataTab endpoint={endpoint} />}
+        {tab === 'settings' && <SettingsTab endpoint={endpoint} onUpdate={setEndpoint} />}
+        {tab === 'api' && <ApiInfoTab endpoint={endpoint} />}
       </div>
-
-      {tab === 'data' && <DataTab endpoint={endpoint} />}
-      {tab === 'settings' && <SettingsTab endpoint={endpoint} onUpdate={setEndpoint} />}
-      {tab === 'api' && <ApiInfoTab endpoint={endpoint} />}
     </div>
   );
 }
