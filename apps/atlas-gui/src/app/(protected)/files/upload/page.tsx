@@ -156,7 +156,7 @@ export default function UploadPage() {
     <div className="flex h-full flex-col">
       <PageHeader title="Upload Files" />
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        <div className="max-w-2xl space-y-4 sm:space-y-6">
+        <div className="mx-auto max-w-4xl space-y-4 sm:space-y-6">
 
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}

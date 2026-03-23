@@ -69,7 +69,8 @@ export default function EndpointDetailPage() {
         </button>
       </PageHeader>
 
-      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="mx-auto max-w-4xl space-y-6">
         {endpoint.description && <p className="text-muted-foreground">{endpoint.description}</p>}
         <p className="text-xs text-muted-foreground font-mono">{endpoint.name}</p>
 
@@ -92,6 +93,7 @@ export default function EndpointDetailPage() {
         {tab === 'data' && <DataTab endpoint={endpoint} />}
         {tab === 'settings' && <SettingsTab endpoint={endpoint} onUpdate={setEndpoint} />}
         {tab === 'api' && <ApiInfoTab endpoint={endpoint} />}
+        </div>
       </div>
     </div>
   );

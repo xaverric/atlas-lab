@@ -156,7 +156,7 @@ export default function JobDetailPage() {
         </button>
       </PageHeader>
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        <div className="space-y-6">
+        <div className="mx-auto max-w-4xl space-y-6">
           <button onClick={() => router.push('/scheduler')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Back to Jobs
           </button>
