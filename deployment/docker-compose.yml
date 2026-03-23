@@ -407,8 +407,10 @@ services:
       - redis
     restart: unless-stopped
 
+  # TODO(production): Enable TLS for MongoDB with X.509 certs for encrypted connections
   mongodb:
     image: mongo:7
+    command: mongod --bind_ip localhost,mongodb --quiet
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-atlas}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
@@ -426,9 +428,14 @@ services:
           cpus: '1.0'
     restart: unless-stopped
 
+  # TODO(production): Enable TLS for Redis with stunnel or native redis TLS
   redis:
     image: redis:7-alpine
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: >-
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 96mb
+      --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
