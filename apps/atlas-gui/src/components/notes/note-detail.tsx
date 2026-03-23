@@ -209,91 +209,91 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
     return (
       <>
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-4xl space-y-6 px-12 py-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+          <div className="px-12 py-8">
+            <div className="mx-auto max-w-3xl">
+              <div className="flex items-center justify-between">
                 <button onClick={onBack} className="rounded-md p-1 hover:bg-accent">
                   <ArrowLeft className="h-5 w-5" />
                 </button>
-                <h1 className="text-3xl font-bold tracking-tight">{note?.title}</h1>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                >
-                  <Clock className="h-4 w-4" /> History
-                </button>
-                <button
-                  onClick={enterEdit}
-                  className="flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm hover:bg-accent"
-                >
-                  <Pencil className="h-4 w-4" /> Edit
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4" /> Delete
-                </button>
-              </div>
-            </div>
-
-            {/* Metadata bar — above content */}
-            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              {note && note.tags.length > 0 && (
-                <div className="flex items-center gap-1.5">
-                  {note.tags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium">{tag}</span>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowHistory(!showHistory)}
+                    className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  >
+                    <Clock className="h-4 w-4" /> History
+                  </button>
+                  <button
+                    onClick={enterEdit}
+                    className="flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm hover:bg-accent"
+                  >
+                    <Pencil className="h-4 w-4" /> Edit
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="h-4 w-4" /> Delete
+                  </button>
                 </div>
-              )}
-              <span className="text-xs">{folderName}</span>
-              <button
-                onClick={() => setShowInfo(true)}
-                className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer transition-colors ${
-                  note?.isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-muted text-muted-foreground hover:bg-accent'
-                }`}
-              >
-                {note?.isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
-                {note?.isPublic ? `Public (${note.publicPermission === 'edit' ? 'editable' : 'view only'})` : 'Private'}
-              </button>
-              {note?.isPublic && (
+              </div>
+
+              <h1 className="mt-6 text-4xl font-bold tracking-tight">{note?.title}</h1>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm text-muted-foreground">
+                {note && note.tags.length > 0 &&
+                  note.tags.map((tag) => (
+                    <span key={tag} className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{tag}</span>
+                  ))
+                }
+                <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{folderName}</span>
                 <button
-                  onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/public/notes/${note.id}`); toast.success('Public link copied'); }}
-                  className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setShowInfo(true)}
+                  className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer transition-colors ${
+                    note?.isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-muted text-muted-foreground hover:bg-accent'
+                  }`}
                 >
-                  <Link className="h-3 w-3" /> Copy link
+                  {note?.isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                  {note?.isPublic ? `Public (${note.publicPermission === 'edit' ? 'editable' : 'view only'})` : 'Private'}
                 </button>
+                {note?.isPublic && (
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/public/notes/${note.id}`); toast.success('Public link copied'); }}
+                    className="flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Link className="h-3 w-3" /> Copy link
+                  </button>
+                )}
+                {note && <span className="text-xs">Updated {formatDate(note.updatedAt)}</span>}
+                <button onClick={() => setShowInfo(true)} className="rounded p-0.5 text-muted-foreground hover:text-foreground" title="Note info">
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              <div className="mt-8 prose dark:prose-invert prose-base max-w-none leading-relaxed">
+                <NoteViewer html={html} />
+              </div>
+
+              <div className="mt-8">
+                <AttachmentPanel
+                  noteId={noteId}
+                  editable={false}
+                  onAttach={() => {}}
+                  refreshKey={attachmentRefreshKey}
+                />
+              </div>
+
+              {showFilePicker && note && (
+                <FilePickerDialog
+                  noteId={noteId}
+                  dmsFolderId={note.dmsFolderId}
+                  onClose={() => setShowFilePicker(false)}
+                  onAttached={(att) => {
+                    handleAttached(att);
+                    setShowFilePicker(false);
+                  }}
+                />
               )}
-              {note && <span className="text-xs">Updated {formatDate(note.updatedAt)}</span>}
-              <button onClick={() => setShowInfo(true)} className="rounded p-0.5 text-muted-foreground hover:text-foreground" title="Note info">
-                <Info className="h-3.5 w-3.5" />
-              </button>
             </div>
-
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <NoteViewer html={html} />
-            </div>
-
-            <AttachmentPanel
-              noteId={noteId}
-              editable={false}
-              onAttach={() => {}}
-              refreshKey={attachmentRefreshKey}
-            />
-
-            {showFilePicker && note && (
-              <FilePickerDialog
-                noteId={noteId}
-                dmsFolderId={note.dmsFolderId}
-                onClose={() => setShowFilePicker(false)}
-                onAttached={(att) => {
-                  handleAttached(att);
-                  setShowFilePicker(false);
-                }}
-              />
-            )}
           </div>
         </div>
         <HistoryDrawer
@@ -312,43 +312,51 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
 
   return (
     <>
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-4xl space-y-6 px-12 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={cancelEdit} className="rounded-md p-1 hover:bg-accent">
-                <ArrowLeft className="h-5 w-5" />
-              </button>
-              <span className="text-sm text-muted-foreground">Editing</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowInfo(true)}
-                className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-              >
-                <Info className="h-4 w-4" /> Settings
-              </button>
-              <button
-                onClick={() => setShowHistory(!showHistory)}
-                className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-              >
-                <Clock className="h-4 w-4" /> History
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="h-4 w-4" /> Delete
-              </button>
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-12 py-6">
+            <div className="mx-auto max-w-3xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button onClick={cancelEdit} className="rounded-md p-1 hover:bg-accent">
+                    <ArrowLeft className="h-5 w-5" />
+                  </button>
+                  <span className="text-sm text-muted-foreground">Editing</span>
+                </div>
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4" /> Delete
+                </button>
+              </div>
+
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Untitled"
+                className="mt-6 w-full bg-transparent text-[32px] font-bold tracking-tight outline-none placeholder:text-muted-foreground/40"
+              />
+
+              <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm text-muted-foreground">
+                {note && note.tags.length > 0 &&
+                  note.tags.map((tag) => (
+                    <span key={tag} className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{tag}</span>
+                  ))
+                }
+                <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{folderName}</span>
+                <button
+                  onClick={() => setShowInfo(true)}
+                  className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer transition-colors ${
+                    isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-muted text-muted-foreground hover:bg-accent'
+                  }`}
+                >
+                  {isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
+                  {isPublic ? `Public (${publicPermission === 'edit' ? 'editable' : 'view only'})` : 'Private'}
+                </button>
+              </div>
             </div>
           </div>
-
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Untitled"
-            className="w-full bg-transparent text-3xl font-bold tracking-tight outline-none placeholder:text-muted-foreground/40"
-          />
 
           <TiptapEditor
             content={html}
@@ -367,24 +375,15 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
             )}
           </TiptapEditor>
 
-          <AttachmentPanel
-            noteId={noteId}
-            editable={true}
-            onAttach={() => setShowFilePicker(true)}
-            refreshKey={attachmentRefreshKey}
-          />
-
-          <div className="flex justify-end gap-2">
-            <button onClick={cancelEdit} className="flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm hover:bg-accent">
-              <X className="h-4 w-4" /> Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {saving ? 'Saving...' : 'Save'}
-            </button>
+          <div className="px-12 py-4">
+            <div className="mx-auto max-w-3xl">
+              <AttachmentPanel
+                noteId={noteId}
+                editable={true}
+                onAttach={() => setShowFilePicker(true)}
+                refreshKey={attachmentRefreshKey}
+              />
+            </div>
           </div>
 
           {showFilePicker && note && (
@@ -398,6 +397,36 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
               }}
             />
           )}
+        </div>
+
+        <div className="flex items-center justify-between border-t bg-card px-12 py-3">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <span>{html.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length} words</span>
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Clock className="h-3.5 w-3.5" /> History
+            </button>
+            <button
+              onClick={() => setShowInfo(true)}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Info className="h-3.5 w-3.5" /> Settings
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={cancelEdit} className="flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm hover:bg-accent">
+              <X className="h-4 w-4" /> Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
         </div>
       </div>
       <HistoryDrawer

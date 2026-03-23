@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Briefcase, FileText, StickyNote, Bell } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { api } from '@/lib/api';
 import { dashboardStore, type DashboardWidget } from '@/lib/dashboard-store';
@@ -11,21 +11,36 @@ import { StatsCard } from '@/components/dashboard/stats-card';
 import { TrackerTableWidget } from '@/components/dashboard/tracker-widget';
 import { FolderWidget } from '@/components/dashboard/folder-widget';
 import { AddWidgetDialog } from '@/components/dashboard/add-widget-dialog';
+import { useNotificationContext } from '@/contexts/notification-context';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/page-header';
-import type { User } from '@atlas/core';
+import type { User, PaginatedResponse } from '@atlas/core';
 
 export default function DashboardPage() {
   const { user: oidcUser } = useAuth();
+  const { unreadCount } = useNotificationContext();
   const [widgets, setWidgets] = useState<DashboardWidget[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [profile, setProfile] = useState<User | null>(null);
+  const [stats, setStats] = useState({ jobs: 0, files: 0, notes: 0 });
 
   useEffect(() => {
     setWidgets(dashboardStore.getWidgets());
     api<{ data: User }>('/api/v1/users/me')
       .then((res) => setProfile(res.data))
       .catch(console.error);
+
+    Promise.allSettled([
+      api<PaginatedResponse<unknown>>('/api/v1/scheduler/jobs?limit=1'),
+      api<PaginatedResponse<unknown>>('/api/v1/files/documents?limit=1'),
+      api<PaginatedResponse<unknown>>('/api/v1/notes?limit=1'),
+    ]).then(([jobsRes, filesRes, notesRes]) => {
+      setStats({
+        jobs: jobsRes.status === 'fulfilled' ? jobsRes.value.total : 0,
+        files: filesRes.status === 'fulfilled' ? filesRes.value.total : 0,
+        notes: notesRes.status === 'fulfilled' ? notesRes.value.total : 0,
+      });
+    });
   }, []);
 
   const handleRemove = useCallback((id: string) => {
@@ -127,6 +142,23 @@ export default function DashboardPage() {
       </PageHeader>
 
       <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          {[
+            { label: 'Total Jobs', value: stats.jobs, icon: Briefcase },
+            { label: 'Files', value: stats.files, icon: FileText },
+            { label: 'Notes', value: stats.notes, icon: StickyNote },
+            { label: 'Unread Notifications', value: unreadCount, icon: Bell },
+          ].map((card) => (
+            <div key={card.label} className="rounded-xl border bg-card p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">{card.label}</p>
+                <card.icon className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="mt-2 text-[28px] font-bold leading-none">{card.value}</p>
+            </div>
+          ))}
+        </div>
+
         {widgets.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {widgets.map((widget) => (

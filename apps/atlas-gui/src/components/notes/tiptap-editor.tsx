@@ -79,7 +79,7 @@ export function TiptapEditor({ content, onChange, placeholder = 'Start writing..
 
   return (
     <div>
-      <div className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+      <div className="sticky top-0 z-10 border-b bg-background/92 backdrop-blur-sm">
         <EditorToolbar
           editor={editor}
           isMarkdown={isMarkdown}

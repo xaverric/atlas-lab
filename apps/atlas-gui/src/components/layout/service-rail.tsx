@@ -56,7 +56,7 @@ function RailButton({ item, isActive, showBadge }: { item: NavItem; isActive: bo
       {showBadge && (
         <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive" />
       )}
-      <span className="pointer-events-none absolute left-full ml-2 hidden rounded-md bg-foreground px-2 py-1 text-xs text-background shadow-md group-hover:block">
+      <span className="pointer-events-none absolute left-full ml-2 z-[100] hidden rounded-md bg-foreground px-2 py-1 text-xs text-background shadow-md group-hover:block">
         {item.label}
       </span>
     </Link>
@@ -68,7 +68,7 @@ export function ServiceRail() {
   const { unreadCount } = useNotificationContext();
 
   return (
-    <aside className="flex h-full w-[52px] flex-col items-center border-r border-rail-border bg-rail-background py-3">
+    <aside className="relative z-10 flex h-full w-[52px] flex-col items-center border-r border-rail-border bg-rail-background py-3">
       <Link href="/dashboard" className="mb-4 flex h-9 w-9 items-center justify-center" aria-label="Home">
         <svg viewBox="0 0 36 36" fill="none" className="h-7 w-7 text-foreground" xmlns="http://www.w3.org/2000/svg">
           <g stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
