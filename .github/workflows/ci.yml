@@ -36,6 +36,9 @@ jobs:
       - name: Lint (ESLint)
         run: npm run lint
 
+      - name: Detect duplicates (jscpd)
+        run: npm run lint:duplicates
+
       - name: Typecheck
         run: npm run typecheck
 

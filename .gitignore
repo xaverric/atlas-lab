@@ -11,6 +11,7 @@ coverage/
 test-results/
 mutation-report/
 .stryker-tmp/
+jscpd-report/
 
 # AI/agent tooling — local only
 .claude/

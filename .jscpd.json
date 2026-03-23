@@ -1,0 +1,19 @@
+{
+  "threshold": 5,
+  "reporters": ["console", "json"],
+  "output": "jscpd-report",
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/package-lock.json",
+    "deployment/**",
+    "**/__tests__/**",
+    "**/models/**",
+    "**/config/**"
+  ],
+  "format": ["typescript", "javascript"],
+  "absolute": false,
+  "minLines": 15,
+  "minTokens": 70
+}
