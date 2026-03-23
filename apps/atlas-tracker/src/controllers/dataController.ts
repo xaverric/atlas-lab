@@ -26,13 +26,14 @@ export const submit: RequestHandler = async (req, res, next) => {
 export const query: RequestHandler = async (req, res, next) => {
   try {
     const endpoint = await endpointService.getByName(req.auth.sub, req.params.name as string);
+    const q = req.query as Record<string, unknown>;
     const filters = {
-      from: req.query.from as string | undefined,
-      to: req.query.to as string | undefined,
-      sort: req.query.sort as string | undefined,
-      limit: req.query.limit ? Number(req.query.limit) : undefined,
-      offset: req.query.offset ? Number(req.query.offset) : undefined,
-      filter: req.query.filter as Record<string, unknown> | undefined,
+      from: q.from as string | undefined,
+      to: q.to as string | undefined,
+      sort: q.sort as string | undefined,
+      limit: (q.limit as number) || undefined,
+      offset: (q.offset as number) || undefined,
+      filter: q.filter as string | undefined,
     };
     const result = await dataService.query(endpoint.userId, endpoint.name, filters);
     res.json({ data: result });
@@ -75,13 +76,14 @@ export const submitPublic: RequestHandler = async (req, res, next) => {
 export const queryPublic: RequestHandler = async (req, res, next) => {
   try {
     const endpoint = await endpointService.getPublicByName(req.params.name as string);
+    const q = req.query as Record<string, unknown>;
     const filters = {
-      from: req.query.from as string | undefined,
-      to: req.query.to as string | undefined,
-      sort: req.query.sort as string | undefined,
-      limit: req.query.limit ? Number(req.query.limit) : undefined,
-      offset: req.query.offset ? Number(req.query.offset) : undefined,
-      filter: req.query.filter as Record<string, unknown> | undefined,
+      from: q.from as string | undefined,
+      to: q.to as string | undefined,
+      sort: q.sort as string | undefined,
+      limit: (q.limit as number) || undefined,
+      offset: (q.offset as number) || undefined,
+      filter: q.filter as string | undefined,
     };
     const result = await dataService.query(endpoint.userId, endpoint.name, filters);
     res.json({ data: result });

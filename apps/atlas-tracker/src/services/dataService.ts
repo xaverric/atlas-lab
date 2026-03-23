@@ -12,8 +12,17 @@ interface QueryFilters {
   sort?: string;
   limit?: number;
   offset?: number;
-  filter?: Record<string, unknown>;
+  filter?: string;
 }
+
+const ALLOWED_OPS = new Set(['$eq', '$ne', '$gt', '$gte', '$lt', '$lte', '$in', '$nin', '$exists', '$regex']);
+
+const sanitizeValue = (val: unknown): unknown => {
+  if (typeof val === 'string') return isNaN(Number(val)) ? val : Number(val);
+  if (typeof val === 'number' || typeof val === 'boolean') return val;
+  if (Array.isArray(val)) return val.map(sanitizeValue);
+  return String(val);
+};
 
 const buildMongoQuery = (filters: QueryFilters): Record<string, unknown> => {
   const query: Record<string, unknown> = {};
@@ -26,15 +35,24 @@ const buildMongoQuery = (filters: QueryFilters): Record<string, unknown> => {
   }
 
   if (filters.filter) {
-    for (const [key, value] of Object.entries(filters.filter)) {
-      if (typeof value === 'object' && value !== null) {
+    let parsed: Record<string, unknown>;
+    try {
+      parsed = typeof filters.filter === 'string' ? JSON.parse(filters.filter) : {};
+    } catch {
+      return query;
+    }
+
+    for (const [key, value] of Object.entries(parsed)) {
+      if (key.startsWith('$')) continue;
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         const mongoOps: Record<string, unknown> = {};
         for (const [op, val] of Object.entries(value as Record<string, unknown>)) {
-          mongoOps[op] = isNaN(Number(val)) ? val : Number(val);
+          if (!ALLOWED_OPS.has(op)) continue;
+          mongoOps[op] = sanitizeValue(val);
         }
-        query[key] = mongoOps;
+        if (Object.keys(mongoOps).length) query[`data.${key}`] = mongoOps;
       } else {
-        query[key] = isNaN(Number(value as string)) ? value : Number(value as string);
+        query[`data.${key}`] = sanitizeValue(value);
       }
     }
   }
