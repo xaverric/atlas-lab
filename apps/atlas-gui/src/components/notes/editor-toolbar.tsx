@@ -49,7 +49,7 @@ export function EditorToolbar({ editor, isMarkdown, onToggleMarkdown, onInsertIm
   return (
     <>
       {PromptDialogElement}
-      <div className="flex flex-wrap items-center gap-0.5 px-12 py-1.5">
+      <div className="flex flex-wrap items-center gap-0.5 py-1.5">
         {buttons.map((btn, i) => {
           if (!btn) return <div key={i} className="mx-1.5 h-5 w-px bg-border" />;
           const Icon = btn.icon;
