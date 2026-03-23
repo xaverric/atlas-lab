@@ -14,6 +14,7 @@ COPY packages/core/package.json packages/core/
 COPY packages/server-common/package.json packages/server-common/
 COPY apps/atlas-notes/package.json apps/atlas-notes/
 
+ENV HUSKY=0
 RUN npm ci --workspace=@atlas/notes --workspace=@atlas/core --workspace=@atlas/server-common \
     && npm cache clean --force && rm -rf /tmp/*
 

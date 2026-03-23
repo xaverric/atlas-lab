@@ -15,6 +15,7 @@ COPY packages/core/package.json packages/core/
 COPY packages/server-common/package.json packages/server-common/
 COPY apps/atlas-core/package.json apps/atlas-core/
 
+ENV HUSKY=0
 RUN npm ci --workspace=@atlas/server --workspace=@atlas/core --workspace=@atlas/server-common \
     && npm cache clean --force \
     && rm -rf /tmp/*

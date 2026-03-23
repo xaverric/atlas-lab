@@ -5,6 +5,7 @@ COPY package.json package-lock.json ./
 COPY packages/core/package.json packages/core/
 COPY apps/atlas-gui/package.json apps/atlas-gui/
 
+ENV HUSKY=0
 RUN npm ci --workspace=@atlas/gui
 
 COPY packages/core/ packages/core/

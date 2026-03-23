@@ -15,6 +15,7 @@ COPY packages/server-common/package.json packages/server-common/
 COPY packages/event-bus/package.json packages/event-bus/
 COPY apps/atlas-scheduler/package.json apps/atlas-scheduler/
 
+ENV HUSKY=0
 RUN npm ci --workspace=@atlas/scheduler --workspace=@atlas/core --workspace=@atlas/server-common --workspace=@atlas/event-bus \
     && npm cache clean --force && rm -rf /tmp/*
 
