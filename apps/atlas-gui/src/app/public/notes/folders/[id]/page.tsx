@@ -135,8 +135,8 @@ export default function PublicNotesFolderPage() {
           <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Notes</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {notes.map((note) => {
-              const excerpt = note.content
-                .replace(/<[^>]*>/g, '')
+              const plain = note.content.replace(/<[^>]*>/g, '');
+              const excerpt = (plain === note.content ? plain : plain.replace(/<[^>]*>/g, ''))
                 .replace(/[#*_~`]/g, '')
                 .slice(0, 120);
               return (
