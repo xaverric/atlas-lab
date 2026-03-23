@@ -10,6 +10,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - traefik-certs:/acme
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
     restart: unless-stopped
 
   keycloak:
@@ -40,6 +45,11 @@ services:
       - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
     depends_on:
       - keycloak-db
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
     restart: unless-stopped
 
   keycloak-db:
@@ -50,6 +60,11 @@ services:
       POSTGRES_PASSWORD: ${KC_DB_PASSWORD}
     volumes:
       - keycloak-db-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
     restart: unless-stopped
 
   atlas-core:
@@ -78,6 +93,11 @@ services:
       - ALL
     tmpfs:
       - /tmp:noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
 
   atlas-dms:
     image: xaverric/atlas-lab-atlas-dms:latest
@@ -111,6 +131,11 @@ services:
       - ALL
     tmpfs:
       - /tmp:noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
 
   atlas-scheduler:
     image: xaverric/atlas-lab-atlas-scheduler:latest
@@ -144,6 +169,11 @@ services:
       - ALL
     tmpfs:
       - /tmp:noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
 
   signal-cli:
     image: bbernhard/signal-cli-rest-api:latest
@@ -192,6 +222,11 @@ services:
       - ALL
     tmpfs:
       - /tmp:noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
 
   atlas-notes:
     image: xaverric/atlas-lab-atlas-notes:latest
@@ -225,6 +260,11 @@ services:
       - ALL
     tmpfs:
       - /tmp:noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
 
   atlas-tracker:
     image: xaverric/atlas-lab-atlas-tracker:latest
@@ -252,6 +292,11 @@ services:
       - ALL
     tmpfs:
       - /tmp:noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
 
   qdrant:
     image: qdrant/qdrant
@@ -303,6 +348,11 @@ services:
       - ALL
     tmpfs:
       - /tmp:noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
 
   atlas-gui:
     image: xaverric/atlas-lab-atlas-gui:latest
@@ -330,6 +380,11 @@ services:
       - ALL
     tmpfs:
       - /tmp:noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
 
   n8n:
     image: n8nio/n8n:latest
@@ -364,6 +419,11 @@ services:
       retries: 5
     volumes:
       - mongo-data:/data/db
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
     restart: unless-stopped
 
   redis:
@@ -376,6 +436,11 @@ services:
       retries: 5
     volumes:
       - redis-data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
     restart: unless-stopped
 
   minio:
