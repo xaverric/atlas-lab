@@ -1,0 +1,63 @@
+name: DAST
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL to scan'
+        required: true
+        default: 'http://localhost:3000'
+      scan_type:
+        description: 'Scan type'
+        required: true
+        type: choice
+        options:
+          - quick
+          - full
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  nuclei-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run Nuclei scanner
+        uses: projectdiscovery/nuclei-action@v2
+        with:
+          target: ${{ inputs.target_url }}
+          templates: |
+            cves/
+            vulnerabilities/
+            misconfiguration/
+            exposures/
+          flags: >-
+            -severity critical,high,medium
+            -stats
+            -silent
+            ${{ inputs.scan_type == 'quick' && '-rate-limit 50' || '-rate-limit 150' }}
+          output: nuclei-results.txt
+
+      - name: Parse results
+        if: always()
+        run: |
+          if [ -f nuclei-results.txt ] && [ -s nuclei-results.txt ]; then
+            echo "### DAST Scan Results" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            cat nuclei-results.txt >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### DAST Scan Results" >> "$GITHUB_STEP_SUMMARY"
+            echo "No vulnerabilities found." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload results
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: dast-results
+          path: nuclei-results.txt
+          retention-days: 30
