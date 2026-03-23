@@ -145,7 +145,7 @@ jobs:
           retention-days: 90
 
       - name: Docker Scout — CVEs
-        uses: docker/scout-action@v1
+        uses: docker/scout-action@v1.20.3
         if: always()
         continue-on-error: true
         with:
@@ -155,7 +155,7 @@ jobs:
           summary: true
 
       - name: Docker Scout — recommendations
-        uses: docker/scout-action@v1
+        uses: docker/scout-action@v1.20.3
         if: always()
         continue-on-error: true
         with:
