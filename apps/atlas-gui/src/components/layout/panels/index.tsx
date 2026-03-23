@@ -20,7 +20,11 @@ import {
   Palette,
   Activity,
   Layout,
+  Sun,
+  Moon,
+  Monitor,
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import {
   SectionPanel,
   PanelHeader,
@@ -412,10 +416,36 @@ function AuditPanel() {
   );
 }
 
+function ThemeSwitcher() {
+  const { theme, setTheme } = useTheme();
+  const options = [
+    { value: 'light', icon: Sun, label: 'Light' },
+    { value: 'dark', icon: Moon, label: 'Dark' },
+    { value: 'system', icon: Monitor, label: 'Auto' },
+  ] as const;
+  return (
+    <div className="mx-3 mt-2 mb-1 flex gap-1 rounded-lg bg-muted p-1">
+      {options.map(({ value, icon: Icon, label }) => (
+        <button
+          key={value}
+          onClick={() => setTheme(value)}
+          className={`flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium transition-colors ${
+            theme === value ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Icon className="h-3 w-3" />
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function SettingsPanel() {
   return (
     <SectionPanel>
       <PanelHeader title="Settings" />
+      <ThemeSwitcher />
       <PanelScroll>
         <PanelGroup label="General">
           <PanelItem icon={<User />} label="Profile" active />
