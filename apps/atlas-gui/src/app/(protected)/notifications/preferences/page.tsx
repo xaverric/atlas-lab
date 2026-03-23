@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { usePush } from '@/hooks/use-push';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface Channel {
   id: string;
@@ -141,14 +142,15 @@ export default function NotificationPreferencesPage() {
     typeof ch === 'string' ? ch : `${ch.label} (${ch.type})`;
 
   return (
-    <div className="max-w-2xl space-y-8">
-      <button onClick={() => router.push('/notifications')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back to Notifications
-      </button>
+    <div className="flex h-full flex-col">
+      <PageHeader title="Notification Preferences" />
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="max-w-2xl space-y-8">
+          <button onClick={() => router.push('/notifications')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Back to Notifications
+          </button>
 
-      <h1 className="text-2xl font-semibold tracking-tight">Notification Preferences</h1>
-
-      {/* Channels */}
+          {/* Channels */}
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">Delivery Channels</h2>
 
@@ -273,6 +275,8 @@ export default function NotificationPreferencesPage() {
           </button>
         </div>
       </section>
+        </div>
+      </div>
     </div>
   );
 }

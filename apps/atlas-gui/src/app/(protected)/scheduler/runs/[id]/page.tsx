@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { StatusBadge } from '@/components/scheduler/status-badge';
 import { LogViewer } from '@/components/scheduler/log-viewer';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface EvaluationResult {
   rule: string;
@@ -63,17 +64,18 @@ export default function RunDetailPage() {
       .catch(() => toast.error('Run not found'));
   }, [id]);
 
-  if (!run) return <p className="text-muted-foreground">Loading...</p>;
+  if (!run) return <p className="p-8 text-muted-foreground">Loading...</p>;
 
   const result = run.result;
 
   return (
-    <div className="space-y-6">
-      <button onClick={() => router.push(`/scheduler/jobs/${run.jobId}`)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back to Job
-      </button>
-
-      <h1 className="text-2xl font-semibold tracking-tight">Run Detail</h1>
+    <div className="flex h-full flex-col">
+      <PageHeader title="Run Details" />
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="space-y-6">
+          <button onClick={() => router.push(`/scheduler/jobs/${run.jobId}`)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Back to Job
+          </button>
 
       {/* Overview */}
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
@@ -202,6 +204,8 @@ export default function RunDetailPage() {
           <LogViewer logs={run.logs} />
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 }

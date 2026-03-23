@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { JobForm, formToPayload } from '@/components/scheduler/job-form';
 import type { JobFormData } from '@/components/scheduler/job-form';
+import { PageHeader } from '@/components/shared/page-header';
 
 export default function NewJobPage() {
   const router = useRouter();
@@ -27,12 +28,16 @@ export default function NewJobPage() {
   };
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <button onClick={() => router.push('/scheduler')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back to Jobs
-      </button>
-      <h1 className="text-2xl font-semibold tracking-tight">New Job</h1>
-      <JobForm onSubmit={handleSubmit} submitLabel="Create Job" saving={saving} />
+    <div className="flex h-full flex-col">
+      <PageHeader title="New Job" />
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="max-w-3xl space-y-6">
+          <button onClick={() => router.push('/scheduler')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Back to Jobs
+          </button>
+          <JobForm onSubmit={handleSubmit} submitLabel="Create Job" saving={saving} />
+        </div>
+      </div>
     </div>
   );
 }

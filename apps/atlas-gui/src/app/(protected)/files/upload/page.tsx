@@ -9,6 +9,7 @@ import { getUserManager } from '@/lib/auth';
 import { UploadQueue } from '@/components/files/upload-queue';
 import type { UploadItem } from '@/components/files/upload-queue';
 import { MoveDialog } from '@/components/files/move-dialog';
+import { PageHeader } from '@/components/shared/page-header';
 
 export default function UploadPage() {
   const router = useRouter();
@@ -152,8 +153,10 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="max-w-2xl space-y-4 sm:space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Upload Documents</h1>
+    <div className="flex h-full flex-col">
+      <PageHeader title="Upload Files" />
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="max-w-2xl space-y-4 sm:space-y-6">
 
       <div
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
@@ -246,6 +249,8 @@ export default function UploadPage() {
           onClose={() => setShowFolderPicker(false)}
         />
       )}
+        </div>
+      </div>
     </div>
   );
 }

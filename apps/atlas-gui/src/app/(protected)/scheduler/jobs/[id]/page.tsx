@@ -11,6 +11,7 @@ import { StatusBadge } from '@/components/scheduler/status-badge';
 import { JobChart } from '@/components/dashboard/job-chart';
 import { CodeMirrorViewer } from '@/components/shared/codemirror-viewer';
 import { dashboardStore } from '@/lib/dashboard-store';
+import { PageHeader } from '@/components/shared/page-header';
 
 interface Schedule {
   type: string;
@@ -136,39 +137,40 @@ export default function JobDetailPage() {
     }
   };
 
-  if (!job) return <p className="text-muted-foreground">Loading...</p>;
+  if (!job) return <p className="p-8 text-muted-foreground">Loading...</p>;
 
   return (
-    <>{ConfirmDialogElement}<div className="space-y-6">
-      <button onClick={() => router.push('/scheduler')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back to Jobs
-      </button>
+    <>{ConfirmDialogElement}<div className="flex h-full flex-col">
+      <PageHeader title={job.name}>
+        <button onClick={togglePin} className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted ${pinned ? 'text-primary border-primary' : ''}`}>
+          <BarChart3 className="h-4 w-4" /> {pinned ? 'Unpin' : 'Pin to Dashboard'}
+        </button>
+        <Link href={`/scheduler/jobs/${id}/edit`} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted">
+          <Pencil className="h-4 w-4" /> Edit
+        </Link>
+        <button onClick={handleRun} className="flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary/90">
+          <Play className="h-4 w-4" /> Run Now
+        </button>
+        <button onClick={handleDelete} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm text-muted-foreground hover:text-destructive hover:border-destructive">
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </PageHeader>
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="space-y-6">
+          <button onClick={() => router.push('/scheduler')} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Back to Jobs
+          </button>
 
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{job.name}</h1>
-            <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${job.enabled ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
-              {job.enabled ? 'Enabled' : 'Disabled'}
-            </span>
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${job.enabled ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+                  {job.enabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
+              {job.description && <p className="mt-1 text-muted-foreground">{job.description}</p>}
+            </div>
           </div>
-          {job.description && <p className="mt-1 text-muted-foreground">{job.description}</p>}
-        </div>
-        <div className="flex gap-2">
-          <button onClick={togglePin} className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted ${pinned ? 'text-primary border-primary' : ''}`}>
-            <BarChart3 className="h-4 w-4" /> {pinned ? 'Unpin' : 'Pin to Dashboard'}
-          </button>
-          <Link href={`/scheduler/jobs/${id}/edit`} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted">
-            <Pencil className="h-4 w-4" /> Edit
-          </Link>
-          <button onClick={handleRun} className="flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary/90">
-            <Play className="h-4 w-4" /> Run Now
-          </button>
-          <button onClick={handleDelete} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm text-muted-foreground hover:text-destructive hover:border-destructive">
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
 
       {/* Info Cards */}
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
@@ -293,6 +295,8 @@ export default function JobDetailPage() {
             <button onClick={() => loadRuns(runsPage + 1)} disabled={runsPage * 20 >= runsTotal} className="rounded border px-3 py-1 text-sm disabled:opacity-50">Next</button>
           </div>
         )}
+      </div>
+        </div>
       </div>
     </div></>
   );

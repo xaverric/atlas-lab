@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { JobForm, formToPayload, jobToFormData } from '@/components/scheduler/job-form';
 import type { JobFormData } from '@/components/scheduler/job-form';
+import { PageHeader } from '@/components/shared/page-header';
 
 export default function EditJobPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,15 +35,19 @@ export default function EditJobPage() {
     }
   };
 
-  if (!initialData) return <p className="text-muted-foreground">Loading...</p>;
+  if (!initialData) return <p className="p-8 text-muted-foreground">Loading...</p>;
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <button onClick={() => router.push(`/scheduler/jobs/${id}`)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> Back to Job
-      </button>
-      <h1 className="text-2xl font-semibold tracking-tight">Edit Job</h1>
-      <JobForm initialData={initialData} onSubmit={handleSubmit} submitLabel="Save Changes" saving={saving} />
+    <div className="flex h-full flex-col">
+      <PageHeader title="Edit Job" />
+      <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="max-w-3xl space-y-6">
+          <button onClick={() => router.push(`/scheduler/jobs/${id}`)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Back to Job
+          </button>
+          <JobForm initialData={initialData} onSubmit={handleSubmit} submitLabel="Save Changes" saving={saving} />
+        </div>
+      </div>
     </div>
   );
 }
