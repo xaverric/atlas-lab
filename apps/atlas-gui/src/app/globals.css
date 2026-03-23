@@ -44,6 +44,10 @@
   --color-sidebar-accent-foreground: #4c4f69;
   --color-sidebar-border: #e2e4ea;
   --color-sidebar-ring: #7287fd;
+
+  /* Rail — darker than sidebar */
+  --color-rail-background: #eceef4;
+  --color-rail-border: #e2e4ea;
 }
 
 @layer base {
@@ -190,6 +194,9 @@
   --color-sidebar-accent-foreground: #cdd6f4;
   --color-sidebar-border: #1e1e2e;
   --color-sidebar-ring: #b4befe;                        /* Lavender */
+
+  --color-rail-background: #181825;                     /* Mantle */
+  --color-rail-border: #1e1e2e;
 
   /* Dark frost glow */
   & [class*="bg-primary"]:not([class*="bg-primary/"]) {
