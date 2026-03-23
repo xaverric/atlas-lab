@@ -9,6 +9,8 @@ dist/
 .turbo
 coverage/
 test-results/
+mutation-report/
+.stryker-tmp/
 
 # AI/agent tooling — local only
 .claude/

@@ -26,6 +26,7 @@
     "start:prod": "bash deployment/startup.sh prod",
     "start:prod:reset": "bash deployment/startup.sh prod --reset",
     "test": "vitest run",
+    "test:mutation": "stryker run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "prepare": "husky"
@@ -35,6 +36,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@stryker-mutator/core": "^9.6.0",
+    "@stryker-mutator/typescript-checker": "^9.6.0",
+    "@stryker-mutator/vitest-runner": "^9.6.0",
     "@types/supertest": "^7.2.0",
     "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^10.1.0",
@@ -50,7 +54,11 @@
     "express-rate-limit": "^8.3.1"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,mjs}": ["eslint --fix --max-warnings 50"],
-    "*.{json,yml,yaml,md}": ["prettier --write --ignore-unknown"]
+    "*.{ts,tsx,js,mjs}": [
+      "eslint --fix --max-warnings 50"
+    ],
+    "*.{json,yml,yaml,md}": [
+      "prettier --write --ignore-unknown"
+    ]
   }
 }

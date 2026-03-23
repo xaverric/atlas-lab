@@ -1,0 +1,21 @@
+/** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
+export default {
+  testRunner: 'vitest',
+  checkers: ['typescript'],
+  reporters: ['clear-text', 'html', 'json'],
+  htmlReporter: { fileName: 'mutation-report/index.html' },
+  jsonReporter: { fileName: 'mutation-report/mutation.json' },
+  thresholds: { high: 80, low: 60, break: null },
+  mutate: [
+    'packages/*/src/**/*.ts',
+    'apps/atlas-core/src/**/*.ts',
+    'apps/atlas-dms/src/**/*.ts',
+    'apps/atlas-scheduler/src/**/*.ts',
+    '!**/__tests__/**',
+    '!**/index.ts',
+    '!**/config/**',
+    '!**/models/**',
+  ],
+  concurrency: 4,
+  timeoutMS: 30000,
+};

@@ -372,21 +372,40 @@ function TrackerPanel() {
 }
 
 function AuditPanel() {
+  const [stats, setStats] = useState<{ service: string; count: number }[]>([]);
+  const [totals, setTotals] = useState({ success: 0, error: 0, total: 0 });
+
+  useEffect(() => {
+    const services = ['atlas-core', 'atlas-dms', 'atlas-scheduler', 'atlas-notify', 'atlas-notes', 'atlas-tracker'];
+    Promise.all(
+      services.map(async (svc) => {
+        try {
+          const res = await api<{ total: number }>(`/api/v1/audit?service=${svc}&limit=1`);
+          return { service: svc, count: res.total ?? 0 };
+        } catch { return { service: svc, count: 0 }; }
+      })
+    ).then(setStats);
+    Promise.all([
+      api<{ total: number }>('/api/v1/audit?limit=1').then(r => r.total ?? 0).catch(() => 0),
+      api<{ total: number }>('/api/v1/audit?status=error&limit=1').then(r => r.total ?? 0).catch(() => 0),
+    ]).then(([total, errors]) => setTotals({ total, error: errors, success: total - errors }));
+  }, []);
+
+  const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+
   return (
     <SectionPanel>
       <PanelHeader title="Audit Log" />
       <PanelScroll>
         <PanelGroup label="Services">
-          <PanelItem icon={<ScrollText />} label="All Events" active />
-          <PanelItem label="atlas-core" badge={{ text: "", color: "green" }} />
-          <PanelItem label="atlas-dms" badge={{ text: "", color: "green" }} />
-          <PanelItem label="atlas-scheduler" badge={{ text: "", color: "green" }} />
-          <PanelItem label="atlas-notify" badge={{ text: "", color: "green" }} />
-          <PanelItem label="atlas-notes" badge={{ text: "", color: "green" }} />
+          <PanelItem icon={<ScrollText />} label="All Events" active count={totals.total || undefined} />
+          {stats.map((s) => (
+            <PanelItem key={s.service} label={s.service} count={s.count || undefined} />
+          ))}
         </PanelGroup>
         <PanelGroup label="Status">
-          <PanelItem label="Success" badge={{ text: "1.2k", color: "green" }} />
-          <PanelItem label="Error" badge={{ text: "14", color: "red" }} />
+          <PanelItem label="Success" badge={{ text: fmt(totals.success), color: 'green' }} />
+          <PanelItem label="Error" badge={{ text: fmt(totals.error), color: 'red' }} />
         </PanelGroup>
       </PanelScroll>
     </SectionPanel>
