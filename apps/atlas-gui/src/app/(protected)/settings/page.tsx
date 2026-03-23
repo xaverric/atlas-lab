@@ -165,7 +165,7 @@ export default function SettingsPage() {
   const allHealthy = services.every(s => s.status === 'ok');
 
   return (
-    <div className="px-8 py-6 space-y-6">
+    <div className="flex h-full flex-col overflow-y-auto px-8 py-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Settings</h1>

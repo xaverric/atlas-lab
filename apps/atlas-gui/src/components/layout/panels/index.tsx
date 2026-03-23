@@ -449,7 +449,6 @@ function SettingsPanel() {
       <PanelScroll>
         <PanelGroup label="General">
           <PanelItem icon={<User />} label="Profile" active />
-          <PanelItem icon={<Palette />} label="Appearance" />
         </PanelGroup>
         <PanelGroup label="System">
           <PanelItem icon={<Layout />} label="Resources" />
