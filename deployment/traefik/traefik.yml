@@ -19,7 +19,7 @@ providers:
 certificatesResolvers:
   letsencrypt:
     acme:
-      email: jilek.daniel@gmail.com
+      email: admin@xaverric.cz
       storage: /acme/acme.json
       httpChallenge:
         entryPoint: web

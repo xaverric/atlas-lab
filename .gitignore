@@ -13,6 +13,9 @@ mutation-report/
 .stryker-tmp/
 jscpd-report/
 
+# Internal docs — plans, specs, security docs (not for public repo)
+docs/
+
 # AI/agent tooling — local only
 .claude/
 .agents/

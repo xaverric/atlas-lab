@@ -11,8 +11,8 @@ export const config = {
   minio: {
     endpoint: process.env.MINIO_ENDPOINT || 'http://localhost:9000',
     publicUrl: process.env.MINIO_PUBLIC_URL || '',
-    accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
-    secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
+    accessKey: process.env.MINIO_ACCESS_KEY || '',
+    secretKey: process.env.MINIO_SECRET_KEY || '',
     bucket: process.env.MINIO_BUCKET || 'atlas-dms',
     region: process.env.MINIO_REGION || 'us-east-1',
   },
