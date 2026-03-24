@@ -10,7 +10,7 @@ const checkDepth = (obj: unknown, depth = 0): boolean => {
   return Object.values(obj).every(v => checkDepth(v, depth + 1));
 };
 
-const ajv = new Ajv({ allErrors: true });
+const ajv = new Ajv();
 addFormats(ajv);
 
 const validators = new Map<string, ValidateFunction>();
