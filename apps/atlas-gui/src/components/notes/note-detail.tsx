@@ -401,7 +401,7 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
 
         <div className="flex items-center justify-between border-t bg-card px-12 py-3">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <span>{html.replace(/<[^>]*>/g, '').trim().split(/\s+/).filter(Boolean).length} words</span>
+            <span>{new DOMParser().parseFromString(html, 'text/html').body.textContent?.trim().split(/\s+/).filter(Boolean).length ?? 0} words</span>
             <button
               onClick={() => setShowHistory(!showHistory)}
               className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
