@@ -32,7 +32,7 @@ const auditLogSchema = new mongoose.Schema(
   { collection: 'auditlogs' },
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 let AuditLog: mongoose.Model<any> | null = null;
 let connectionReady = false;
 
@@ -71,12 +71,18 @@ export interface AuditQuery {
   offset?: number;
 }
 
+const escapeRegex = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const ALLOWED_SORT_FIELDS = new Set([
+  'timestamp', 'service', 'action', 'category', 'userId', 'duration',
+]);
+
 export const find = async (query: AuditQuery) => {
   const model = getModel();
   const filter: Record<string, unknown> = {};
 
   if (query.service) filter.service = query.service;
-  if (query.action) filter.action = { $regex: query.action, $options: 'i' };
+  if (query.action) filter.action = { $regex: escapeRegex(query.action), $options: 'i' };
   if (query.category) filter.category = query.category;
   if (query.userId) filter.userId = query.userId;
   if (query.status) filter['result.status'] = query.status;
@@ -94,7 +100,7 @@ export const find = async (query: AuditQuery) => {
   let sortOrder: 1 | -1 = -1;
   if (query.sort) {
     const [field, order] = query.sort.split(':');
-    sortField = field || 'timestamp';
+    sortField = ALLOWED_SORT_FIELDS.has(field || '') ? (field as string) : 'timestamp';
     sortOrder = order === 'asc' ? 1 : -1;
   }
 
@@ -110,7 +116,7 @@ export const find = async (query: AuditQuery) => {
     model.countDocuments(filter),
   ]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const data = raw.map((doc: any) => ({
     id: String(doc._id),
     timestamp: doc.timestamp,
