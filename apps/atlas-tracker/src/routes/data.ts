@@ -15,8 +15,8 @@ const dataQuerySchema = z.object({
 
 const router = Router();
 
-router.use(auth);
 router.use(apiRateLimiter);
+router.use(auth);
 router.post('/:name/data', dataController.submit);
 router.get('/:name/data', validate(dataQuerySchema, 'query'), dataController.query);
 router.delete('/:name/data/:id', dataController.deleteEntry);
