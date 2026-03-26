@@ -31,6 +31,7 @@ import {
 import * as folderDao from '../../src/daos/folderDao.js';
 import * as documentDao from '../../src/daos/documentDao.js';
 import { Document } from '../../src/models/Document.js';
+import { publishNotification } from '../../src/services/publishNotification.js';
 
 const mockFolder = {
   id: 'f1',
@@ -88,6 +89,45 @@ describe('folderService', () => {
         isPublic: true,
         publicPermission: 'edit',
       });
+    });
+
+    it('defaults publicPermission to view when public parent has none', async () => {
+      const publicNoPermission = { id: 'fp', name: 'Pub', parentId: null, ownerId: 'user-1', isPublic: true };
+      vi.mocked(folderDao.findById).mockResolvedValue(publicNoPermission as any);
+      vi.mocked(folderDao.create).mockResolvedValue({} as any);
+
+      await create('Child', 'user-1', 'fp');
+      expect(folderDao.create).toHaveBeenCalledWith({
+        name: 'Child',
+        parentId: 'fp',
+        ownerId: 'user-1',
+        isPublic: true,
+        publicPermission: 'view',
+      });
+    });
+
+    it('non-public parent creates regular folder without isPublic', async () => {
+      vi.mocked(folderDao.findById).mockResolvedValue(mockFolder as any);
+      vi.mocked(folderDao.create).mockResolvedValue(mockFolder as any);
+
+      await create('Child', 'user-1', 'f1');
+      expect(folderDao.create).toHaveBeenCalledWith({
+        name: 'Child',
+        parentId: 'f1',
+        ownerId: 'user-1',
+      });
+    });
+
+    it('fires notification with dms.folder.created event', async () => {
+      vi.mocked(folderDao.create).mockResolvedValue(mockFolder as any);
+
+      await create('Docs', 'user-1');
+      expect(publishNotification).toHaveBeenCalledWith(
+        'user-1',
+        'Folder Created',
+        'Folder "Docs" has been created.',
+        'dms.folder.created',
+      );
     });
   });
 
@@ -425,6 +465,154 @@ describe('folderService', () => {
       vi.mocked(folderDao.findByNameAndParent).mockResolvedValue(folder as any);
       vi.mocked(folderDao.findById).mockResolvedValue(folder as any);
       await expect(resolveByPath(['Private'])).rejects.toThrow('Folder is not public');
+    });
+
+    it('throws 404 when middle segment not found', async () => {
+      const root = { id: 'r1' };
+      vi.mocked(folderDao.findByNameAndParent)
+        .mockResolvedValueOnce(root as any)
+        .mockResolvedValueOnce(null as any);
+
+      await expect(resolveByPath(['Root', 'Missing', 'Deep'])).rejects.toThrow('Folder not found');
+    });
+  });
+
+  describe('isPublicFolder - additional cases', () => {
+    it('traverses parent chain to find public ancestor', async () => {
+      const grandchild = { id: 'gc', isPublic: false, parentId: 'fc' };
+      const child = { id: 'fc', isPublic: false, parentId: 'f2' };
+      vi.mocked(folderDao.findById)
+        .mockResolvedValueOnce(grandchild as any)
+        .mockResolvedValueOnce(child as any)
+        .mockResolvedValueOnce(mockPublicFolder as any);
+      expect(await isPublicFolder('gc')).toBe(true);
+    });
+  });
+
+  describe('resolvePublicPermission - additional cases', () => {
+    it('traverses parent chain to find permission', async () => {
+      const child = { id: 'fc', isPublic: false, parentId: 'f2' };
+      vi.mocked(folderDao.findById)
+        .mockResolvedValueOnce(child as any)
+        .mockResolvedValueOnce(mockPublicFolder as any);
+      expect(await resolvePublicPermission('fc')).toBe('edit');
+    });
+
+    it('returns null when findById returns null', async () => {
+      vi.mocked(folderDao.findById).mockResolvedValue(null as any);
+      expect(await resolvePublicPermission('nonexistent')).toBeNull();
+    });
+  });
+
+  describe('createPublic - additional cases', () => {
+    it('non-public parent creates child with isPublic false', async () => {
+      vi.mocked(folderDao.findById).mockResolvedValue(mockFolder as any);
+      vi.mocked(folderDao.create).mockResolvedValue({} as any);
+
+      await createPublic('New', 'f1');
+      expect(folderDao.create).toHaveBeenCalledWith({
+        name: 'New',
+        parentId: 'f1',
+        ownerId: 'user-1',
+        isPublic: false,
+        publicPermission: undefined,
+      });
+    });
+
+    it('public parent with no publicPermission defaults to view', async () => {
+      const publicNoPermission = {
+        id: 'fp', name: 'Pub', parentId: null, ownerId: 'user-1', isPublic: true,
+      };
+      vi.mocked(folderDao.findById).mockResolvedValue(publicNoPermission as any);
+      vi.mocked(folderDao.create).mockResolvedValue({} as any);
+
+      await createPublic('Child', 'fp');
+      expect(folderDao.create).toHaveBeenCalledWith({
+        name: 'Child',
+        parentId: 'fp',
+        ownerId: 'user-1',
+        isPublic: true,
+        publicPermission: 'view',
+      });
+    });
+  });
+
+  describe('getPublicFolder - additional cases', () => {
+    it('breadcrumb stops at public parent', async () => {
+      const child = {
+        id: 'fc', name: 'Child', parentId: 'f2', ownerId: 'user-1', isPublic: false,
+        toJSON: () => ({ id: 'fc', name: 'Child', parentId: 'f2', ownerId: 'user-1', isPublic: false }),
+      };
+      // First call: getPublicFolder finds the folder
+      // Second call: isPublicFolder checks the folder itself (not public)
+      // Third call: isPublicFolder checks the parent (public) => true
+      // Fourth call: breadcrumb traversal finds parent
+      vi.mocked(folderDao.findById)
+        .mockResolvedValueOnce(child as any)       // getPublicFolder: find folder
+        .mockResolvedValueOnce(child as any)        // isPublicFolder: check child
+        .mockResolvedValueOnce(mockPublicFolder as any) // isPublicFolder: check parent => true
+        .mockResolvedValueOnce(mockPublicFolder as any); // breadcrumb: find parent
+
+      const result = await getPublicFolder('fc');
+      expect(result.breadcrumb).toEqual([
+        { id: 'f2', name: 'Public' },
+        { id: 'fc', name: 'Child' },
+      ]);
+    });
+  });
+
+  describe('getMetadata - additional cases', () => {
+    it('returns zero counts for empty folder', async () => {
+      vi.mocked(folderDao.findById).mockResolvedValue(mockFolder as any);
+      vi.mocked(documentDao.countByFolder).mockResolvedValue(0);
+      vi.mocked(folderDao.countByParent).mockResolvedValue(0);
+      vi.mocked(documentDao.sumSizeByFolder).mockResolvedValue(0);
+
+      const result = await getMetadata('f1', 'user-1');
+      expect(result).toEqual({
+        id: 'f1', name: 'Docs', parentId: null, ownerId: 'user-1', isPublic: false,
+        docCount: 0, subfolderCount: 0, totalSize: 0,
+      });
+    });
+
+    it('passes isAdmin flag to findById', async () => {
+      vi.mocked(folderDao.findById).mockResolvedValue(mockFolder as any);
+      vi.mocked(documentDao.countByFolder).mockResolvedValue(1);
+      vi.mocked(folderDao.countByParent).mockResolvedValue(1);
+      vi.mocked(documentDao.sumSizeByFolder).mockResolvedValue(500);
+
+      await getMetadata('f1', 'user-1', true);
+      expect(folderDao.findById).toHaveBeenCalledWith('f1', 'user-1', true);
+    });
+  });
+
+  describe('getPublicFolderTree - additional cases', () => {
+    it('returns nested tree with multiple levels', async () => {
+      const child = { id: 'fc', name: 'Child', ownerId: 'user-1', toJSON: () => ({ id: 'fc', name: 'Child' }) };
+      const grandchild = { id: 'gc', name: 'Grand', toJSON: () => ({ id: 'gc', name: 'Grand' }) };
+
+      vi.mocked(folderDao.findById).mockResolvedValue(mockPublicFolder as any);
+      vi.mocked(folderDao.listByParent)
+        .mockResolvedValueOnce([child] as any)   // children of f2
+        .mockResolvedValueOnce([grandchild] as any) // children of fc
+        .mockResolvedValueOnce([] as any);        // children of gc
+
+      const tree = await getPublicFolderTree('f2');
+      expect(tree).toEqual([
+        { id: 'fc', name: 'Child', children: [
+          { id: 'gc', name: 'Grand', children: [] },
+        ]},
+      ]);
+    });
+  });
+
+  describe('create - isAdmin flag', () => {
+    it('passes isAdmin to folderDao.findById when checking parent', async () => {
+      vi.mocked(folderDao.findById).mockResolvedValue(mockFolder as any);
+      vi.mocked(folderDao.create).mockResolvedValue(mockFolder as any);
+
+      await create('Sub', 'user-1', 'f1', true);
+      expect(folderDao.findById).toHaveBeenCalledWith('f1', 'user-1', true);
     });
   });
 });

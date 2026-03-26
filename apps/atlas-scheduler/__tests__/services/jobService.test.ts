@@ -61,10 +61,17 @@ vi.mock('../../src/daos/jobStorageDao.js', () => ({
   remove: vi.fn(),
 }));
 
+vi.mock('../../src/workers/scheduler.js', () => ({
+  scheduleJob: vi.fn(),
+  removeJob: vi.fn(),
+}));
+
 import * as jobService from '../../src/services/jobService.js';
 import * as jobDao from '../../src/daos/jobDao.js';
+import * as scheduler from '../../src/workers/scheduler.js';
 
 const mockJobDao = vi.mocked(jobDao);
+const mockScheduler = vi.mocked(scheduler);
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -314,6 +321,244 @@ describe('jobService', () => {
     it('returns Date for once with runAt', () => {
       const result = jobService.computeNextRun({ type: 'once', runAt: '2099-06-01T00:00:00Z' });
       expect(result).toEqual(new Date('2099-06-01T00:00:00Z'));
+    });
+
+    it('returns exact Date instance for cron type', () => {
+      const result = jobService.computeNextRun({ type: 'cron', expression: '*/5 * * * *', timezone: 'Europe/Prague' });
+      expect(result).toBeInstanceOf(Date);
+      expect(result).not.toBeNull();
+    });
+
+    it('returns the runAt date for once type', () => {
+      const runAt = '2099-12-31T23:59:59Z';
+      const result = jobService.computeNextRun({ type: 'once', runAt });
+      expect(result).toEqual(new Date(runAt));
+      expect(result!.toISOString()).toBe('2099-12-31T23:59:59.000Z');
+    });
+
+    it('returns null for interval type', () => {
+      const result = jobService.computeNextRun({ type: 'interval' });
+      expect(result).toBeNull();
+    });
+
+    it('returns null for cron type without expression', () => {
+      const result = jobService.computeNextRun({ type: 'cron' });
+      expect(result).toBeNull();
+    });
+
+    it('returns null for once type without runAt', () => {
+      const result = jobService.computeNextRun({ type: 'once' });
+      expect(result).toBeNull();
+    });
+
+    it('uses UTC timezone by default for cron', async () => {
+      jobService.computeNextRun({ type: 'cron', expression: '0 0 * * *' });
+      const { CronExpressionParser } = vi.mocked(await import('cron-parser'));
+      expect(CronExpressionParser.parse).toHaveBeenCalledWith('0 0 * * *', { tz: 'UTC' });
+    });
+
+    it('passes custom timezone for cron', async () => {
+      jobService.computeNextRun({ type: 'cron', expression: '0 0 * * *', timezone: 'America/New_York' });
+      const { CronExpressionParser } = vi.mocked(await import('cron-parser'));
+      expect(CronExpressionParser.parse).toHaveBeenCalledWith('0 0 * * *', { tz: 'America/New_York' });
+    });
+
+    it('handles Date object as runAt for once type', () => {
+      const runAtDate = new Date('2099-06-15T12:00:00Z');
+      const result = jobService.computeNextRun({ type: 'once', runAt: runAtDate });
+      expect(result).toEqual(runAtDate);
+    });
+  });
+
+  describe('create - scheduling behavior', () => {
+    it('calls scheduleJob when job is enabled', async () => {
+      const jobData = {
+        name: 'Enabled Job',
+        ownerId: 'user-1',
+        schedule: { type: 'cron', expression: '0 * * * *' },
+        executionType: 'webhook',
+        config: {},
+        enabled: true,
+      };
+
+      const jobObj = { ...jobData, _id: 'j10' };
+      const saved = { ...jobData, _id: 'j10', enabled: true, toObject: () => jobObj };
+      mockJobDao.create.mockResolvedValue(saved as never);
+
+      await jobService.create(jobData);
+      expect(mockScheduler.scheduleJob).toHaveBeenCalledWith(jobObj);
+    });
+
+    it('does NOT call scheduleJob when job is disabled', async () => {
+      const jobData = {
+        name: 'Disabled Job',
+        ownerId: 'user-1',
+        schedule: { type: 'cron', expression: '0 * * * *' },
+        executionType: 'webhook',
+        config: {},
+        enabled: false,
+      };
+
+      const saved = { ...jobData, _id: 'j11', enabled: false, toObject: () => ({ ...jobData, _id: 'j11' }) };
+      mockJobDao.create.mockResolvedValue(saved as never);
+
+      await jobService.create(jobData);
+      expect(mockScheduler.scheduleJob).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('update - scheduling behavior', () => {
+    it('reschedules when schedule changes and job is enabled', async () => {
+      const existingJob = { _id: 'j1', name: 'Existing', ownerId: 'user-1', enabled: true };
+      mockJobDao.findById.mockResolvedValue(existingJob as never);
+
+      const updatedObj = { ...existingJob, _id: 'j1' };
+      const updatedJob = { ...existingJob, enabled: true, toObject: () => updatedObj };
+      mockJobDao.updateById.mockResolvedValue(updatedJob as never);
+
+      await jobService.update('j1', 'user-1', {
+        schedule: { type: 'cron', expression: '*/10 * * * *' },
+      });
+
+      expect(mockScheduler.removeJob).toHaveBeenCalledWith('j1');
+      expect(mockScheduler.scheduleJob).toHaveBeenCalledWith(updatedObj);
+    });
+
+    it('removes job from queue but does not reschedule when updated job is disabled', async () => {
+      const existingJob = { _id: 'j1', name: 'Existing', ownerId: 'user-1' };
+      mockJobDao.findById.mockResolvedValue(existingJob as never);
+
+      const updatedJob = { ...existingJob, enabled: false, toObject: () => ({ ...existingJob }) };
+      mockJobDao.updateById.mockResolvedValue(updatedJob as never);
+
+      await jobService.update('j1', 'user-1', { name: 'Renamed' });
+
+      expect(mockScheduler.removeJob).toHaveBeenCalledWith('j1');
+      expect(mockScheduler.scheduleJob).not.toHaveBeenCalled();
+    });
+
+    it('does not recompute nextRunAt when schedule is not in update data', async () => {
+      const existingJob = { _id: 'j1', name: 'Existing', ownerId: 'user-1' };
+      mockJobDao.findById.mockResolvedValue(existingJob as never);
+
+      const updatedJob = { ...existingJob, enabled: false, toObject: () => ({ ...existingJob }) };
+      mockJobDao.updateById.mockResolvedValue(updatedJob as never);
+
+      await jobService.update('j1', 'user-1', { name: 'New Name' });
+
+      const updateArg = mockJobDao.updateById.mock.calls[0][1];
+      expect(updateArg).not.toHaveProperty('nextRunAt');
+    });
+  });
+
+  describe('list - default pagination', () => {
+    it('uses page=1 limit=20 when no page/limit provided', async () => {
+      mockJobDao.list.mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 } as never);
+      await jobService.list('user-1', {});
+      expect(mockJobDao.list).toHaveBeenCalledWith(
+        expect.objectContaining({ page: 1, limit: 20 }),
+      );
+    });
+
+    it('passes undefined for unspecified filter fields', async () => {
+      mockJobDao.list.mockResolvedValue({ data: [], total: 0, page: 1, limit: 20 } as never);
+      await jobService.list('user-1', {});
+      expect(mockJobDao.list).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executionType: undefined,
+          enabled: undefined,
+          group: undefined,
+          tags: undefined,
+          search: undefined,
+        }),
+      );
+    });
+
+    it('uses provided page and limit values', async () => {
+      mockJobDao.list.mockResolvedValue({ data: [], total: 0, page: 3, limit: 50 } as never);
+      await jobService.list('user-1', { page: 3, limit: 50 });
+      expect(mockJobDao.list).toHaveBeenCalledWith(
+        expect.objectContaining({ page: 3, limit: 50 }),
+      );
+    });
+  });
+
+  describe('addNotification - detailed', () => {
+    it('passes notification data to dao', async () => {
+      const job = { _id: 'j1', ownerId: 'user-1' };
+      mockJobDao.findById.mockResolvedValue(job as never);
+      const notification = { channel: 'telegram', on: 'failure', destination: 'chat-123' };
+      const updated = { ...job, notifications: [notification] };
+      mockJobDao.addNotification.mockResolvedValue(updated as never);
+
+      const result = await jobService.addNotification('j1', 'user-1', notification);
+      expect(result).toBe(updated);
+      expect(mockJobDao.addNotification).toHaveBeenCalledWith('j1', notification);
+    });
+
+    it('passes isAdmin to getById check', async () => {
+      mockJobDao.findById.mockResolvedValue({ _id: 'j1', ownerId: 'admin' } as never);
+      mockJobDao.addNotification.mockResolvedValue({ _id: 'j1' } as never);
+
+      await jobService.addNotification('j1', 'admin', { channel: 'email' }, true);
+      expect(mockJobDao.findById).toHaveBeenCalledWith('j1', 'admin', true);
+    });
+  });
+
+  describe('removeNotification - detailed', () => {
+    it('passes notificationId to dao', async () => {
+      const job = { _id: 'j1', ownerId: 'user-1', notifications: [] };
+      mockJobDao.findById.mockResolvedValue(job as never);
+      mockJobDao.removeNotification.mockResolvedValue(job as never);
+
+      await jobService.removeNotification('j1', 'user-1', 'notif-42');
+      expect(mockJobDao.removeNotification).toHaveBeenCalledWith('j1', 'notif-42');
+    });
+
+    it('passes isAdmin to getById check', async () => {
+      mockJobDao.findById.mockResolvedValue({ _id: 'j1', ownerId: 'admin' } as never);
+      mockJobDao.removeNotification.mockResolvedValue({ _id: 'j1' } as never);
+
+      await jobService.removeNotification('j1', 'admin', 'notif-1', true);
+      expect(mockJobDao.findById).toHaveBeenCalledWith('j1', 'admin', true);
+    });
+  });
+
+  describe('remove - scheduling', () => {
+    it('calls removeJob before deleteById', async () => {
+      mockJobDao.findById.mockResolvedValue({ _id: 'j1', ownerId: 'user-1' } as never);
+      mockJobDao.deleteById.mockResolvedValue(null as never);
+
+      const callOrder: string[] = [];
+      mockScheduler.removeJob.mockImplementation(async () => { callOrder.push('removeJob'); });
+      mockJobDao.deleteById.mockImplementation(async () => { callOrder.push('deleteById'); return null as never; });
+
+      await jobService.remove('j1', 'user-1');
+      expect(callOrder).toEqual(['removeJob', 'deleteById']);
+      expect(mockScheduler.removeJob).toHaveBeenCalledWith('j1');
+    });
+  });
+
+  describe('setEnabled - scheduling', () => {
+    it('calls scheduleJob when enabling', async () => {
+      const jobObj = { _id: 'j1', enabled: true };
+      const job = { ...jobObj, ownerId: 'user-1', toObject: () => jobObj };
+      mockJobDao.findById.mockResolvedValue(job as never);
+      mockJobDao.updateById.mockResolvedValue(job as never);
+
+      await jobService.setEnabled('j1', 'user-1', true);
+      expect(mockScheduler.scheduleJob).toHaveBeenCalledWith(jobObj);
+      expect(mockScheduler.removeJob).not.toHaveBeenCalled();
+    });
+
+    it('calls removeJob when disabling', async () => {
+      const job = { _id: 'j1', ownerId: 'user-1', enabled: false, toObject: () => ({ _id: 'j1' }) };
+      mockJobDao.findById.mockResolvedValue(job as never);
+      mockJobDao.updateById.mockResolvedValue(job as never);
+
+      await jobService.setEnabled('j1', 'user-1', false);
+      expect(mockScheduler.removeJob).toHaveBeenCalledWith('j1');
+      expect(mockScheduler.scheduleJob).not.toHaveBeenCalled();
     });
   });
 });

@@ -157,6 +157,116 @@ describe('createEventBus', () => {
     expect(bus.isConnected()).toBe(false);
   });
 
+  it('pub error event sets connected to false', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const bus = createEventBus(makeConfig());
+    await waitForConnect();
+
+    expect(bus.isConnected()).toBe(true);
+    pubClient.emit('error', new Error('pub connection lost'));
+    expect(bus.isConnected()).toBe(false);
+
+    consoleSpy.mockRestore();
+  });
+
+  it('sub error event sets connected to false', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const bus = createEventBus(makeConfig());
+    await waitForConnect();
+
+    expect(bus.isConnected()).toBe(true);
+    subClient.emit('error', new Error('sub connection lost'));
+    expect(bus.isConnected()).toBe(false);
+
+    consoleSpy.mockRestore();
+  });
+
+  it('pub ready event restores connected to true after error', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const bus = createEventBus(makeConfig());
+    await waitForConnect();
+
+    pubClient.emit('error', new Error('temporary failure'));
+    expect(bus.isConnected()).toBe(false);
+
+    pubClient.emit('ready');
+    expect(bus.isConnected()).toBe(true);
+
+    consoleSpy.mockRestore();
+  });
+
+  it('malformed JSON message does not crash the bus', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const bus = createEventBus(makeConfig());
+    await waitForConnect();
+
+    subClient.emit('message', 'atlas:events', 'not-valid-json{{{');
+    await waitForConnect();
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[event-bus] Failed to parse event:'),
+      expect.any(Error),
+    );
+
+    await bus.publish('test.event', { ok: true }, 'src');
+    expect(pubClient.publish).toHaveBeenCalledTimes(1);
+    expect(bus.isConnected()).toBe(true);
+
+    consoleSpy.mockRestore();
+  });
+
+  it('publish failure is caught silently', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const bus = createEventBus(makeConfig());
+    await waitForConnect();
+
+    (pubClient.publish as Mock).mockRejectedValueOnce(new Error('publish boom'));
+
+    await expect(bus.publish('test.event', {}, 'src')).resolves.toBeUndefined();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('[event-bus] Publish failed:'),
+      expect.any(Error),
+    );
+
+    consoleSpy.mockRestore();
+  });
+
+  it('multiple subscriptions matching same pattern are all dispatched', async () => {
+    const bus = createEventBus(makeConfig());
+    await waitForConnect();
+
+    const handler1 = vi.fn();
+    const handler2 = vi.fn();
+    bus.subscribe('user.*', handler1);
+    bus.subscribe('user.*', handler2);
+
+    const envelope = {
+      event: 'user.updated',
+      payload: { id: '42' },
+      source: 'core',
+      timestamp: new Date().toISOString(),
+      correlationId: 'xyz',
+    };
+
+    subClient.emit('message', 'atlas:events', JSON.stringify(envelope));
+    await waitForConnect();
+
+    expect(handler1).toHaveBeenCalledWith(envelope);
+    expect(handler2).toHaveBeenCalledWith(envelope);
+  });
+
+  it('close explicitly sets connected to false', async () => {
+    const bus = createEventBus(makeConfig());
+    await waitForConnect();
+
+    expect(bus.isConnected()).toBe(true);
+    await bus.close();
+    expect(bus.isConnected()).toBe(false);
+
+    await bus.publish('test.event', {}, 'src');
+    expect(pubClient.publish).not.toHaveBeenCalled();
+  });
+
   it('error in handler does not crash the bus', async () => {
     const bus = createEventBus(makeConfig());
     await waitForConnect();

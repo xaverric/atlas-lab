@@ -114,6 +114,18 @@ describe('shareService', () => {
         folderId: 'f1', type: 'folder', ownerId: 'user-1', expiresInHours: 1, maxDownloads: 0,
       })).rejects.toThrow('Access denied');
     });
+
+    it('defaults type to document when not specified', async () => {
+      vi.mocked(documentDao.findById).mockResolvedValue({ ownerId: 'user-1' } as any);
+      vi.mocked(crypto.randomBytes).mockReturnValue({ toString: () => 'tok' } as any);
+      vi.mocked(shareTokenDao.create).mockResolvedValue({ id: 'share-def' } as any);
+
+      await create({ documentId: 'doc-1', ownerId: 'user-1', expiresInHours: 1, maxDownloads: 0 });
+
+      expect(shareTokenDao.create).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'document' }),
+      );
+    });
   });
 
   describe('resolve', () => {
@@ -174,10 +186,50 @@ describe('shareService', () => {
       await expect(resolve('maxed')).rejects.toThrow('Download limit reached');
     });
 
+    it('allows access when maxDownloads is 0 (unlimited)', async () => {
+      const unlimited = { ...validShare, maxDownloads: 0, downloadCount: 999 };
+      vi.mocked(shareTokenDao.findByToken).mockResolvedValue(unlimited as any);
+      vi.mocked(shareTokenDao.incrementDownloadCount).mockResolvedValue(null as any);
+      vi.mocked(documentDao.findById).mockResolvedValue({ storageKey: 'k1', originalName: 'f.pdf' } as any);
+      vi.mocked(storageService.getPresignedDownloadUrl).mockResolvedValue('https://s3/url');
+
+      const result = await resolve('unlimited-token');
+      expect(result.type).toBe('document');
+      expect((result as any).url).toBe('https://s3/url');
+    });
+
+    it('throws 410 with exact message when download limit reached', async () => {
+      const maxed = { ...validShare, maxDownloads: 5, downloadCount: 5 };
+      vi.mocked(shareTokenDao.findByToken).mockResolvedValue(maxed as any);
+      await expect(resolve('maxed')).rejects.toMatchObject({
+        status: 410,
+        message: 'Download limit reached',
+      });
+    });
+
+    it('throws 410 with exact message when share expired', async () => {
+      const expired = { ...validShare, expiresAt: new Date(Date.now() - 1) };
+      vi.mocked(shareTokenDao.findByToken).mockResolvedValue(expired as any);
+      await expect(resolve('expired')).rejects.toMatchObject({
+        status: 410,
+        message: 'Share link has expired',
+      });
+    });
+
     it('throws 401 when share requires password', async () => {
       const locked = { ...validShare, password: 'hashed' };
       vi.mocked(shareTokenDao.findByToken).mockResolvedValue(locked as any);
       await expect(resolve('locked')).rejects.toThrow('Password required');
+    });
+
+    it('does not call bcrypt.compare when share has no password', async () => {
+      vi.mocked(shareTokenDao.findByToken).mockResolvedValue(validShare as any);
+      vi.mocked(shareTokenDao.incrementDownloadCount).mockResolvedValue(null as any);
+      vi.mocked(documentDao.findById).mockResolvedValue({ storageKey: 'k1', originalName: 'f.pdf' } as any);
+      vi.mocked(storageService.getPresignedDownloadUrl).mockResolvedValue('https://s3/url');
+
+      await resolve('no-pw-token');
+      expect(bcrypt.compare).not.toHaveBeenCalled();
     });
 
     it('throws 404 when referenced document no longer exists', async () => {
@@ -237,6 +289,24 @@ describe('shareService', () => {
       vi.mocked(shareTokenDao.findByToken).mockResolvedValue(expired as any);
       await expect(verifyPassword('expired', 'pw')).rejects.toThrow('Share link has expired');
     });
+
+    it('throws 403 with exact message when password is wrong', async () => {
+      vi.mocked(shareTokenDao.findByToken).mockResolvedValue(lockedShare as any);
+      vi.mocked(bcrypt.compare).mockResolvedValue(false as any);
+      await expect(verifyPassword('token', 'bad')).rejects.toMatchObject({
+        status: 403,
+        message: 'Invalid password',
+      });
+    });
+
+    it('throws 410 when download limit reached during verifyPassword', async () => {
+      const maxed = { ...lockedShare, maxDownloads: 5, downloadCount: 5 };
+      vi.mocked(shareTokenDao.findByToken).mockResolvedValue(maxed as any);
+      await expect(verifyPassword('maxed', 'pw')).rejects.toMatchObject({
+        status: 410,
+        message: 'Download limit reached',
+      });
+    });
   });
 
   describe('revoke', () => {
@@ -277,6 +347,27 @@ describe('shareService', () => {
       await revoke('s1', 'user-1');
       expect(shareTokenDao.findById).toHaveBeenCalledWith('s1');
       expect(shareTokenDao.deleteById).toHaveBeenCalledWith('s1');
+    });
+
+    it('revokes folder share when owner matches', async () => {
+      vi.mocked(shareTokenDao.findByToken).mockResolvedValue({
+        id: 's-folder', type: 'folder', folderId: { toString: () => 'f1' },
+      } as any);
+      vi.mocked(folderDao.findById).mockResolvedValue({ ownerId: 'user-1' } as any);
+      vi.mocked(shareTokenDao.deleteById).mockResolvedValue(null as any);
+
+      await revoke('s-folder', 'user-1');
+      expect(folderDao.findById).toHaveBeenCalledWith('f1');
+      expect(shareTokenDao.deleteById).toHaveBeenCalledWith('s-folder');
+    });
+
+    it('throws 404 with exact message when share not found', async () => {
+      vi.mocked(shareTokenDao.findByToken).mockResolvedValue(null as any);
+      vi.mocked(shareTokenDao.findById).mockResolvedValue(null as any);
+      await expect(revoke('missing', 'user-1')).rejects.toMatchObject({
+        status: 404,
+        message: 'Share token not found',
+      });
     });
   });
 });

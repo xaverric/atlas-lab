@@ -175,4 +175,57 @@ describe('checkPublicPermission', () => {
     await checkPublicPermission('full')(req as any, createRes(), next);
     expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 403 }));
   });
+
+  it('view permission is insufficient for edit (boundary)', async () => {
+    const req = createReq({ params: { folderId: 'f1' } });
+    const next = vi.fn();
+    vi.mocked(folderService.resolvePublicPermission).mockResolvedValue('view');
+
+    await checkPublicPermission('edit')(req as any, createRes(), next);
+    expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 403 }));
+  });
+
+  it('edit permission is insufficient for full (boundary)', async () => {
+    const req = createReq({ params: { folderId: 'f1' } });
+    const next = vi.fn();
+    vi.mocked(folderService.resolvePublicPermission).mockResolvedValue('edit');
+
+    await checkPublicPermission('full')(req as any, createRes(), next);
+    expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 403 }));
+  });
+
+  it('full permission satisfies view requirement', async () => {
+    const req = createReq({ params: { folderId: 'f1' } });
+    const next = vi.fn();
+    vi.mocked(folderService.resolvePublicPermission).mockResolvedValue('full');
+
+    await checkPublicPermission('view')(req as any, createRes(), next);
+    expect(next).toHaveBeenCalledWith();
+    expect((req as any).publicPermission).toBe('full');
+  });
+
+  it('full permission satisfies edit requirement', async () => {
+    const req = createReq({ params: { folderId: 'f1' } });
+    const next = vi.fn();
+    vi.mocked(folderService.resolvePublicPermission).mockResolvedValue('full');
+
+    await checkPublicPermission('edit')(req as any, createRes(), next);
+    expect(next).toHaveBeenCalledWith();
+    expect((req as any).publicPermission).toBe('full');
+  });
+
+  it('root folder (no parentId) uses its own id for public permission check', async () => {
+    const req = createReq({ params: { id: 'root-folder' } });
+    const next = vi.fn();
+    vi.mocked(documentDao.findById).mockResolvedValue(null as any);
+    vi.mocked(folderDao.findById).mockResolvedValue({ _id: { toString: () => 'root-folder' }, parentId: null } as any);
+    vi.mocked(folderService.resolvePublicPermission).mockResolvedValue('full');
+
+    await checkPublicPermission('edit')(req as any, createRes(), next);
+
+    expect(folderService.resolvePublicPermission).toHaveBeenCalledWith('root-folder');
+    expect(next).toHaveBeenCalledWith();
+    expect((req as any).publicPermission).toBe('full');
+    expect((req as any).publicFolderId).toBe('root-folder');
+  });
 });

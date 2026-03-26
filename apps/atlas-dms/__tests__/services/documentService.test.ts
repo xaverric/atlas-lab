@@ -34,6 +34,7 @@ import {
 import * as documentDao from '../../src/daos/documentDao.js';
 import * as storageService from '../../src/services/storageService.js';
 import * as folderService from '../../src/services/folderService.js';
+import { publishNotification } from '../../src/services/publishNotification.js';
 
 const mockFile = {
   originalname: 'test.pdf',
@@ -86,6 +87,42 @@ describe('documentService', () => {
 
       expect(documentDao.create).toHaveBeenCalledWith(
         expect.objectContaining({ folderId: null }),
+      );
+    });
+
+    it('sets folderId to null when explicitly passed as null', async () => {
+      vi.mocked(storageService.upload).mockResolvedValue('key-123');
+      vi.mocked(documentDao.create).mockResolvedValue(mockDoc as any);
+
+      await upload({ file: mockFile, name: 'Test', tags: [], ownerId: 'user-1', folderId: null });
+
+      expect(documentDao.create).toHaveBeenCalledWith(
+        expect.objectContaining({ folderId: null }),
+      );
+    });
+
+    it('sets folderId to null when explicitly passed as undefined', async () => {
+      vi.mocked(storageService.upload).mockResolvedValue('key-123');
+      vi.mocked(documentDao.create).mockResolvedValue(mockDoc as any);
+
+      await upload({ file: mockFile, name: 'Test', tags: [], ownerId: 'user-1', folderId: undefined });
+
+      expect(documentDao.create).toHaveBeenCalledWith(
+        expect.objectContaining({ folderId: null }),
+      );
+    });
+
+    it('calls publishNotification with correct args on upload', async () => {
+      vi.mocked(storageService.upload).mockResolvedValue('key-123');
+      vi.mocked(documentDao.create).mockResolvedValue(mockDoc as any);
+
+      await upload({ file: mockFile, name: 'Test Doc', tags: [], ownerId: 'user-1', folderId: 'folder-1' });
+
+      expect(publishNotification).toHaveBeenCalledWith(
+        'user-1',
+        'File Uploaded',
+        expect.stringContaining('Test Doc'),
+        'dms.document.uploaded',
       );
     });
   });
@@ -177,6 +214,22 @@ describe('documentService', () => {
       await update('doc-1', 'user-1', { tags: ['new'] });
       expect(documentDao.updateById).toHaveBeenCalledWith('doc-1', { tags: ['new'] });
     });
+
+    it('sends only name when tags is undefined', async () => {
+      vi.mocked(documentDao.findById).mockResolvedValue(mockDoc as any);
+      vi.mocked(documentDao.updateById).mockResolvedValue({ ...mockDoc, name: 'Only Name' } as any);
+
+      await update('doc-1', 'user-1', { name: 'Only Name' });
+      expect(documentDao.updateById).toHaveBeenCalledWith('doc-1', { name: 'Only Name' });
+    });
+
+    it('sends only tags when name is undefined', async () => {
+      vi.mocked(documentDao.findById).mockResolvedValue(mockDoc as any);
+      vi.mocked(documentDao.updateById).mockResolvedValue(mockDoc as any);
+
+      await update('doc-1', 'user-1', { tags: ['alpha', 'beta'] });
+      expect(documentDao.updateById).toHaveBeenCalledWith('doc-1', { tags: ['alpha', 'beta'] });
+    });
   });
 
   describe('remove', () => {
@@ -193,6 +246,21 @@ describe('documentService', () => {
     it('throws 404 when document not found', async () => {
       vi.mocked(documentDao.findById).mockResolvedValue(null as any);
       await expect(remove('doc-1', 'user-1')).rejects.toThrow('Document not found');
+    });
+
+    it('calls publishNotification with dms.document.deleted event', async () => {
+      vi.mocked(documentDao.findById).mockResolvedValue(mockDoc as any);
+      vi.mocked(storageService.remove).mockResolvedValue(undefined);
+      vi.mocked(documentDao.deleteById).mockResolvedValue(null as any);
+
+      await remove('doc-1', 'user-1');
+
+      expect(publishNotification).toHaveBeenCalledWith(
+        'user-1',
+        'File Deleted',
+        expect.stringContaining('Test Doc'),
+        'dms.document.deleted',
+      );
     });
   });
 
@@ -216,6 +284,13 @@ describe('documentService', () => {
       vi.mocked(documentDao.findManyByIds).mockResolvedValue([]);
       const result = await bulkDelete(['d1'], 'user-1');
       expect(result).toEqual({ deleted: 0 });
+    });
+
+    it('does not call storageService.remove or deleteManyByIds when 0 docs match', async () => {
+      vi.mocked(documentDao.findManyByIds).mockResolvedValue([]);
+      await bulkDelete(['d1'], 'user-1');
+      expect(storageService.remove).not.toHaveBeenCalled();
+      expect(documentDao.deleteManyByIds).not.toHaveBeenCalled();
     });
   });
 
@@ -286,6 +361,22 @@ describe('documentService', () => {
       const result = await getPublicPreviewUrl('doc-1');
       expect(result).toBe('https://s3/pub-preview');
     });
+
+    it('throws 404 when document not found', async () => {
+      vi.mocked(documentDao.findById).mockResolvedValue(null as any);
+      await expect(getPublicPreviewUrl('doc-1')).rejects.toThrow('Document not found');
+    });
+
+    it('throws 403 when document has no folderId', async () => {
+      vi.mocked(documentDao.findById).mockResolvedValue({ ...mockDoc, folderId: null } as any);
+      await expect(getPublicPreviewUrl('doc-1')).rejects.toThrow('Document is not in a public folder');
+    });
+
+    it('throws 403 when folder is not public', async () => {
+      vi.mocked(documentDao.findById).mockResolvedValue(mockDoc as any);
+      vi.mocked(folderService.isPublicFolder).mockResolvedValue(false);
+      await expect(getPublicPreviewUrl('doc-1')).rejects.toThrow('Document is not in a public folder');
+    });
   });
 
   describe('updatePublic', () => {
@@ -353,6 +444,11 @@ describe('documentService', () => {
     it('throws 403 when folder is not public', async () => {
       vi.mocked(documentDao.findById).mockResolvedValue(mockDoc as any);
       vi.mocked(folderService.isPublicFolder).mockResolvedValue(false);
+      await expect(removePublic('doc-1')).rejects.toThrow('Document is not in a public folder');
+    });
+
+    it('throws 403 when document has no folderId', async () => {
+      vi.mocked(documentDao.findById).mockResolvedValue({ ...mockDoc, folderId: null } as any);
       await expect(removePublic('doc-1')).rejects.toThrow('Document is not in a public folder');
     });
   });

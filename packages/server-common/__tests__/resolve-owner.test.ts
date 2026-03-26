@@ -27,4 +27,28 @@ describe('resolveOwner', () => {
     const { ownerId } = resolveOwner(mockReq('admin-1', ['admin']));
     expect(ownerId).toBe('admin-1');
   });
+
+  it('returns isAdmin false when realm_access is missing entirely', () => {
+    const req = { auth: { sub: 'user-1' }, query: {} } as any;
+    const { ownerId, isAdmin } = resolveOwner(req);
+    expect(isAdmin).toBe(false);
+    expect(ownerId).toBe('user-1');
+  });
+
+  it('returns isAdmin false when roles array is missing', () => {
+    const req = { auth: { sub: 'user-1', realm_access: {} }, query: {} } as any;
+    const { isAdmin } = resolveOwner(req);
+    expect(isAdmin).toBe(false);
+  });
+
+  it('does not throw when non-admin passes empty string userId', () => {
+    const req = { auth: { sub: 'user-1', realm_access: { roles: ['user'] } }, query: { userId: '' } } as any;
+    const { ownerId } = resolveOwner(req);
+    expect(ownerId).toBe('user-1');
+  });
+
+  it('throws with exact 403 message when non-admin passes userId', () => {
+    expect(() => resolveOwner(mockReq('user-1', ['user'], 'other')))
+      .toThrow('Only admins can browse other users data');
+  });
 });

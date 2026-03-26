@@ -2,7 +2,7 @@ name: Nightly
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch:
 
 permissions:
@@ -28,7 +28,10 @@ jobs:
         service:
           - { name: atlas-core, dockerfile: apps/atlas-core/Dockerfile }
           - { name: atlas-dms, dockerfile: apps/atlas-dms/Dockerfile }
-          - { name: atlas-scheduler, dockerfile: apps/atlas-scheduler/Dockerfile }
+          - {
+              name: atlas-scheduler,
+              dockerfile: apps/atlas-scheduler/Dockerfile,
+            }
           - { name: atlas-notify, dockerfile: apps/atlas-notify/Dockerfile }
           - { name: atlas-notes, dockerfile: apps/atlas-notes/Dockerfile }
           - { name: atlas-tracker, dockerfile: apps/atlas-tracker/Dockerfile }
@@ -83,32 +86,22 @@ jobs:
           npm audit 2>&1 | tee -a "$GITHUB_STEP_SUMMARY" || true
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
-  mutation:
-    needs: ci
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - name: Mutation testing
-        run: npm run test:mutation
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: mutation-report
-          path: mutation-report/
-          retention-days: 30
-
   security:
     needs: build
     strategy:
       fail-fast: false
       matrix:
-        service: [atlas-core, atlas-dms, atlas-scheduler, atlas-notify, atlas-notes, atlas-gui, atlas-mcp, atlas-tracker]
+        service:
+          [
+            atlas-core,
+            atlas-dms,
+            atlas-scheduler,
+            atlas-notify,
+            atlas-notes,
+            atlas-gui,
+            atlas-mcp,
+            atlas-tracker,
+          ]
     uses: ./.github/workflows/security.yml
     with:
       image: xaverric/atlas-lab-${{ matrix.service }}:nightly
