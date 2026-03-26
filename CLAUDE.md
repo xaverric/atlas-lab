@@ -23,6 +23,8 @@ gh run view <RUN_ID> -R xaverric/atlas-lab --log-failed
 
 **Security scans:** After build, Trivy scans all 8 Docker images. Results appear in GitHub Security tab (SARIF) and as downloadable artifacts (SBOM + vulnerability report). Critical vulnerabilities should be fixed immediately.
 
+**Dependabot alerts:** Check `gh api repos/xaverric/atlas-lab/dependabot/alerts --jq '.[] | select(.state=="open")'` at conversation start. Fix open alerts proactively — update packages, verify tests pass, commit and push. Dashboard: https://github.com/xaverric/atlas-lab/security/dependabot
+
 **Docker Hub images:** `xaverric/atlas-lab-atlas-*:latest` — pushed automatically on every main push.
 
 **Docker Hub MCP:** Use `mcp__MCP_DOCKER__checkRepositoryTag` to verify images exist on Docker Hub after build.
@@ -81,14 +83,14 @@ npm run init
 
 ### Backend services
 
-| Service | Package | Port | Purpose | External deps |
-|---------|---------|------|---------|---------------|
-| atlas-core | `@atlas/server` | 4000 | User management, health | MongoDB |
-| atlas-dms | `@atlas/dms` | 4001 | Document storage, folders, sharing | MongoDB, MinIO (S3) |
-| atlas-scheduler | `@atlas/scheduler` | 4002 | Job scheduling (cron/interval/once), executors (http/webhook/shell/script/monitor) | MongoDB, Redis (BullMQ) |
-| atlas-notify | `@atlas/notify` | 4003 | Multi-channel notifications (email/Telegram), templates, preferences | MongoDB, Redis (BullMQ), SMTP, Telegram API |
-| atlas-notes | `@atlas/notes` | 4004 | Notes knowledge base, semantic search | MongoDB, Qdrant (vector DB), Ollama (embeddings) |
-| atlas-mcp | `@atlas/mcp` | 4005 | MCP server — proxies all backend services for AI tool use | None (HTTP proxy) |
+| Service         | Package            | Port | Purpose                                                                            | External deps                                    |
+| --------------- | ------------------ | ---- | ---------------------------------------------------------------------------------- | ------------------------------------------------ |
+| atlas-core      | `@atlas/server`    | 4000 | User management, health                                                            | MongoDB                                          |
+| atlas-dms       | `@atlas/dms`       | 4001 | Document storage, folders, sharing                                                 | MongoDB, MinIO (S3)                              |
+| atlas-scheduler | `@atlas/scheduler` | 4002 | Job scheduling (cron/interval/once), executors (http/webhook/shell/script/monitor) | MongoDB, Redis (BullMQ)                          |
+| atlas-notify    | `@atlas/notify`    | 4003 | Multi-channel notifications (email/Telegram), templates, preferences               | MongoDB, Redis (BullMQ), SMTP, Telegram API      |
+| atlas-notes     | `@atlas/notes`     | 4004 | Notes knowledge base, semantic search                                              | MongoDB, Qdrant (vector DB), Ollama (embeddings) |
+| atlas-mcp       | `@atlas/mcp`       | 4005 | MCP server — proxies all backend services for AI tool use                          | None (HTTP proxy)                                |
 
 ### Frontend
 
@@ -99,15 +101,15 @@ npm run init
 
 ### Infrastructure (Docker)
 
-| Service | Purpose |
-|---------|---------|
-| Traefik | Reverse proxy, TLS (Let's Encrypt), subdomain routing |
-| Keycloak | OIDC auth (realm: atlas, SSO 8h, access token 30min) |
-| MongoDB | Primary DB (each service uses own database) |
-| Redis | BullMQ job queues (scheduler + notify only) |
-| MinIO | S3-compatible file storage (DMS) |
-| Qdrant | Vector DB for semantic search (notes) |
-| Ollama | Local LLM embeddings — nomic-embed-text, 768 dims (notes) |
+| Service  | Purpose                                                   |
+| -------- | --------------------------------------------------------- |
+| Traefik  | Reverse proxy, TLS (Let's Encrypt), subdomain routing     |
+| Keycloak | OIDC auth (realm: atlas, SSO 8h, access token 30min)      |
+| MongoDB  | Primary DB (each service uses own database)               |
+| Redis    | BullMQ job queues (scheduler + notify only)               |
+| MinIO    | S3-compatible file storage (DMS)                          |
+| Qdrant   | Vector DB for semantic search (notes)                     |
+| Ollama   | Local LLM embeddings — nomic-embed-text, 768 dims (notes) |
 
 Production subdomains (`ATLAS_DOMAIN=xaverric.cz`): `xaverric.cz` (gui), `api.` (core), `dms.` (dms), `scheduler.` (scheduler), `notify.` (notify), `notes.` (notes), `mcp.` (mcp), `auth.` (keycloak), `s3.` (minio API), `storage.` (minio console)
 
