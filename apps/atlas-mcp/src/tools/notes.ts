@@ -113,6 +113,7 @@ export const registerNotesTools = (server: McpServer) => {
         method: 'POST',
         path: '/api/v1/notes/search',
         token,
+        sessionId,
         body,
       });
       return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
@@ -132,6 +133,7 @@ export const registerNotesTools = (server: McpServer) => {
         method: 'POST',
         path: '/api/v1/notes/search/ai',
         token,
+        sessionId,
         body,
       });
       return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };

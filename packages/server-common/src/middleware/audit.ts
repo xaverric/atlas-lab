@@ -40,6 +40,8 @@ auditLogSchema.index({ userId: 1, timestamp: -1 });
 auditLogSchema.index({ action: 1, timestamp: -1 });
 auditLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 90 * 86400 });
 
+type AuditLogEntry = mongoose.InferSchemaType<typeof auditLogSchema>;
+
 const SKIP_PATHS = new Set(['/health']);
 
 const shouldSkip = (method: string, path: string): boolean => {
@@ -81,8 +83,7 @@ const extractResource = (path: string): { type?: string; id?: string } => {
   return { type, id };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let AuditLog: mongoose.Model<any> | null = null;
+let AuditLog: mongoose.Model<AuditLogEntry> | null = null;
 let auditDisabled = false;
 let connectionReady = false;
 let connectionPromise: Promise<void> | null = null;

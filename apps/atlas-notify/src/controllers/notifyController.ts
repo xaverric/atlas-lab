@@ -1,8 +1,7 @@
-import type { Request, RequestHandler } from 'express';
+import type { RequestHandler } from 'express';
 import { ApiError } from '@atlas/core';
 import { resolveOwner } from '@atlas/server-common';
 import * as notifyService from '../services/notifyService.js';
-
 
 export const send: RequestHandler = async (req, res, next) => {
   try {

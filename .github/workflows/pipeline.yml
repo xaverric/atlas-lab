@@ -1,12 +1,15 @@
 name: Pipeline
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 on:
   push:
-    branches: [main, 'feature/*']
-    paths-ignore: ['docs/**', 'LICENSE']
+    branches: [main, "feature/*"]
+    paths-ignore: ["docs/**", "LICENSE"]
   pull_request:
     branches: [main]
-    paths-ignore: ['docs/**', 'LICENSE']
+    paths-ignore: ["docs/**", "LICENSE"]
 
 permissions:
   checks: write
@@ -34,7 +37,10 @@ jobs:
         service:
           - { name: atlas-core, dockerfile: apps/atlas-core/Dockerfile }
           - { name: atlas-dms, dockerfile: apps/atlas-dms/Dockerfile }
-          - { name: atlas-scheduler, dockerfile: apps/atlas-scheduler/Dockerfile }
+          - {
+              name: atlas-scheduler,
+              dockerfile: apps/atlas-scheduler/Dockerfile,
+            }
           - { name: atlas-notify, dockerfile: apps/atlas-notify/Dockerfile }
           - { name: atlas-notes, dockerfile: apps/atlas-notes/Dockerfile }
           - { name: atlas-tracker, dockerfile: apps/atlas-tracker/Dockerfile }
@@ -70,7 +76,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [atlas-core, atlas-dms, atlas-scheduler, atlas-notify, atlas-notes, atlas-gui, atlas-mcp, atlas-tracker]
+        service:
+          [
+            atlas-core,
+            atlas-dms,
+            atlas-scheduler,
+            atlas-notify,
+            atlas-notes,
+            atlas-gui,
+            atlas-mcp,
+            atlas-tracker,
+          ]
     uses: ./.github/workflows/security.yml
     with:
       image: xaverric/atlas-lab-${{ matrix.service }}:dev
@@ -78,7 +94,7 @@ jobs:
     secrets: inherit
 
   publish-reports:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && always()
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.ci.result == 'success' && always()
     needs: [ci, security]
     runs-on: ubuntu-latest
     steps:

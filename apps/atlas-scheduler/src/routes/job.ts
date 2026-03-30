@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { validate, requireRole, stripHtml } from '@atlas/server-common';
+import { validate, stripHtml } from '@atlas/server-common';
 import { paginationSchema, objectIdSchema } from '@atlas/core';
 import { auth } from '../middleware/auth.js';
 import * as jobController from '../controllers/jobController.js';
 
-const DANGEROUS_EXECUTORS = ['javascript'];
+const DANGEROUS_EXECUTORS = ['javascript', 'shell', 'git'];
 const safeText = z.string().transform(stripHtml);
 
 const router = Router();
@@ -87,7 +87,7 @@ const retryPolicySchema = z.object({
 const createJobSchema = z.object({
   name: safeText.pipe(z.string().min(1).max(200)),
   description: safeText.pipe(z.string().max(2000)).default(''),
-  executionType: z.enum(['webhook', 'javascript']),
+  executionType: z.enum(['webhook', 'javascript', 'shell', 'git', 'n8n']),
   enabled: z.boolean().default(true),
   group: z.string().max(50).default(''),
   schedule: scheduleSchema,
@@ -100,6 +100,9 @@ const createJobSchema = z.object({
   const configSchemas: Record<string, z.ZodType> = {
     webhook: webhookConfigSchema,
     javascript: javascriptConfigSchema,
+    shell: shellConfigSchema,
+    git: gitConfigSchema,
+    n8n: n8nConfigSchema,
   };
 
   const schema = configSchemas[data.executionType];
@@ -124,7 +127,7 @@ const updateJobSchema = z.object({
 }).refine((d) => Object.keys(d).length > 0, { message: 'At least one field required' });
 
 const listQuerySchema = paginationSchema.extend({
-  executionType: z.enum(['webhook', 'javascript']).optional(),
+  executionType: z.enum(['webhook', 'javascript', 'shell', 'git', 'n8n']).optional(),
   group: z.string().optional(),
   enabled: z.preprocess((v) => {
     if (v === 'true') return true;

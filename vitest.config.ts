@@ -14,7 +14,6 @@ export default defineConfig({
         '**/workers/**',
         '**/migrations/**',
         'apps/atlas-gui/**',
-        'apps/atlas-mcp/**',
         'deployment/**',
       ],
       thresholds: {

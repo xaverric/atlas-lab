@@ -1,5 +1,5 @@
 import { config } from './config.js';
-import { refreshAccessToken, setToken } from './session.js';
+import { refreshAccessToken } from './session.js';
 
 type ServiceName = keyof typeof config.services;
 
@@ -34,21 +34,24 @@ const doFetch = async (url: string, method: string, headers: Record<string, stri
 export const request = async (service: ServiceName, opts: RequestOptions) => {
   const base = config.services[service];
   const url = buildUrl(base, opts.path, opts.query);
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${opts.token}`,
+  const buildHeaders = (token: string): Record<string, string> => {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    if (opts.body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    return headers;
   };
 
-  if (opts.body !== undefined) {
-    headers['Content-Type'] = 'application/json';
-  }
-
-  let res = await doFetch(url, opts.method || 'GET', headers, opts.body);
+  let res = await doFetch(url, opts.method || 'GET', buildHeaders(opts.token), opts.body);
 
   if (res.status === 401 && opts.sessionId) {
     const newToken = await refreshAccessToken(opts.sessionId);
     if (newToken) {
-      headers.Authorization = `Bearer ${newToken}`;
-      res = await doFetch(url, opts.method || 'GET', headers, opts.body);
+      res = await doFetch(url, opts.method || 'GET', buildHeaders(newToken), opts.body);
     }
   }
 

@@ -25,6 +25,7 @@ export const registerCoreTools = (server: McpServer) => {
         method: 'PATCH',
         path: '/api/v1/users/me/preferences',
         token,
+        sessionId,
         body: { theme },
       });
       return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };

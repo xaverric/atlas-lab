@@ -7,6 +7,7 @@ export default defineWorkspace([
   'apps/atlas-notify/vitest.config.ts',
   'apps/atlas-notes/vitest.config.ts',
   'apps/atlas-tracker/vitest.config.ts',
+  'apps/atlas-mcp/vitest.config.ts',
   'packages/core/vitest.config.ts',
   'packages/server-common/vitest.config.ts',
   'packages/event-bus/vitest.config.ts',

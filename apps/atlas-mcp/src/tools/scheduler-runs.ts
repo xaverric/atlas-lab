@@ -21,6 +21,7 @@ export const registerSchedulerRunTools = (server: McpServer) => {
       const result = await request('scheduler', {
         path: `/api/v1/scheduler/jobs/${jobId}/runs`,
         token,
+        sessionId,
         query,
       });
       return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };

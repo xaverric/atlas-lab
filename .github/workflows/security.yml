@@ -1,5 +1,8 @@
 name: Security Scan
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 on:
   workflow_call:
     inputs:
@@ -10,6 +13,11 @@ on:
       service_name:
         description: Service name for report naming
         required: true
+        type: string
+      fail_on_severities:
+        description: Comma-separated severities that should fail the workflow
+        required: false
+        default: CRITICAL,HIGH
         type: string
     secrets:
       DOCKERHUB_USERNAME:
@@ -162,3 +170,27 @@ jobs:
         with:
           command: recommendations
           image: ${{ inputs.image }}
+
+      - name: Enforce vulnerability policy
+        if: always()
+        env:
+          SERVICE: ${{ inputs.service_name }}
+          FAIL_ON_SEVERITIES: ${{ inputs.fail_on_severities }}
+        run: |
+          if [ ! -f trivy.json ]; then
+            echo "::error::Missing trivy.json for ${SERVICE}"
+            exit 1
+          fi
+
+          TOTAL=0
+          IFS=',' read -ra SEVERITIES <<< "${FAIL_ON_SEVERITIES}"
+          for severity in "${SEVERITIES[@]}"; do
+            TRIMMED=$(echo "$severity" | xargs)
+            COUNT=$(grep -o "\"Severity\": \"${TRIMMED}\"" trivy.json | wc -l | tr -d ' ')
+            TOTAL=$((TOTAL + COUNT))
+          done
+
+          if [ "${TOTAL}" -gt 0 ]; then
+            echo "::error::Found ${TOTAL} vulnerabilities matching policy (${FAIL_ON_SEVERITIES}) in ${SERVICE}"
+            exit 1
+          fi

@@ -100,6 +100,7 @@ export const registerTrackerTools = (server: McpServer) => {
         method: 'POST',
         path: `${API}/${endpointName}/data`,
         token,
+        sessionId,
         body: data,
       });
       return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
@@ -127,6 +128,7 @@ export const registerTrackerTools = (server: McpServer) => {
       const result = await request('tracker', {
         path: `${API}/${endpointName}/data`,
         token,
+        sessionId,
         query,
       });
       return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
@@ -146,6 +148,7 @@ export const registerTrackerTools = (server: McpServer) => {
         method: 'DELETE',
         path: `${API}/${endpointName}/data/${id}`,
         token,
+        sessionId,
       });
       return { content: [{ type: 'text', text: 'Data entry deleted' }] };
     },

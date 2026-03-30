@@ -4,7 +4,7 @@ import * as documentService from '../services/documentService.js';
 import * as documentDao from '../daos/documentDao.js';
 import * as folderDao from '../daos/folderDao.js';
 
-const stripPrivate = ({ parentId, ownerId, folderId, ...rest }: Record<string, any>) => rest;
+const stripPrivate = ({ parentId: _parentId, ownerId: _ownerId, folderId: _folderId, ...rest }: Record<string, unknown>) => rest;
 
 export const getFolder: RequestHandler = async (req, res, next) => {
   try {

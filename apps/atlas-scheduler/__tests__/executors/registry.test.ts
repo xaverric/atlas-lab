@@ -23,11 +23,29 @@ describe('executor registry', () => {
     expect(typeof executor.execute).toBe('function');
   });
 
+  it('returns shell executor', () => {
+    const executor = getExecutor('shell');
+    expect(executor).toBeDefined();
+    expect(typeof executor.execute).toBe('function');
+  });
+
+  it('returns git executor', () => {
+    const executor = getExecutor('git');
+    expect(executor).toBeDefined();
+    expect(typeof executor.execute).toBe('function');
+  });
+
+  it('returns n8n executor', () => {
+    const executor = getExecutor('n8n');
+    expect(executor).toBeDefined();
+    expect(typeof executor.execute).toBe('function');
+  });
+
   it('throws for unknown executor type', () => {
     expect(() => getExecutor('unknown')).toThrow('Unknown executor type: unknown');
   });
 
   it('error message lists allowed types', () => {
-    expect(() => getExecutor('shell')).toThrow('Allowed: webhook, javascript');
+    expect(() => getExecutor('unknown')).toThrow('Allowed: webhook, javascript, shell, git, n8n');
   });
 });

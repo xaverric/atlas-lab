@@ -3,6 +3,9 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   output: 'standalone',
   transpilePackages: ['@atlas/core'],
+  turbopack: {
+    root: `${process.cwd()}/../..`,
+  },
   async rewrites() {
     const dmsUrl = process.env.NEXT_PUBLIC_DMS_URL || 'http://localhost:4001';
     const notesUrl = process.env.NEXT_PUBLIC_NOTES_URL || 'http://localhost:4004';

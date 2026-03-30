@@ -1,8 +1,11 @@
 name: Release
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 on:
   push:
-    tags: ['v*']
+    tags: ["v*"]
 
 permissions:
   checks: write
@@ -26,7 +29,10 @@ jobs:
         service:
           - { name: atlas-core, dockerfile: apps/atlas-core/Dockerfile }
           - { name: atlas-dms, dockerfile: apps/atlas-dms/Dockerfile }
-          - { name: atlas-scheduler, dockerfile: apps/atlas-scheduler/Dockerfile }
+          - {
+              name: atlas-scheduler,
+              dockerfile: apps/atlas-scheduler/Dockerfile,
+            }
           - { name: atlas-notify, dockerfile: apps/atlas-notify/Dockerfile }
           - { name: atlas-notes, dockerfile: apps/atlas-notes/Dockerfile }
           - { name: atlas-tracker, dockerfile: apps/atlas-tracker/Dockerfile }
@@ -47,10 +53,10 @@ jobs:
         with:
           images: xaverric/atlas-lab-${{ matrix.service.name }}
           tags: |
+            type=raw,value=${{ github.ref_name }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=raw,value=stable
 
       - uses: docker/build-push-action@v7
         with:
@@ -68,15 +74,56 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [atlas-core, atlas-dms, atlas-scheduler, atlas-notify, atlas-notes, atlas-gui, atlas-mcp, atlas-tracker]
+        service:
+          [
+            atlas-core,
+            atlas-dms,
+            atlas-scheduler,
+            atlas-notify,
+            atlas-notes,
+            atlas-gui,
+            atlas-mcp,
+            atlas-tracker,
+          ]
     uses: ./.github/workflows/security.yml
     with:
-      image: xaverric/atlas-lab-${{ matrix.service }}:stable
+      image: xaverric/atlas-lab-${{ matrix.service }}:${{ github.ref_name }}
       service_name: ${{ matrix.service }}
     secrets: inherit
 
+  promote-stable:
+    needs: [build, security]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          [
+            atlas-core,
+            atlas-dms,
+            atlas-scheduler,
+            atlas-notify,
+            atlas-notes,
+            atlas-gui,
+            atlas-mcp,
+            atlas-tracker,
+          ]
+    steps:
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Promote release image to stable
+        run: |
+          docker buildx imagetools create \
+            --tag "xaverric/atlas-lab-${{ matrix.service }}:stable" \
+            "xaverric/atlas-lab-${{ matrix.service }}:${{ github.ref_name }}"
+
   release:
-    needs: build
+    needs: promote-stable
     runs-on: ubuntu-latest
     permissions:
       contents: write

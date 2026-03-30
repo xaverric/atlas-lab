@@ -1,8 +1,6 @@
-import type { Request, RequestHandler } from 'express';
-import { ApiError } from '@atlas/core';
+import type { RequestHandler } from 'express';
 import { resolveOwner } from '@atlas/server-common';
 import * as revisionService from '../services/revisionService.js';
-
 
 export const list: RequestHandler = async (req, res, next) => {
   try {

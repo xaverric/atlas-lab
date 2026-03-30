@@ -3,7 +3,6 @@ import type { EventBus, EventEnvelope } from '@atlas/event-bus';
 import { config } from '../config/index.js';
 import * as preferenceDao from '../daos/preferenceDao.js';
 import * as notificationDao from '../daos/notificationDao.js';
-import { getDeliverer } from '../channels/registry.js';
 import { resolve } from './templateResolver.js';
 import * as sseManager from './sseManager.js';
 

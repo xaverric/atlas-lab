@@ -12,7 +12,7 @@ export const n8nExecutor: Executor = {
   async execute(cfg, timeoutMs, ctx?: ExecutionContext): Promise<ExecutionResult> {
     const { webhookUrl, payload, waitForCompletion = true } = cfg as unknown as N8nExecutorConfig;
 
-    ctx?.logger.info(`n8n webhook: POST ${webhookUrl}`);
+    ctx?.logger.info(`n8n webhook: POST ${webhookUrl} (waitForCompletion=${waitForCompletion})`);
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);

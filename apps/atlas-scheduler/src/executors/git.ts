@@ -1,12 +1,13 @@
 import { execFile } from 'node:child_process';
 import { writeFile, unlink, mkdir, access } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { config } from '../config/index.js';
 import type { Executor, ExecutionResult, ExecutionContext } from './types.js';
 
 const MAX_OUTPUT = 50_000;
+const ALLOWED_WORKDIR_ROOTS = ['/tmp', '/home', '/app'];
 
 interface GitExecutorConfig {
   operation: 'clone' | 'pull' | 'push' | 'sync';
@@ -17,6 +18,8 @@ interface GitExecutorConfig {
   commitMessage?: string;
   remote?: string;
 }
+
+type GitRunResult = Awaited<ReturnType<typeof runGit>>;
 
 const runGit = (
   args: string[],
@@ -40,6 +43,7 @@ const runGit = (
 
 const setupSshEnv = async (sshPrivateKey: string): Promise<{ env: Record<string, string>; keyPath: string }> => {
   const keyPath = join(tmpdir(), `atlas-git-${randomUUID()}`);
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- generated tmp path inside OS temp dir
   await writeFile(keyPath, sshPrivateKey, { mode: 0o600 });
   return {
     env: { GIT_SSH_COMMAND: `ssh -i ${keyPath} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null` },
@@ -54,6 +58,96 @@ const dirExists = async (path: string): Promise<boolean> => {
   } catch {
     return false;
   }
+};
+
+const isAllowedWorkDir = (path: string): boolean => {
+  const resolved = resolve(path);
+  return ALLOWED_WORKDIR_ROOTS.some((root) => resolved === root || resolved.startsWith(`${root}/`));
+};
+
+const requireWorkDir = (workDir: string | undefined, operation: 'pull' | 'push' | 'sync'): string => {
+  if (!workDir) {
+    throw new Error(`workDir is required for ${operation} operation`);
+  }
+  return workDir;
+};
+
+const runClone = async (
+  repoUrl: string,
+  branch: string,
+  remote: string,
+  workDir: string | undefined,
+  gitOpts: (cwd?: string) => { cwd?: string; env?: Record<string, string>; timeout: number },
+  collect: (result: GitRunResult) => GitRunResult,
+  ctx?: ExecutionContext,
+) => {
+  const targetDir = workDir || join(tmpdir(), `atlas-git-repo-${randomUUID()}`);
+
+  if (await dirExists(join(targetDir, '.git'))) {
+    ctx?.logger.info(`Directory ${targetDir} already contains a repo, pulling instead`);
+    collect(await runGit(['pull', remote, branch], gitOpts(targetDir)));
+    return;
+  }
+
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- validated workDir or generated tmp path
+  await mkdir(targetDir, { recursive: true });
+  collect(await runGit(['clone', '-b', branch, repoUrl, targetDir], gitOpts()));
+};
+
+const runPull = async (
+  branch: string,
+  remote: string,
+  workDir: string | undefined,
+  gitOpts: (cwd?: string) => { cwd?: string; env?: Record<string, string>; timeout: number },
+  collect: (result: GitRunResult) => GitRunResult,
+) => {
+  collect(await runGit(['pull', remote, branch], gitOpts(requireWorkDir(workDir, 'pull'))));
+};
+
+const runPush = async (
+  branch: string,
+  remote: string,
+  workDir: string | undefined,
+  commitMessage: string | undefined,
+  gitOpts: (cwd?: string) => { cwd?: string; env?: Record<string, string>; timeout: number },
+  collect: (result: GitRunResult) => GitRunResult,
+) => {
+  const cwd = requireWorkDir(workDir, 'push');
+
+  if (commitMessage) {
+    const addResult = collect(await runGit(['add', '-A'], gitOpts(cwd)));
+    if (addResult.exitCode === 0) {
+      const commitResult = collect(await runGit(['commit', '-m', commitMessage], gitOpts(cwd)));
+      if (commitResult.exitCode !== 0) return;
+    } else {
+      return;
+    }
+  }
+
+  collect(await runGit(['push', remote, branch], gitOpts(cwd)));
+};
+
+const runSync = async (
+  branch: string,
+  remote: string,
+  workDir: string | undefined,
+  commitMessage: string | undefined,
+  gitOpts: (cwd?: string) => { cwd?: string; env?: Record<string, string>; timeout: number },
+  collect: (result: GitRunResult) => GitRunResult,
+) => {
+  const cwd = requireWorkDir(workDir, 'sync');
+  const pullResult = collect(await runGit(['pull', remote, branch], gitOpts(cwd)));
+  if (pullResult.exitCode !== 0) return;
+
+  if (commitMessage) {
+    const addResult = collect(await runGit(['add', '-A'], gitOpts(cwd)));
+    if (addResult.exitCode !== 0) return;
+
+    const commitResult = collect(await runGit(['commit', '-m', commitMessage], gitOpts(cwd)));
+    if (commitResult.exitCode !== 0) return;
+  }
+
+  collect(await runGit(['push', remote, branch], gitOpts(cwd)));
 };
 
 export const gitExecutor: Executor = {
@@ -72,6 +166,12 @@ export const gitExecutor: Executor = {
       commitMessage,
       remote = 'origin',
     } = cfg as unknown as GitExecutorConfig;
+
+    if (workDir && !isAllowedWorkDir(workDir)) {
+      const error = `Working directory "${workDir}" is not allowed. Allowed: ${ALLOWED_WORKDIR_ROOTS.join(', ')}`;
+      ctx?.logger.error(error);
+      return { exitCode: 1, error };
+    }
 
     ctx?.logger.info(`Git ${operation}: ${repoUrl} (branch: ${branch})`);
 
@@ -99,48 +199,19 @@ export const gitExecutor: Executor = {
         return result;
       };
 
-      if (operation === 'clone') {
-        const targetDir = workDir || join(tmpdir(), `atlas-git-repo-${randomUUID()}`);
-
-        if (await dirExists(join(targetDir, '.git'))) {
-          ctx?.logger.info(`Directory ${targetDir} already contains a repo, pulling instead`);
-          collect(await runGit(['pull', remote, branch], gitOpts(targetDir)));
-        } else {
-          await mkdir(targetDir, { recursive: true });
-          collect(await runGit(['clone', '-b', branch, repoUrl, targetDir], gitOpts()));
-        }
-      }
-
-      if (operation === 'pull') {
-        if (!workDir) return { exitCode: 1, error: 'workDir is required for pull operation' };
-        collect(await runGit(['pull', remote, branch], gitOpts(workDir)));
-      }
-
-      if (operation === 'push') {
-        if (!workDir) return { exitCode: 1, error: 'workDir is required for push operation' };
-        if (commitMessage) {
-          collect(await runGit(['add', '-A'], gitOpts(workDir)));
-          if (lastExitCode === 0) {
-            collect(await runGit(['commit', '-m', commitMessage], gitOpts(workDir)));
-          }
-        }
-        if (lastExitCode === 0 || !commitMessage) {
-          collect(await runGit(['push', remote, branch], gitOpts(workDir)));
-        }
-      }
-
-      if (operation === 'sync') {
-        if (!workDir) return { exitCode: 1, error: 'workDir is required for sync operation' };
-        const pullResult = collect(await runGit(['pull', remote, branch], gitOpts(workDir)));
-        if (pullResult.exitCode === 0) {
-          if (commitMessage) {
-            collect(await runGit(['add', '-A'], gitOpts(workDir)));
-            if (lastExitCode === 0) {
-              collect(await runGit(['commit', '-m', commitMessage], gitOpts(workDir)));
-            }
-          }
-          collect(await runGit(['push', remote, branch], gitOpts(workDir)));
-        }
+      switch (operation) {
+        case 'clone':
+          await runClone(repoUrl, branch, remote, workDir, gitOpts, collect, ctx);
+          break;
+        case 'pull':
+          await runPull(branch, remote, workDir, gitOpts, collect);
+          break;
+        case 'push':
+          await runPush(branch, remote, workDir, commitMessage, gitOpts, collect);
+          break;
+        case 'sync':
+          await runSync(branch, remote, workDir, commitMessage, gitOpts, collect);
+          break;
       }
 
       const stdout = allStdout.join('\n').slice(0, MAX_OUTPUT);
@@ -158,6 +229,7 @@ export const gitExecutor: Executor = {
       return { exitCode: 1, error: message };
     } finally {
       if (keyPath) {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- generated tmp path inside OS temp dir
         await unlink(keyPath).catch(() => {});
       }
     }

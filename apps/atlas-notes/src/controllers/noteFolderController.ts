@@ -1,8 +1,6 @@
-import type { Request, RequestHandler } from 'express';
-import { ApiError } from '@atlas/core';
+import type { RequestHandler } from 'express';
 import { resolveOwner } from '@atlas/server-common';
 import * as noteFolderService from '../services/noteFolderService.js';
-
 
 export const create: RequestHandler = async (req, res, next) => {
   try {

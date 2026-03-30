@@ -1,8 +1,6 @@
-import type { Request, RequestHandler } from 'express';
-import { ApiError } from '@atlas/core';
+import type { RequestHandler } from 'express';
 import { resolveOwner } from '@atlas/server-common';
 import * as preferenceService from '../services/preferenceService.js';
-
 
 export const listRules: RequestHandler = async (req, res, next) => {
   try {
