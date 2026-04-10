@@ -26,7 +26,7 @@ export function VisibilityBadge({ isPublic, permission, inherited, size = 'sm', 
 
   if (inherited) {
     return (
-      <span className={cn('inline-flex items-center gap-1 text-amber-500', textSize)} title="Public (inherited from parent folder)">
+      <span className={cn('inline-flex items-center gap-1 text-[#0071e3]', textSize)} title="Public (inherited from parent folder)">
         <Link className={iconSize} />
         {showLabel && (
           <span>
@@ -39,7 +39,7 @@ export function VisibilityBadge({ isPublic, permission, inherited, size = 'sm', 
   }
 
   return (
-    <span className={cn('inline-flex items-center gap-1 text-info', textSize)}>
+    <span className={cn('inline-flex items-center gap-1 text-[#0071e3]', textSize)}>
       <Globe className={iconSize} />
       {showLabel && (permission || 'public')}
     </span>

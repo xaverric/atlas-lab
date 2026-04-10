@@ -36,13 +36,13 @@ export function Modal({ open, onClose, title, children, footer, maxWidth = 'max-
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-[4px]" onClick={onClose} />
-      <div className={cn('relative flex w-[90%] max-h-[85vh] flex-col rounded-2xl border bg-card shadow-2xl', maxWidth)}>
-        <div className="flex items-center justify-between border-b px-6 py-5">
-          <h2 className="text-lg font-bold">{title}</h2>
+      <div className="fixed inset-0 bg-black/40" onClick={onClose} />
+      <div className={cn('relative flex w-[90%] max-h-[85vh] flex-col rounded-xl bg-white shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] dark:bg-[#1c1c1e]', maxWidth)}>
+        <div className="flex items-center justify-between px-6 py-4">
+          <h2 className="text-[17px] font-semibold tracking-tight">{title}</h2>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[rgba(0,0,0,0.48)] transition-colors hover:bg-black/[0.04] hover:text-[#1d1d1f] dark:text-[rgba(255,255,255,0.48)] dark:hover:bg-white/[0.06] dark:hover:text-white"
           >
             <CloseIcon />
           </button>
@@ -51,7 +51,7 @@ export function Modal({ open, onClose, title, children, footer, maxWidth = 'max-
           {children}
         </div>
         {footer && (
-          <div className="flex justify-end gap-2 border-t px-6 py-4">
+          <div className="flex justify-end gap-2 px-6 py-4">
             {footer}
           </div>
         )}

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 export function SectionPanel({ children }: { children: ReactNode }) {
   return (
-    <aside className="flex h-full w-[220px] flex-col overflow-hidden border-r bg-sidebar-background">
+    <aside className="flex h-full w-[220px] flex-col overflow-hidden bg-sidebar-background">
       {children}
     </aside>
   );
@@ -19,7 +19,7 @@ interface PanelHeaderProps {
 
 export function PanelHeader({ title, children }: PanelHeaderProps) {
   return (
-    <div className="flex items-center justify-between border-b px-3.5 py-3">
+    <div className="flex items-center justify-between px-3.5 py-3">
       <h2 className="text-sm font-semibold">{title}</h2>
       {children && <div className="flex items-center gap-1">{children}</div>}
     </div>
@@ -34,7 +34,7 @@ interface PanelSearchProps {
 
 export function PanelSearch({ placeholder = 'Search...', value, onChange }: PanelSearchProps) {
   return (
-    <div className="mx-3 mt-2.5 mb-1.5 flex items-center gap-2 rounded-lg border px-2.5 py-1.5 focus-within:border-ring">
+    <div className="mx-3 mt-2.5 mb-1.5 flex items-center gap-2 rounded-[11px] bg-black/[0.04] px-2.5 py-1.5 focus-within:ring-2 focus-within:ring-[#0071e3]/30 dark:bg-white/[0.06]">
       <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
       <input
         type="text"
@@ -95,8 +95,8 @@ export function PanelItem({ active, icon, label, count, badge, onClick }: PanelI
       className={cn(
         'mx-2 flex w-[calc(100%-16px)] items-center gap-2 rounded-md px-2 py-1.5 text-[13px] transition-colors',
         active
-          ? 'bg-primary/8 font-medium text-primary'
-          : 'text-foreground/80 hover:bg-accent hover:text-foreground',
+          ? 'bg-[#0071e3]/8 font-medium text-[#0071e3]'
+          : 'text-foreground/80 hover:bg-black/[0.04] hover:text-foreground dark:hover:bg-white/[0.06]',
       )}
     >
       {icon && <span className="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{icon}</span>}
@@ -129,8 +129,8 @@ export function PanelAction({ children, primary, onClick, title }: PanelActionPr
       className={cn(
         'flex h-7 w-7 items-center justify-center rounded-md transition-colors [&>svg]:h-4 [&>svg]:w-4',
         primary
-          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-          : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+          ? 'bg-[#0071e3] text-white hover:opacity-90'
+          : 'text-muted-foreground hover:bg-black/[0.04] hover:text-foreground dark:hover:bg-white/[0.06]',
       )}
     >
       {children}

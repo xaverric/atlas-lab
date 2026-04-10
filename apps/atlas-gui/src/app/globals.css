@@ -4,50 +4,54 @@
 
 @theme {
   /* ============================================
-     CATPPUCCIN LATTE — Light Theme
-     Warm light with vibrant accents
-     Base: #eff1f5 | Text: #4c4f69 | Blue: #1e66f5
+     APPLE LIGHT — Clean, minimal, product-first
+     Background: #ffffff | Alt: #f5f5f7 | Text: #1d1d1f
+     Accent: #0071e3 (Apple Blue — ONLY chromatic color)
      ============================================ */
-  --color-background: #fbfbfd;                         /* Near white with tiny blue tint */
-  --color-foreground: #4c4f69;                          /* Text */
-  --color-card: #ffffff;                                /* Pure white cards */
-  --color-card-foreground: #4c4f69;
+  --color-background: #ffffff;
+  --color-foreground: #1d1d1f;
+  --color-card: #f5f5f7;
+  --color-card-foreground: #1d1d1f;
   --color-popover: #ffffff;
-  --color-popover-foreground: #4c4f69;
-  --color-primary: #1e66f5;                             /* Blue */
+  --color-popover-foreground: #1d1d1f;
+  --color-primary: #0071e3;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #f0f1f5;                           /* Very light grey — barely visible */
-  --color-secondary-foreground: #4c4f69;
-  --color-muted: #f4f5f8;                               /* Almost white muted */
-  --color-muted-foreground: #6c6f85;                    /* Subtext0 */
-  --color-accent: #eef0f8;                              /* Very light blue-grey hover */
-  --color-accent-foreground: #4c4f69;
-  --color-destructive: #d20f39;
+  --color-secondary: #f5f5f7;
+  --color-secondary-foreground: #1d1d1f;
+  --color-muted: #f5f5f7;
+  --color-muted-foreground: rgba(0, 0, 0, 0.48);
+  --color-accent: #f5f5f7;
+  --color-accent-foreground: #1d1d1f;
+  --color-destructive: #ff3b30;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e2e4ea;                              /* Light border — visible but soft */
-  --color-input: #e2e4ea;
-  --color-ring: #7287fd;                                /* Lavender */
-  --color-success: #40a02b;                             /* Green */
-  --color-success-foreground: #eff1f5;
-  --color-warning: #df8e1d;                             /* Yellow */
-  --color-warning-foreground: #eff1f5;
-  --color-info: #209fb5;                                /* Sapphire */
-  --color-info-foreground: #eff1f5;
-  --radius: 0.75rem;                                    /* 12px — rounder islands */
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-input: rgba(0, 0, 0, 0.08);
+  --color-ring: #0071e3;
+  --color-success: #34c759;
+  --color-success-foreground: #ffffff;
+  --color-warning: #ff9500;
+  --color-warning-foreground: #ffffff;
+  --color-info: #007aff;
+  --color-info-foreground: #ffffff;
+  --radius: 0.5rem;
 
-  /* Sidebar — slightly off-white, not grey */
-  --color-sidebar-background: #f5f6f9;                  /* Very light, barely tinted */
-  --color-sidebar-foreground: #4c4f69;
-  --color-sidebar-primary: #1e66f5;
+  /* Sidebar */
+  --color-sidebar-background: #f5f5f7;
+  --color-sidebar-foreground: #1d1d1f;
+  --color-sidebar-primary: #0071e3;
   --color-sidebar-primary-foreground: #ffffff;
-  --color-sidebar-accent: #eceef4;                      /* Light hover */
-  --color-sidebar-accent-foreground: #4c4f69;
-  --color-sidebar-border: #e2e4ea;
-  --color-sidebar-ring: #7287fd;
+  --color-sidebar-accent: rgba(0, 0, 0, 0.04);
+  --color-sidebar-accent-foreground: #1d1d1f;
+  --color-sidebar-border: rgba(0, 0, 0, 0.06);
+  --color-sidebar-ring: #0071e3;
 
-  /* Rail — darker than sidebar */
-  --color-rail-background: #eceef4;
-  --color-rail-border: #e2e4ea;
+  /* Rail (navigation) */
+  --color-rail-background: rgba(0, 0, 0, 0.8);
+  --color-rail-border: rgba(255, 255, 255, 0.1);
+
+  /* Link colors */
+  --color-link: #0066cc;
+  --color-link-dark: #2997ff;
 }
 
 @layer base {
@@ -57,65 +61,63 @@
 
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Frost glow on primary buttons */
-  [class*="bg-primary"]:not([class*="bg-primary/"]) {
-    box-shadow:
-      0 0 0 1px oklch(from #1e66f5 l c h / 0.12),
-      0 2px 4px oklch(from #1e66f5 l c h / 0.1),
-      0 4px 14px oklch(from #1e66f5 l c h / 0.07);
-    transition: box-shadow 0.15s ease;
-  }
-
-  [class*="bg-primary"]:not([class*="bg-primary/"]):hover {
-    box-shadow:
-      0 0 0 1px oklch(from #1e66f5 l c h / 0.18),
-      0 2px 6px oklch(from #1e66f5 l c h / 0.14),
-      0 6px 20px oklch(from #1e66f5 l c h / 0.1);
-  }
-
-  /* Card elevation */
-  [class*="bg-card"] {
-    box-shadow: 0 1px 2px oklch(0 0 0 / 0.04), 0 1px 3px oklch(0 0 0 / 0.02);
-  }
-
-  /* Focus ring */
-  :focus-visible {
-    outline: 2px solid #7287fd;
-    outline-offset: 2px;
-  }
-
-  /* ---- Islands Component Overrides ---- */
-
-  /* Buttons — more padding, rounded, subtle inner highlight */
+  /* Apple-style button press — no frost glow, subtle scale */
   button, [role="button"], a[class*="rounded"] {
     transition: all 0.15s ease;
   }
 
-  /* Inputs & selects — taller, inner shadow, softer border */
+  button:active, [role="button"]:active {
+    transform: scale(0.98);
+  }
+
+  /* Primary buttons — subtle shadow, no glow */
+  [class*="bg-primary"]:not([class*="bg-primary/"]) {
+    box-shadow: none;
+    transition: opacity 0.15s ease;
+  }
+
+  [class*="bg-primary"]:not([class*="bg-primary/"]):hover {
+    opacity: 0.88;
+  }
+
+  /* Card elevation — Apple soft shadow */
+  [class*="bg-card"] {
+    box-shadow: none;
+  }
+
+  /* Focus ring — Apple Blue */
+  :focus-visible {
+    outline: 2px solid #0071e3;
+    outline-offset: 2px;
+  }
+
+  /* Inputs — Apple style: subtle border, no inner shadow */
   input:not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
-    box-shadow: inset 0 1px 2px oklch(0 0 0 / 0.04);
+    box-shadow: none;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   input:not([type="checkbox"]):not([type="radio"]):focus,
   select:focus,
   textarea:focus {
-    border-color: #7287fd;
-    box-shadow: inset 0 1px 2px oklch(0 0 0 / 0.04), 0 0 0 3px oklch(from #7287fd l c h / 0.12);
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.16);
   }
 
-  /* Tables — rounder, card-like */
+  /* Tables */
   table {
     border-collapse: separate;
     border-spacing: 0;
   }
 
-
-  /* Scrollbars — thin, themed */
+  /* Scrollbars — Apple thin */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -124,102 +126,98 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #dcdee5;
+    background: rgba(0, 0, 0, 0.15);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #c5c8d2;
+    background: rgba(0, 0, 0, 0.25);
   }
 
-  /* Checkbox — rounder */
+  /* Checkbox */
   input[type="checkbox"] {
     border-radius: 4px;
   }
 
-  /* Modals / Popovers — larger shadow */
-  [class*="shadow-md"], [class*="shadow-lg"] {
-    box-shadow: 0 4px 24px oklch(0 0 0 / 0.08), 0 2px 8px oklch(0 0 0 / 0.04);
+  /* Modals / Popovers — Apple shadow */
+  [class*="shadow-md"], [class*="shadow-lg"], [class*="shadow-xl"], [class*="shadow-2xl"] {
+    box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
   }
 }
 
 /* ============================================
-   CATPPUCCIN MOCHA — Dark Theme
-   Warm dark with pastel accents
-   Base: #1e1e2e | Text: #cdd6f4 | Blue: #89b4fa
+   APPLE DARK — Pure black, bright accents
+   Background: #000000 | Surface: #1c1c1e
+   Text: #ffffff | Accent: #0071e3
    ============================================ */
 .dark {
-  --color-background: #1e1e2e;                          /* Base */
-  --color-foreground: #cdd6f4;                          /* Text */
-  --color-card: #181825;                                /* Mantle */
-  --color-card-foreground: #cdd6f4;
-  --color-popover: #313244;                             /* Surface0 */
-  --color-popover-foreground: #cdd6f4;
-  --color-primary: #89b4fa;                             /* Blue */
-  --color-primary-foreground: #11111b;                  /* Crust */
-  --color-secondary: #313244;                           /* Surface0 */
-  --color-secondary-foreground: #cdd6f4;
-  --color-muted: #313244;                               /* Surface0 */
-  --color-muted-foreground: #a6adc8;                    /* Subtext0 */
-  --color-accent: #45475a;                              /* Surface1 */
-  --color-accent-foreground: #cdd6f4;
-  --color-destructive: #f38ba8;                         /* Red */
-  --color-destructive-foreground: #11111b;
-  --color-border: #45475a;                              /* Surface1 */
-  --color-input: #45475a;
-  --color-ring: #b4befe;                                /* Lavender */
-  --color-success: #a6e3a1;                             /* Green */
-  --color-success-foreground: #11111b;
-  --color-warning: #f9e2af;                             /* Yellow */
-  --color-warning-foreground: #11111b;
-  --color-info: #89dceb;                                /* Sky */
-  --color-info-foreground: #11111b;
+  --color-background: #000000;
+  --color-foreground: #ffffff;
+  --color-card: #1c1c1e;
+  --color-card-foreground: #ffffff;
+  --color-popover: #1c1c1e;
+  --color-popover-foreground: #ffffff;
+  --color-primary: #0071e3;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1c1c1e;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #1c1c1e;
+  --color-muted-foreground: rgba(255, 255, 255, 0.48);
+  --color-accent: #2c2c2e;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ff453a;
+  --color-destructive-foreground: #ffffff;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-input: rgba(255, 255, 255, 0.1);
+  --color-ring: #0071e3;
+  --color-success: #30d158;
+  --color-success-foreground: #ffffff;
+  --color-warning: #ff9f0a;
+  --color-warning-foreground: #ffffff;
+  --color-info: #0a84ff;
+  --color-info-foreground: #ffffff;
 
-  --color-sidebar-background: #11111b;                  /* Crust */
-  --color-sidebar-foreground: #bac2de;                  /* Subtext1 */
-  --color-sidebar-primary: #89b4fa;                     /* Blue */
-  --color-sidebar-primary-foreground: #11111b;
-  --color-sidebar-accent: #1e1e2e;                      /* Base */
-  --color-sidebar-accent-foreground: #cdd6f4;
-  --color-sidebar-border: #1e1e2e;
-  --color-sidebar-ring: #b4befe;                        /* Lavender */
+  --color-sidebar-background: #1c1c1e;
+  --color-sidebar-foreground: #ffffff;
+  --color-sidebar-primary: #0071e3;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: rgba(255, 255, 255, 0.06);
+  --color-sidebar-accent-foreground: #ffffff;
+  --color-sidebar-border: rgba(255, 255, 255, 0.08);
+  --color-sidebar-ring: #0071e3;
 
-  --color-rail-background: #181825;                     /* Mantle */
-  --color-rail-border: #1e1e2e;
+  --color-rail-background: rgba(0, 0, 0, 0.85);
+  --color-rail-border: rgba(255, 255, 255, 0.08);
 
-  /* Dark frost glow */
+  --color-link: #2997ff;
+  --color-link-dark: #2997ff;
+
   & [class*="bg-primary"]:not([class*="bg-primary/"]) {
-    box-shadow:
-      0 0 0 1px oklch(from #89b4fa l c h / 0.15),
-      0 2px 4px oklch(from #89b4fa l c h / 0.1),
-      0 4px 14px oklch(from #89b4fa l c h / 0.07);
+    box-shadow: none;
   }
 
   & [class*="bg-primary"]:not([class*="bg-primary/"]):hover {
-    box-shadow:
-      0 0 0 1px oklch(from #89b4fa l c h / 0.22),
-      0 2px 6px oklch(from #89b4fa l c h / 0.15),
-      0 6px 20px oklch(from #89b4fa l c h / 0.1);
+    opacity: 0.88;
   }
 
   & [class*="bg-card"] {
-    box-shadow: 0 1px 3px oklch(0 0 0 / 0.25), 0 1px 2px oklch(0 0 0 / 0.15);
+    box-shadow: none;
   }
 
   & :focus-visible {
-    outline-color: #b4befe;
+    outline-color: #0071e3;
   }
 
   & input:not([type="checkbox"]):not([type="radio"]):focus,
   & select:focus,
   & textarea:focus {
-    border-color: #b4befe;
-    box-shadow: inset 0 1px 2px oklch(0 0 0 / 0.15), 0 0 0 3px oklch(from #b4befe l c h / 0.15);
+    border-color: #0071e3;
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.25);
   }
 
   & ::-webkit-scrollbar-thumb {
-    background: #45475a;
+    background: rgba(255, 255, 255, 0.15);
   }
   & ::-webkit-scrollbar-thumb:hover {
-    background: #585b70;
+    background: rgba(255, 255, 255, 0.25);
   }
 }

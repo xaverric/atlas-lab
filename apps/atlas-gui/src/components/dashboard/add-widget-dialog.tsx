@@ -155,7 +155,7 @@ export function AddWidgetDialog({ open, onClose, onAdded }: AddWidgetDialogProps
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
       <div
-        className="w-full max-w-md rounded-lg border bg-card p-6 shadow-lg"
+        className="w-full max-w-md rounded-xl bg-[#f5f5f7] p-6 shadow-lg dark:bg-[#1c1c1e]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -163,7 +163,7 @@ export function AddWidgetDialog({ open, onClose, onAdded }: AddWidgetDialogProps
             {step !== 'type' && (
               <button
                 onClick={() => setStep(step === 'size' && selectedType !== 'stats' ? 'config' : 'type')}
-                className="rounded-md p-1 hover:bg-muted text-muted-foreground"
+                className="rounded-md p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -187,7 +187,7 @@ export function AddWidgetDialog({ open, onClose, onAdded }: AddWidgetDialogProps
                 <button
                   key={wt.type}
                   onClick={() => handleSelectType(wt.type)}
-                  className="w-full flex items-center gap-3 rounded-lg border p-3 text-left hover:bg-muted transition-colors"
+                  className="w-full flex items-center gap-3 rounded-lg bg-[#f5f5f7] dark:bg-[#1c1c1e] border border-black/[0.06] dark:border-white/[0.06] p-3 text-left hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                 >
                   <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
                   <div>
@@ -212,7 +212,7 @@ export function AddWidgetDialog({ open, onClose, onAdded }: AddWidgetDialogProps
                   <button
                     key={opt.value}
                     onClick={() => handleSelectOption(opt)}
-                    className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-muted transition-colors"
+                    className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                   >
                     {opt.label}
                   </button>
@@ -231,8 +231,8 @@ export function AddWidgetDialog({ open, onClose, onAdded }: AddWidgetDialogProps
                   onClick={() => setSelectedSize(s.value)}
                   className={`w-full flex items-center justify-between rounded-lg border p-3 text-left transition-colors ${
                     selectedSize === s.value
-                      ? 'border-primary bg-primary/5'
-                      : 'hover:bg-muted'
+                      ? 'border-[#0071e3] bg-[#0071e3]/5'
+                      : 'border-black/[0.06] dark:border-white/[0.06] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                   }`}
                 >
                   <span className="text-sm font-medium">{s.label}</span>
@@ -242,7 +242,7 @@ export function AddWidgetDialog({ open, onClose, onAdded }: AddWidgetDialogProps
             </div>
             <button
               onClick={handleAdd}
-              className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              className="w-full rounded-md bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:bg-[#0071e3]/90"
             >
               Add Widget
             </button>

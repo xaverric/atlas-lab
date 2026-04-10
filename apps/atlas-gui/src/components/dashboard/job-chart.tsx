@@ -132,7 +132,7 @@ export function JobChart({ jobId, compact }: JobChartProps) {
             <XAxis dataKey="date" tick={{ fontSize: 10 }} angle={-30} textAnchor="end" height={50} />
             <YAxis tick={{ fontSize: 10 }} width={50} tickFormatter={formatMs} />
             <Tooltip formatter={(value) => formatMs(Number(value))} />
-            <Area type="monotone" dataKey="duration" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} name="Duration" />
+            <Area type="monotone" dataKey="duration" stroke="#0071e3" fill="#0071e3" fillOpacity={0.15} name="Duration" />
           </AreaChart>
         </ResponsiveContainer>
       </div>

@@ -40,13 +40,13 @@ export function EmptyState({ preset, icon, title, description, showUpload }: Emp
 
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <Icon className="h-12 w-12 text-muted-foreground/50" />
-      <h3 className="mt-4 text-lg font-medium">{t}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{d}</p>
+      <Icon className="h-12 w-12 text-[rgba(0,0,0,0.2)] dark:text-[rgba(255,255,255,0.2)]" />
+      <h3 className="mt-4 text-[17px] font-semibold">{t}</h3>
+      <p className="mt-1 text-sm text-[rgba(0,0,0,0.48)] dark:text-[rgba(255,255,255,0.48)]">{d}</p>
       {upload && (
         <Link
           href="/files/upload"
-          className="mt-4 flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="mt-4 flex items-center gap-2 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           <Upload className="h-4 w-4" />
           Upload

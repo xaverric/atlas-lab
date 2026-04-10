@@ -65,6 +65,7 @@ jobs:
             xaverric/atlas-lab-${{ matrix.service.name }}:dev
             xaverric/atlas-lab-${{ matrix.service.name }}:${{ needs.ci.outputs.sha_short }}
             xaverric/atlas-lab-${{ matrix.service.name }}:latest
+          build-args: CACHE_BUST=${{ github.run_id }}
           cache-from: type=gha,scope=${{ matrix.service.name }}
           cache-to: type=gha,scope=${{ matrix.service.name }},mode=max
           sbom: true

@@ -45,21 +45,21 @@ export function UserMenu() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-80"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-xs font-semibold text-white transition-opacity hover:opacity-80"
         aria-label="User menu"
       >
         {initials}
       </button>
 
       {open && (
-        <div className="absolute bottom-0 left-[calc(100%+8px)] w-52 rounded-xl border bg-card shadow-lg z-[200]">
-          <div className="border-b px-3 py-2.5">
-            <p className="truncate text-sm font-medium">{displayName}</p>
+        <div className="absolute bottom-0 left-[calc(100%+8px)] w-52 rounded-xl bg-white shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] z-[200] dark:bg-[#1c1c1e]">
+          <div className="px-3 py-2.5">
+            <p className="truncate text-sm font-medium text-[#1d1d1f] dark:text-white">{displayName}</p>
             {email && <p className="truncate text-xs text-muted-foreground">{email}</p>}
           </div>
 
-          <div className="border-b px-3 py-2.5">
-            <p className="mb-1.5 text-xs text-muted-foreground">Theme</p>
+          <div className="px-3 py-2.5">
+            <p className="mb-1.5 text-xs text-[rgba(0,0,0,0.48)] dark:text-[rgba(255,255,255,0.48)]">Theme</p>
             <div className="flex gap-1">
               {themeOptions.map(({ value, icon: Icon, label }) => (
                 <button
@@ -68,8 +68,8 @@ export function UserMenu() {
                   className={cn(
                     'flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1 text-xs transition-colors',
                     theme === value
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-muted',
+                      ? 'bg-[#0071e3] text-white'
+                      : 'text-[rgba(0,0,0,0.48)] hover:bg-black/[0.04] dark:text-[rgba(255,255,255,0.48)] dark:hover:bg-white/[0.06]',
                   )}
                   aria-label={label}
                 >

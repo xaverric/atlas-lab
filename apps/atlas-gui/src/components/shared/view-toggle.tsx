@@ -27,16 +27,16 @@ export function useViewMode(storageKey: string, defaultMode: ViewMode = 'list'):
 
 export function ViewToggle({ view, onChange }: { view: ViewMode; onChange: (view: ViewMode) => void }) {
   return (
-    <div className="flex rounded-md border">
+    <div className="flex rounded-lg bg-[#f5f5f7] p-0.5 dark:bg-[#2c2c2e]">
       <button
         onClick={() => onChange('grid')}
-        className={cn('rounded-l-md p-1.5 transition-colors', view === 'grid' ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50')}
+        className={cn('rounded-md p-1.5 transition-colors', view === 'grid' ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-[#3a3a3c] dark:text-white' : 'text-[rgba(0,0,0,0.48)] hover:text-[#1d1d1f] dark:text-[rgba(255,255,255,0.48)] dark:hover:text-white')}
       >
         <LayoutGrid className="h-4 w-4" />
       </button>
       <button
         onClick={() => onChange('list')}
-        className={cn('rounded-r-md p-1.5 transition-colors', view === 'list' ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50')}
+        className={cn('rounded-md p-1.5 transition-colors', view === 'list' ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-[#3a3a3c] dark:text-white' : 'text-[rgba(0,0,0,0.48)] hover:text-[#1d1d1f] dark:text-[rgba(255,255,255,0.48)] dark:hover:text-white')}
       >
         <List className="h-4 w-4" />
       </button>

@@ -38,16 +38,16 @@ export function Drawer({ open, onClose, title, children, width = 'w-[380px]' }: 
       )}
       <div
         className={cn(
-          'fixed top-0 right-0 bottom-0 z-[200] flex flex-col border-l bg-card shadow-xl transition-transform duration-200',
+          'fixed top-0 right-0 bottom-0 z-[200] flex flex-col bg-white shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] transition-transform duration-200 dark:bg-[#1c1c1e]',
           width,
           open ? 'translate-x-0' : 'translate-x-full',
         )}
       >
-        <div className="flex items-center justify-between border-b px-5 py-4">
-          <h3 className="text-[15px] font-semibold">{title}</h3>
+        <div className="flex items-center justify-between px-5 py-4">
+          <h3 className="text-[15px] font-semibold tracking-tight">{title}</h3>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-[rgba(0,0,0,0.48)] transition-colors hover:bg-black/[0.04] hover:text-[#1d1d1f] dark:text-[rgba(255,255,255,0.48)] dark:hover:bg-white/[0.06] dark:hover:text-white"
           >
             <CloseIcon />
           </button>

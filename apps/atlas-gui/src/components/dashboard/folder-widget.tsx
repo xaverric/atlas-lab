@@ -67,7 +67,7 @@ export function FolderWidget({ type, folderId, folderName }: FolderWidgetProps) 
             <li key={item.id}>
               <Link
                 href={`${basePath}?${paramKey}=${item.id}`}
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted transition-colors"
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
               >
                 <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <span className="truncate flex-1">{item.title || item.name}</span>

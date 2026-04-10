@@ -1,27 +1,27 @@
 const statusMap: Record<string, string> = {
-  success: 'bg-success/10 text-success',
-  completed: 'bg-success/10 text-success',
-  delivered: 'bg-success/10 text-success',
-  enabled: 'bg-success/10 text-success',
-  active: 'bg-success/10 text-success',
+  success: 'bg-[#34c759]/10 text-[#34c759]',
+  completed: 'bg-[#34c759]/10 text-[#34c759]',
+  delivered: 'bg-[#34c759]/10 text-[#34c759]',
+  enabled: 'bg-[#34c759]/10 text-[#34c759]',
+  active: 'bg-[#34c759]/10 text-[#34c759]',
 
-  error: 'bg-destructive/10 text-destructive',
-  failed: 'bg-destructive/10 text-destructive',
-  rejected: 'bg-destructive/10 text-destructive',
-  disabled: 'bg-destructive/10 text-destructive',
+  error: 'bg-[#ff3b30]/10 text-[#ff3b30]',
+  failed: 'bg-[#ff3b30]/10 text-[#ff3b30]',
+  rejected: 'bg-[#ff3b30]/10 text-[#ff3b30]',
+  disabled: 'bg-[#ff3b30]/10 text-[#ff3b30]',
 
-  running: 'bg-info/10 text-info',
-  pending: 'bg-info/10 text-info',
-  in_progress: 'bg-info/10 text-info',
-  queued: 'bg-info/10 text-info',
+  running: 'bg-[#007aff]/10 text-[#007aff]',
+  pending: 'bg-[#007aff]/10 text-[#007aff]',
+  in_progress: 'bg-[#007aff]/10 text-[#007aff]',
+  queued: 'bg-[#007aff]/10 text-[#007aff]',
 
-  warning: 'bg-warning/10 text-warning',
-  timeout: 'bg-warning/10 text-warning',
-  stale: 'bg-warning/10 text-warning',
-  paused: 'bg-warning/10 text-warning',
+  warning: 'bg-[#ff9500]/10 text-[#ff9500]',
+  timeout: 'bg-[#ff9500]/10 text-[#ff9500]',
+  stale: 'bg-[#ff9500]/10 text-[#ff9500]',
+  paused: 'bg-[#ff9500]/10 text-[#ff9500]',
 };
 
 export function getStatusClasses(status?: string | null): string {
-  if (!status) return 'bg-muted text-muted-foreground';
-  return statusMap[status.toLowerCase()] ?? 'bg-muted text-muted-foreground';
+  if (!status) return 'bg-[#f5f5f7] text-[rgba(0,0,0,0.48)] dark:bg-[#1c1c1e] dark:text-[rgba(255,255,255,0.48)]';
+  return statusMap[status.toLowerCase()] ?? 'bg-[#f5f5f7] text-[rgba(0,0,0,0.48)] dark:bg-[#1c1c1e] dark:text-[rgba(255,255,255,0.48)]';
 }

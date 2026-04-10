@@ -34,10 +34,8 @@ export function TreeNode({ node, onToggle, onClick }: TreeNodeProps) {
   return (
     <div
       className={cn(
-        'group flex items-center gap-2.5 py-2 px-3 text-sm cursor-pointer hover:bg-accent/50 transition-colors',
-        node.isSelected && 'bg-accent',
-        isFolder && (node.isPublic ? 'border-l-2 border-info' : 'border-l-2 border-muted-foreground/30'),
-        !isFolder && 'border-l-2 border-transparent',
+        'group flex items-center gap-2.5 py-2 px-3 text-sm cursor-pointer hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors',
+        node.isSelected && 'bg-[#0071e3]/8',
       )}
       style={{ paddingLeft: `${indent + 8}px` }}
       onClick={onClick}
@@ -59,7 +57,7 @@ export function TreeNode({ node, onToggle, onClick }: TreeNodeProps) {
       {!isFolder && <span className="w-5 shrink-0" />}
 
       {isFolder ? (
-        <Folder className="h-4 w-4 shrink-0 text-warning" />
+        <Folder className="h-4 w-4 shrink-0 text-[rgba(0,0,0,0.48)] dark:text-[rgba(255,255,255,0.48)]" />
       ) : (
         <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
       )}

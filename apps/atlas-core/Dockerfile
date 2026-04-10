@@ -5,6 +5,8 @@ LABEL org.opencontainers.image.description="Atlas Lab — atlas-core"
 LABEL org.opencontainers.image.vendor="xaverric"
 LABEL org.opencontainers.image.licenses="UNLICENSED"
 
+# Cache-bust: forces apk upgrade to re-run on each CI build (security patches)
+ARG CACHE_BUST
 # CIS 4.8 — remove SUID/SGID binaries
 RUN apk upgrade --no-cache && npm install -g npm@latest && find / -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null || true
 
