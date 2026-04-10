@@ -51,7 +51,7 @@ export function EditorToolbar({ editor, isMarkdown, onToggleMarkdown, onInsertIm
       {PromptDialogElement}
       <div className="flex flex-wrap items-center gap-0.5 py-1.5">
         {buttons.map((btn, i) => {
-          if (!btn) return <div key={i} className="mx-1.5 h-5 w-px bg-border" />;
+          if (!btn) return <div key={i} className="mx-1.5 h-5 w-px bg-[rgba(0,0,0,0.08)] dark:bg-[rgba(255,255,255,0.1)]" />;
           const Icon = btn.icon;
           return (
             <button
@@ -60,8 +60,8 @@ export function EditorToolbar({ editor, isMarkdown, onToggleMarkdown, onInsertIm
               onClick={btn.action}
               title={btn.title}
               className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors hover:bg-accent',
-                btn.active && 'bg-accent text-primary',
+                'flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06]',
+                btn.active && 'bg-[#0071e3]/10 text-[#0071e3]',
               )}
             >
               {Icon ? <Icon className="h-4 w-4" /> : <span className="text-xs font-bold">{btn.label}</span>}
@@ -69,12 +69,12 @@ export function EditorToolbar({ editor, isMarkdown, onToggleMarkdown, onInsertIm
           );
         })}
         {onToggleMarkdown && (
-          <div className="ml-auto flex rounded-lg bg-muted p-0.5">
+          <div className="ml-auto flex rounded-lg bg-[#f5f5f7] dark:bg-[#2c2c2e] p-0.5">
             <button
               onClick={isMarkdown ? onToggleMarkdown : undefined}
               className={cn(
                 'rounded-md px-3 py-1 text-xs font-medium transition-colors',
-                !isMarkdown ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                !isMarkdown ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-[#3a3a3c] dark:text-white' : 'text-muted-foreground hover:text-foreground',
               )}
             >
               WYSIWYG
@@ -83,7 +83,7 @@ export function EditorToolbar({ editor, isMarkdown, onToggleMarkdown, onInsertIm
               onClick={!isMarkdown ? onToggleMarkdown : undefined}
               className={cn(
                 'rounded-md px-3 py-1 text-xs font-medium transition-colors',
-                isMarkdown ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                isMarkdown ? 'bg-white text-[#1d1d1f] shadow-sm dark:bg-[#3a3a3c] dark:text-white' : 'text-muted-foreground hover:text-foreground',
               )}
             >
               Markdown

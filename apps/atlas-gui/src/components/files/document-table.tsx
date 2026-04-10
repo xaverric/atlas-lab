@@ -123,7 +123,7 @@ export function DocumentTable({
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="group rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
+              className="group rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
               onContextMenu={(e) => handleContextMenu(e, doc)}
             >
               <div className="flex items-start gap-3">
@@ -174,10 +174,10 @@ export function DocumentTable({
   return (
     <>
       {/* Desktop table */}
-      <div className="hidden md:block rounded-lg border bg-card overflow-x-auto">
+      <div className="hidden md:block rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left text-xs font-medium text-muted-foreground">
+            <tr className="text-left text-xs font-medium text-muted-foreground">
               <th className="px-4 py-3 w-10">
                 <input
                   type="checkbox"
@@ -203,7 +203,7 @@ export function DocumentTable({
             {documents.map((doc) => (
               <tr
                 key={doc.id}
-                className="border-b last:border-b-0 hover:bg-accent/50 transition-colors"
+                className="hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                 onContextMenu={(e) => handleContextMenu(e, doc)}
               >
                 <td className="px-4 py-3">
@@ -274,7 +274,7 @@ export function DocumentTable({
                 onClick={() => onSort(s.key)}
                 className={cn(
                   'text-xs px-2 py-1 rounded border transition-colors',
-                  sort.field === s.key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground',
+                  sort.field === s.key ? 'bg-[#0071e3] text-white' : 'text-muted-foreground',
                 )}
               >
                 {s.label}
@@ -287,7 +287,7 @@ export function DocumentTable({
         {documents.map((doc) => (
           <div
             key={doc.id}
-            className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 active:bg-muted/50 transition-colors"
+            className="flex items-center gap-3 rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
             onContextMenu={(e) => handleContextMenu(e, doc)}
             onTouchStart={(e) => handleTouchStart(doc, e)}
             onTouchEnd={handleTouchEnd}

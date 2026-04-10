@@ -1,0 +1,4 @@
+# CVE-2026-32280: golang stdlib in docker-cli (Alpine package)
+# Waiting for Alpine to ship docker-cli built with Go >= 1.25.9
+# Tracked: only affects atlas-scheduler image
+CVE-2026-32280

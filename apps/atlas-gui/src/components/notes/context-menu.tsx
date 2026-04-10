@@ -38,14 +38,14 @@ export function NoteContextMenu({ x, y, onClose, items }: NoteContextMenuProps) 
   return (
     <div
       ref={ref}
-      className="fixed z-50 min-w-[200px] rounded-md border bg-popover py-1 shadow-lg"
+      className="fixed z-50 min-w-[200px] rounded-xl bg-white py-1 shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] dark:bg-[#1c1c1e]"
       style={{ left: x, top: y }}
     >
       {items.map((item, i) => (
         <button
           key={item.label}
           onClick={() => { item.action(); onClose(); }}
-          className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-accent ${
+          className={`flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06] ${
             item.destructive ? 'text-destructive' : ''
           } ${i > 0 && item.destructive ? 'border-t mt-1 pt-2.5' : ''}`}
         >

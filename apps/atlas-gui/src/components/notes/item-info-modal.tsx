@@ -193,7 +193,7 @@ export function ItemInfoModal({ type, itemId, onClose, onUpdate }: ItemInfoModal
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       {ConfirmDialogElement}
-      <div className="relative w-full max-w-md rounded-lg bg-background shadow-lg border">
+      <div className="relative w-full max-w-md rounded-xl bg-white shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] dark:bg-[#1c1c1e]">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-5 py-3">
           <h2 className="text-sm font-semibold">
@@ -227,15 +227,15 @@ export function ItemInfoModal({ type, itemId, onClose, onUpdate }: ItemInfoModal
                       }}
                       className="rounded border bg-background px-2 py-0.5 text-sm w-48"
                     />
-                    <button onClick={saveName} className="rounded p-1 hover:bg-accent text-primary">
+                    <button onClick={saveName} className="rounded-lg p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[#0071e3]">
                       <Check className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={() => setEditingName(false)} className="rounded p-1 hover:bg-accent text-muted-foreground">
+                    <button onClick={() => setEditingName(false)} className="rounded-lg p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ) : (
-                  <button onClick={startEditing} className="flex items-center gap-1.5 font-medium truncate hover:text-primary group">
+                  <button onClick={startEditing} className="flex items-center gap-1.5 font-medium truncate hover:text-[#0071e3] group">
                     <span className="truncate">{displayName}</span>
                     <Pencil className="h-3 w-3 shrink-0 opacity-0 group-hover:opacity-100" />
                   </button>
@@ -250,7 +250,7 @@ export function ItemInfoModal({ type, itemId, onClose, onUpdate }: ItemInfoModal
                   className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors ${
                     isPublic
                       ? 'bg-info/10 text-info hover:bg-info/20'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      : 'bg-[#f5f5f7] text-muted-foreground hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:hover:bg-[#3a3a3c]'
                   }`}
                 >
                   {isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
@@ -306,7 +306,7 @@ export function ItemInfoModal({ type, itemId, onClose, onUpdate }: ItemInfoModal
                       <span className="text-muted-foreground shrink-0">Tags</span>
                       <div className="flex flex-wrap justify-end gap-1">
                         {note.tags.map((tag) => (
-                          <span key={tag} className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
+                          <span key={tag} className="rounded bg-[#f5f5f7] dark:bg-[#2c2c2e] px-1.5 py-0.5 text-[10px] text-muted-foreground">{tag}</span>
                         ))}
                       </div>
                     </div>
@@ -339,7 +339,7 @@ export function ItemInfoModal({ type, itemId, onClose, onUpdate }: ItemInfoModal
             {isPublic && (
               <button
                 onClick={copyPublicLink}
-                className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+                className="flex items-center gap-1.5 rounded-lg bg-[#f5f5f7] px-3 py-1.5 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]"
               >
                 <Copy className="h-3.5 w-3.5" />
                 Copy public link
@@ -348,7 +348,7 @@ export function ItemInfoModal({ type, itemId, onClose, onUpdate }: ItemInfoModal
             <div className="flex-1" />
             <button
               onClick={handleDelete}
-              className="flex items-center gap-1.5 rounded-md border border-destructive/30 px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
+              className="flex items-center gap-1.5 rounded-lg border border-destructive/30 px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="h-3.5 w-3.5" />
               Delete

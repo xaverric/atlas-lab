@@ -99,7 +99,7 @@ export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDra
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       {ConfirmDialogElement}
       <div
-        className="relative w-full max-w-md max-h-[80vh] rounded-xl border bg-card shadow-xl flex flex-col"
+        className="relative w-full max-w-md max-h-[80vh] rounded-xl bg-white shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] dark:bg-[#1c1c1e] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -109,7 +109,7 @@ export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDra
             <h2 className="text-sm font-semibold">Version History</h2>
             <p className="text-xs text-muted-foreground">{revisions.length} version{revisions.length !== 1 ? 's' : ''}</p>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 hover:bg-accent transition-colors">
+          <button onClick={onClose} className="rounded-lg p-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -118,7 +118,7 @@ export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDra
         <div className="overflow-y-auto flex-1 py-2">
           {loading && (
             <div className="flex items-center justify-center py-12">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#0071e3] border-t-transparent" />
             </div>
           )}
 
@@ -138,14 +138,14 @@ export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDra
                     key={rev.id}
                     className={cn(
                       'mx-3 px-3 py-3 rounded-lg transition-colors',
-                      isCurrent ? 'bg-primary/5 border border-primary/20' : 'hover:bg-accent/50'
+                      isCurrent ? 'bg-[#0071e3]/5 border border-[#0071e3]/20' : 'hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className={cn(
                           'text-sm font-medium',
-                          isCurrent && 'text-primary'
+                          isCurrent && 'text-[#0071e3]'
                         )}>
                           {isCurrent ? 'Current' : `Version ${versionIndex[rev.id]}`}
                         </span>
@@ -154,7 +154,7 @@ export function HistoryDrawer({ noteId, isOpen, onClose, onRestore }: HistoryDra
                       {!isCurrent && (
                         <button
                           onClick={() => handleRestore(rev)}
-                          className="shrink-0 flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                          className="shrink-0 flex items-center gap-1 rounded-lg bg-[#f5f5f7] px-2 py-1 text-xs text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c] transition-colors"
                         >
                           <RotateCcw className="h-3 w-3" />
                           Restore

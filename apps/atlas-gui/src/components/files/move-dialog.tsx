@@ -86,24 +86,24 @@ export function MoveDialog({ title, documentName, currentFolderId, onConfirm, on
           ))}
         </nav>
 
-        <div className="flex-1 overflow-auto rounded border min-h-0">
+        <div className="flex-1 overflow-auto rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] min-h-0">
           <button
             onClick={() => setSelected(browsing)}
             className={cn(
-              'flex w-full items-center gap-2 px-3 py-2.5 text-sm active:bg-muted border-b',
-              selected === browsing && 'bg-primary/10 text-primary',
+              'flex w-full items-center gap-2 px-3 py-2.5 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06]',
+              selected === browsing && 'bg-[#0071e3]/10 text-[#0071e3]',
             )}
           >
             <Folder className="h-4 w-4 text-warning" />
             (current folder)
           </button>
           {folders.map((folder) => (
-            <div key={folder.id} className="flex items-center border-b last:border-0">
+            <div key={folder.id} className="flex items-center">
               <button
                 onClick={() => setSelected(folder.id)}
                 className={cn(
-                  'flex flex-1 items-center gap-2 px-3 py-2.5 text-sm active:bg-muted',
-                  selected === folder.id && 'bg-primary/10 text-primary',
+                  'flex flex-1 items-center gap-2 px-3 py-2.5 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06]',
+                  selected === folder.id && 'bg-[#0071e3]/10 text-[#0071e3]',
                 )}
               >
                 <Folder className="h-4 w-4 text-warning" />
@@ -123,11 +123,11 @@ export function MoveDialog({ title, documentName, currentFolderId, onConfirm, on
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="rounded-md border px-4 py-2.5 text-sm active:bg-muted">Cancel</button>
+          <button onClick={onClose} className="rounded-lg bg-[#f5f5f7] px-4 py-2.5 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]">Cancel</button>
           <button
             onClick={() => { onConfirm(selected); onClose(); }}
             disabled={selected === currentFolderId}
-            className="rounded-md bg-primary px-4 py-2.5 text-sm text-primary-foreground disabled:opacity-50 active:bg-primary/90"
+            className="rounded-lg bg-[#0071e3] px-4 py-2.5 text-sm text-white hover:opacity-90 disabled:opacity-50"
           >
             {displayConfirm}
           </button>

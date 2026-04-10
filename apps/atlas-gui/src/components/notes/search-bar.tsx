@@ -18,7 +18,7 @@ export function SearchBar({ onSearch }: SearchBarProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2 rounded-xl border bg-card px-3 py-2">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 rounded-[11px] bg-[#f5f5f7] dark:bg-[#1c1c1e] px-3 py-2">
       <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
       <input
         value={query}
@@ -31,15 +31,15 @@ export function SearchBar({ onSearch }: SearchBarProps) {
         onClick={() => setSemantic(!semantic)}
         title={semantic ? 'Semantic search (AI)' : 'Text search'}
         className={cn(
-          'shrink-0 rounded-md p-1.5 transition-colors',
-          semantic ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
+          'shrink-0 rounded-lg p-1.5 transition-colors',
+          semantic ? 'bg-[#0071e3]/10 text-[#0071e3]' : 'text-muted-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06] hover:text-foreground',
         )}
       >
         <Sparkles className="h-4 w-4" />
       </button>
       <button
         type="submit"
-        className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        className="shrink-0 rounded-lg bg-[#0071e3] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
       >
         Search
       </button>

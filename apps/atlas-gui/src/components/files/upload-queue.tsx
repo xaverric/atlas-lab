@@ -25,7 +25,7 @@ export function UploadQueue({ items, onRemove }: UploadQueueProps) {
     <div className="space-y-2">
       <h3 className="text-sm font-medium">Upload Queue ({items.length})</h3>
       {items.map((item) => (
-        <div key={item.id} className="flex items-center gap-3 rounded-lg border p-3">
+        <div key={item.id} className="flex items-center gap-3 rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
           <FileIcon mimeType={item.file.type || 'application/octet-stream'} className="text-muted-foreground" />
           <div className="flex-1 min-w-0">
             <p className="truncate text-sm font-medium">{item.name}</p>

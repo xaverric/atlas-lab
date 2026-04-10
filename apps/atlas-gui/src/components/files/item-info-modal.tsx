@@ -178,8 +178,8 @@ export function FileItemInfoModal({ type, itemId, onClose, onUpdate }: FileItemI
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-md rounded-lg bg-background shadow-lg border">
-        <div className="flex items-center justify-between border-b px-5 py-3">
+      <div className="relative w-full max-w-md rounded-xl bg-white shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] dark:bg-[#1c1c1e]">
+        <div className="flex items-center justify-between px-5 py-3">
           <h2 className="text-sm font-semibold">
             {type === 'folder' ? 'Folder' : 'Document'} Info
           </h2>
@@ -210,10 +210,10 @@ export function FileItemInfoModal({ type, itemId, onClose, onUpdate }: FileItemI
                       }}
                       className="rounded border bg-background px-2 py-0.5 text-sm w-48"
                     />
-                    <button onClick={saveName} className="rounded p-1 hover:bg-accent text-primary">
+                    <button onClick={saveName} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-primary">
                       <Check className="h-3.5 w-3.5" />
                     </button>
-                    <button onClick={() => setEditingName(false)} className="rounded p-1 hover:bg-accent text-muted-foreground">
+                    <button onClick={() => setEditingName(false)} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -319,11 +319,11 @@ export function FileItemInfoModal({ type, itemId, onClose, onUpdate }: FileItemI
         </div>
 
         {!loading && (
-          <div className="flex items-center gap-2 border-t px-5 py-3">
+          <div className="flex items-center gap-2 px-5 py-3">
             {type === 'folder' && isPublic && (
               <button
                 onClick={copyPublicLink}
-                className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+                className="flex items-center gap-1.5 rounded-lg bg-[#f5f5f7] px-3 py-1.5 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]"
               >
                 <Copy className="h-3.5 w-3.5" />
                 Copy public link
@@ -332,7 +332,7 @@ export function FileItemInfoModal({ type, itemId, onClose, onUpdate }: FileItemI
             {type === 'document' && (
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+                className="flex items-center gap-1.5 rounded-lg bg-[#f5f5f7] px-3 py-1.5 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]"
               >
                 <Download className="h-3.5 w-3.5" />
                 Download
@@ -341,7 +341,7 @@ export function FileItemInfoModal({ type, itemId, onClose, onUpdate }: FileItemI
             <div className="flex-1" />
             <button
               onClick={handleDelete}
-              className="flex items-center gap-1.5 rounded-md border border-destructive/30 px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
+              className="flex items-center gap-1.5 rounded-lg bg-[#ff3b30]/10 px-3 py-1.5 text-sm text-[#ff3b30] hover:bg-[#ff3b30]/20"
             >
               <Trash2 className="h-3.5 w-3.5" />
               Delete

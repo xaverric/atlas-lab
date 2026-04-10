@@ -47,6 +47,7 @@ jobs:
           exit-code: 0
           severity: CRITICAL,HIGH,MEDIUM
           output: trivy-results.txt
+          trivyignores: .trivyignore
 
       - name: Trivy — SARIF
         uses: aquasecurity/trivy-action@v0.35.0
@@ -55,6 +56,7 @@ jobs:
           format: sarif
           output: trivy.sarif
           severity: CRITICAL,HIGH,MEDIUM
+          trivyignores: .trivyignore
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
@@ -79,6 +81,7 @@ jobs:
           format: json
           output: trivy.json
           severity: CRITICAL,HIGH,MEDIUM
+          trivyignores: .trivyignore
 
       - name: Generate HTML report
         if: always()

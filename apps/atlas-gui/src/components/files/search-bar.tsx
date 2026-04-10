@@ -66,7 +66,7 @@ export function SearchBar({ filters, onChange, availableTags, className }: Searc
   return (
     <div className={cn('space-y-3', className)}>
       <div className="flex gap-2">
-        <div className="relative flex-1 flex items-center gap-2 rounded-xl border bg-card px-3">
+        <div className="relative flex-1 flex items-center gap-2 rounded-[11px] bg-[#f5f5f7] dark:bg-[#1c1c1e] px-3">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             type="text"
@@ -89,7 +89,7 @@ export function SearchBar({ filters, onChange, availableTags, className }: Searc
           onClick={() => setShowFilters((p) => !p)}
           className={cn(
             'flex items-center gap-1.5 rounded-md border border-input px-3 py-2 text-sm md:hidden',
-            showFilters && 'bg-muted',
+            showFilters && 'bg-[#f5f5f7] dark:bg-[#1c1c1e]',
           )}
         >
           <SlidersHorizontal className="h-4 w-4" />
@@ -136,7 +136,7 @@ export function SearchBar({ filters, onChange, availableTags, className }: Searc
       </div>
 
       {showFilters && (
-        <div className="grid grid-cols-1 gap-2 rounded-lg border p-3 md:hidden">
+        <div className="grid grid-cols-1 gap-2 rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3 md:hidden">
           <select
             value={filters.mimeType}
             onChange={(e) => set('mimeType', e.target.value)}
@@ -185,7 +185,7 @@ export function SearchBar({ filters, onChange, availableTags, className }: Searc
               className={cn(
                 'shrink-0 rounded-full border px-2.5 py-0.5 text-xs transition-colors',
                 filters.tags.includes(tag)
-                  ? 'border-primary bg-primary/10 text-primary'
+                  ? 'bg-[#0071e3]/10 text-[#0071e3]'
                   : 'border-input text-muted-foreground hover:text-foreground',
               )}
             >

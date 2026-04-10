@@ -212,25 +212,25 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
           <div className="px-12 py-8">
             <div className="mx-auto max-w-3xl">
               <div className="flex items-center justify-between">
-                <button onClick={onBack} className="rounded-md p-1 hover:bg-accent">
+                <button onClick={onBack} className="rounded-lg p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
                   <ArrowLeft className="h-5 w-5" />
                 </button>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShowHistory(!showHistory)}
-                    className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                    className="flex items-center gap-1.5 rounded-lg bg-[#f5f5f7] px-3 py-1.5 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c] transition-colors"
                   >
                     <Clock className="h-4 w-4" /> History
                   </button>
                   <button
                     onClick={enterEdit}
-                    className="flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm hover:bg-accent"
+                    className="flex items-center gap-1.5 rounded-lg bg-[#f5f5f7] px-3 py-2 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]"
                   >
                     <Pencil className="h-4 w-4" /> Edit
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                    className="flex items-center gap-1.5 rounded-lg border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
                   >
                     <Trash2 className="h-4 w-4" /> Delete
                   </button>
@@ -242,14 +242,14 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
               <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm text-muted-foreground">
                 {note && note.tags.length > 0 &&
                   note.tags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{tag}</span>
+                    <span key={tag} className="rounded-full bg-[#0071e3]/10 px-2.5 py-0.5 text-xs font-medium text-[#0071e3]">{tag}</span>
                   ))
                 }
-                <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{folderName}</span>
+                <span className="rounded-full bg-[#0071e3]/10 px-2.5 py-0.5 text-xs font-medium text-[#0071e3]">{folderName}</span>
                 <button
                   onClick={() => setShowInfo(true)}
                   className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer transition-colors ${
-                    note?.isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-muted text-muted-foreground hover:bg-accent'
+                    note?.isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-[#f5f5f7] text-muted-foreground hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:hover:bg-[#3a3a3c]'
                   }`}
                 >
                   {note?.isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
@@ -318,14 +318,14 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
             <div className="mx-auto max-w-3xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <button onClick={cancelEdit} className="rounded-md p-1 hover:bg-accent">
+                  <button onClick={cancelEdit} className="rounded-lg p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
                     <ArrowLeft className="h-5 w-5" />
                   </button>
                   <span className="text-sm text-muted-foreground">Editing</span>
                 </div>
                 <button
                   onClick={handleDelete}
-                  className="flex items-center gap-1.5 rounded-md border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                  className="flex items-center gap-1.5 rounded-lg border border-destructive/50 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
                 >
                   <Trash2 className="h-4 w-4" /> Delete
                 </button>
@@ -341,14 +341,14 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
               <div className="mt-4 flex flex-wrap items-center gap-2.5 text-sm text-muted-foreground">
                 {note && note.tags.length > 0 &&
                   note.tags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{tag}</span>
+                    <span key={tag} className="rounded-full bg-[#0071e3]/10 px-2.5 py-0.5 text-xs font-medium text-[#0071e3]">{tag}</span>
                   ))
                 }
-                <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{folderName}</span>
+                <span className="rounded-full bg-[#0071e3]/10 px-2.5 py-0.5 text-xs font-medium text-[#0071e3]">{folderName}</span>
                 <button
                   onClick={() => setShowInfo(true)}
                   className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer transition-colors ${
-                    isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-muted text-muted-foreground hover:bg-accent'
+                    isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-[#f5f5f7] text-muted-foreground hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:hover:bg-[#3a3a3c]'
                   }`}
                 >
                   {isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
@@ -416,13 +416,13 @@ export function NoteDetail({ noteId, onBack, onNoteUpdate }: NoteDetailProps) {
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={cancelEdit} className="flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm hover:bg-accent">
+            <button onClick={cancelEdit} className="flex items-center gap-1.5 rounded-lg bg-[#f5f5f7] px-4 py-2 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]">
               <X className="h-4 w-4" /> Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save'}
             </button>

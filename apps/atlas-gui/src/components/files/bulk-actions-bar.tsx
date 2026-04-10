@@ -17,27 +17,27 @@ export function BulkActionsBar({ count, onDelete, onMove, onClear, currentFolder
 
   return (
     <>
-      <div className="rounded-lg border bg-muted/50 px-3 py-2">
+      <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] px-3 py-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium">{count} selected</span>
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={onDelete}
-              className="flex items-center gap-1.5 rounded-md border border-destructive px-3 py-1.5 text-sm text-destructive active:bg-destructive/10"
+              className="flex items-center gap-1.5 rounded-lg bg-[#ff3b30]/10 px-3 py-1.5 text-sm text-[#ff3b30] hover:bg-[#ff3b30]/20"
             >
               <Trash2 className="h-3.5 w-3.5" /> Delete
             </button>
             {currentFolderId && (
               <button
                 onClick={() => onMove(null)}
-                className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm active:bg-muted"
+                className="flex items-center gap-1.5 rounded-lg bg-white dark:bg-[#2c2c2e] px-3 py-1.5 text-sm hover:bg-[#e8e8ed] dark:hover:bg-[#3a3a3c]"
               >
                 <FolderInput className="h-3.5 w-3.5" /> Move to Root
               </button>
             )}
             <button
               onClick={() => setShowMovePicker(true)}
-              className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm active:bg-muted"
+              className="flex items-center gap-1.5 rounded-lg bg-white dark:bg-[#2c2c2e] px-3 py-1.5 text-sm hover:bg-[#e8e8ed] dark:hover:bg-[#3a3a3c]"
             >
               <FolderInput className="h-3.5 w-3.5" /> Move to...
             </button>

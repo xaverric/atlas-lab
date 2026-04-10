@@ -32,12 +32,12 @@ export function FilePickerDialog({ noteId, dmsFolderId, onClose, onAttached }: F
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
       <div
-        className="mx-4 flex max-h-[80vh] w-full max-w-2xl flex-col rounded-lg bg-background shadow-xl"
+        className="mx-4 flex max-h-[80vh] w-full max-w-2xl flex-col rounded-xl bg-white shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] dark:bg-[#1c1c1e]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b px-4 py-3">
           <h2 className="text-lg font-semibold">Attach File</h2>
-          <button onClick={onClose} className="rounded p-1 hover:bg-accent">
+          <button onClick={onClose} className="rounded-lg p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -45,13 +45,13 @@ export function FilePickerDialog({ noteId, dmsFolderId, onClose, onAttached }: F
         <div className="flex border-b">
           <button
             onClick={() => setTab('browse')}
-            className={`px-4 py-2.5 text-sm font-medium ${tab === 'browse' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`px-4 py-2.5 text-sm font-medium ${tab === 'browse' ? 'border-b-2 border-[#0071e3] text-[#0071e3]' : 'text-muted-foreground hover:text-foreground'}`}
           >
             Browse Files
           </button>
           <button
             onClick={() => setTab('upload')}
-            className={`px-4 py-2.5 text-sm font-medium ${tab === 'upload' ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+            className={`px-4 py-2.5 text-sm font-medium ${tab === 'upload' ? 'border-b-2 border-[#0071e3] text-[#0071e3]' : 'text-muted-foreground hover:text-foreground'}`}
           >
             Upload New
           </button>
@@ -133,7 +133,7 @@ function BrowseTab({ noteId, onAttached }: { noteId: string; onAttached: FilePic
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         {folderStack.length > 1 && (
-          <button onClick={navigateBack} className="rounded p-1 hover:bg-accent">
+          <button onClick={navigateBack} className="rounded-lg p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
             <ArrowLeft className="h-4 w-4" />
           </button>
         )}
@@ -157,7 +157,7 @@ function BrowseTab({ noteId, onAttached }: { noteId: string; onAttached: FilePic
             <button
               key={folder.id}
               onClick={() => navigateInto(folder)}
-              className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
             >
               <Folder className="h-4 w-4 text-muted-foreground" />
               <span>{folder.name}</span>
@@ -169,7 +169,7 @@ function BrowseTab({ noteId, onAttached }: { noteId: string; onAttached: FilePic
               key={file.id}
               onClick={() => handlePick(file)}
               disabled={attaching === file.id}
-              className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06] disabled:opacity-50"
             >
               <FileIcon mimeType={file.mimeType} className="h-4 w-4 text-muted-foreground" />
               <span className="flex-1 truncate text-left">{file.name}</span>
@@ -270,7 +270,7 @@ function UploadTab({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="mt-4 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
         >
           {uploading ? 'Uploading...' : 'Choose Files'}
         </button>

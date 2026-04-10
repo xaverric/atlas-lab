@@ -192,7 +192,7 @@ export function UploadModal({ folderId: initialFolderId, onClose, onComplete }: 
           >
             <Upload className="h-8 w-8 text-muted-foreground" />
             <p className="mt-2 text-sm text-muted-foreground">Drag and drop files, or</p>
-            <label className="mt-2 cursor-pointer rounded-md bg-primary px-4 py-2.5 sm:py-2 text-sm font-medium text-primary-foreground active:bg-primary/90">
+            <label className="mt-2 cursor-pointer rounded-lg bg-[#0071e3] px-4 py-2.5 sm:py-2 text-sm font-medium text-white hover:opacity-90 active:opacity-90">
               Browse Files
               <input
                 type="file"
@@ -233,7 +233,7 @@ export function UploadModal({ folderId: initialFolderId, onClose, onComplete }: 
                 className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2.5 sm:py-2 text-sm"
               />
               {showTagSuggestions && filteredSuggestions.length > 0 && (
-                <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md max-h-48 overflow-auto">
+                <div className="absolute z-10 mt-1 w-full rounded-xl bg-white shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] dark:bg-[#1c1c1e] max-h-48 overflow-auto">
                   {filteredSuggestions.slice(0, 8).map((tag) => (
                     <button
                       key={tag}
@@ -254,13 +254,13 @@ export function UploadModal({ folderId: initialFolderId, onClose, onComplete }: 
           <button
             onClick={handleSubmit}
             disabled={queue.filter((q) => q.status === 'pending' || q.status === 'error').length === 0 || uploading}
-            className="flex-1 sm:flex-none rounded-md bg-primary px-4 py-2.5 sm:py-2 text-sm font-medium text-primary-foreground active:bg-primary/90 disabled:opacity-50"
+            className="flex-1 sm:flex-none rounded-lg bg-[#0071e3] px-4 py-2.5 sm:py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
             {uploading ? 'Uploading...' : `Upload ${queue.filter((q) => q.status === 'pending' || q.status === 'error').length} file(s)`}
           </button>
           <button
             onClick={onClose}
-            className="rounded-md border px-4 py-2.5 sm:py-2 text-sm active:bg-muted"
+            className="rounded-lg bg-[#f5f5f7] px-4 py-2.5 sm:py-2 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]"
           >
             Cancel
           </button>

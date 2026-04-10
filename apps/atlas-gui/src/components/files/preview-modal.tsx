@@ -203,7 +203,7 @@ export function PreviewModal({ document: doc, onClose }: PreviewModalProps) {
         <pre className="text-xs sm:text-sm font-mono p-0 m-0">
           <code>
             {lines.map((line, i) => (
-              <div key={i} className="flex hover:bg-muted-foreground/5">
+              <div key={i} className="flex hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
                 <span
                   className="select-none text-muted-foreground/50 text-right pr-3 pl-2 py-0 border-r border-muted-foreground/10 shrink-0"
                   style={{ minWidth: `${gutterWidth + 2}ch` }}
@@ -360,7 +360,7 @@ function NoPreview({ onDownload, mimeType }: { onDownload: () => void; mimeType:
       <p className="text-muted-foreground text-sm">Preview not available for this file type</p>
       <button
         onClick={onDownload}
-        className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground active:bg-primary/90"
+        className="flex items-center gap-2 rounded-lg bg-[#0071e3] px-4 py-2 text-sm text-white hover:opacity-90"
       >
         <Download className="h-4 w-4" /> Download
       </button>

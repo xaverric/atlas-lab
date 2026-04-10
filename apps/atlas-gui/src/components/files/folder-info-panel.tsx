@@ -82,7 +82,7 @@ export function FolderInfoPanel({ folderId, onClose, onPublicToggle }: FolderInf
 
   if (loading) {
     return (
-      <div className="rounded-lg border p-4">
+      <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
         <p className="text-sm text-muted-foreground">Loading folder info...</p>
       </div>
     );
@@ -91,7 +91,7 @@ export function FolderInfoPanel({ folderId, onClose, onPublicToggle }: FolderInf
   if (!meta) return null;
 
   return (
-    <div className="rounded-lg border p-4 space-y-3">
+    <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold">Folder Info</h3>
         <button onClick={onClose} className="rounded p-1 text-muted-foreground hover:text-foreground">
@@ -159,7 +159,7 @@ export function FolderInfoPanel({ folderId, onClose, onPublicToggle }: FolderInf
 
       <button
         onClick={copyLink}
-        className="flex w-full items-center justify-center gap-2 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-white dark:bg-[#2c2c2e] px-3 py-1.5 text-sm hover:bg-[#e8e8ed] dark:hover:bg-[#3a3a3c]"
       >
         <Copy className="h-3.5 w-3.5" />
         Copy link

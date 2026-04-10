@@ -65,7 +65,7 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
 
   if (loading) {
     return (
-      <div className="rounded-md border p-4">
+      <div className="rounded-lg p-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Paperclip className="h-4 w-4" />
           Loading attachments...
@@ -77,8 +77,8 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
   return (
     <>
     {ConfirmDialogElement}
-    <div className="rounded-md border">
-      <div className="flex items-center justify-between border-b px-4 py-2.5">
+    <div className="rounded-lg border border-[rgba(0,0,0,0.08)] dark:border-[rgba(255,255,255,0.1)]">
+      <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.08)] dark:border-[rgba(255,255,255,0.1)] px-4 py-2.5">
         <div className="flex items-center gap-2 text-sm font-medium">
           <Paperclip className="h-4 w-4" />
           Attachments {attachments.length > 0 && `(${attachments.length})`}
@@ -86,7 +86,7 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
         {editable && (
           <button
             onClick={onAttach}
-            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium hover:bg-accent"
+            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
           >
             <Plus className="h-3.5 w-3.5" /> Attach
           </button>
@@ -97,7 +97,7 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
         <div className="px-4 py-6 text-center text-sm text-muted-foreground">
           No attachments yet.
           {editable && (
-            <button onClick={onAttach} className="ml-1 text-primary hover:underline">
+            <button onClick={onAttach} className="ml-1 text-[#0071e3] hover:underline">
               Attach a file
             </button>
           )}
@@ -116,7 +116,7 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
                   href={`/files/${att.documentId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded p-1.5 hover:bg-accent"
+                  className="rounded-lg p-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                   title="Open in Files"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -124,7 +124,7 @@ export function AttachmentPanel({ noteId, editable, onAttach, refreshKey }: Atta
                 </a>
                 <button
                   onClick={() => handleDownload(att)}
-                  className="rounded p-1.5 hover:bg-accent"
+                  className="rounded-lg p-1.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                   title="Download"
                 >
                   <Download className="h-3.5 w-3.5" />

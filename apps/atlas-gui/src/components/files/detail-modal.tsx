@@ -224,7 +224,7 @@ export function DetailModal({ documentId, onClose, onUpdate }: DetailModalProps)
         <div className="flex-1 overflow-auto p-4 space-y-4">
           {/* Preview */}
           {previewable && previewUrl && (
-            <div className="rounded-lg border overflow-hidden">
+            <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] overflow-hidden">
               {isImage ? (
                 <img src={previewUrl} alt={doc.name} className="mx-auto max-h-[40dvh] sm:max-h-[50vh] object-contain" />
               ) : isVideo ? (
@@ -241,19 +241,19 @@ export function DetailModal({ documentId, onClose, onUpdate }: DetailModalProps)
 
           {/* Metadata */}
           <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-            <div className="rounded-lg border p-3">
+            <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
               <p className="text-xs text-muted-foreground">Type</p>
               <p className="text-sm font-medium truncate">{doc.mimeType}</p>
             </div>
-            <div className="rounded-lg border p-3">
+            <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
               <p className="text-xs text-muted-foreground">Size</p>
               <p className="text-sm font-medium">{formatSize(doc.size)}</p>
             </div>
-            <div className="rounded-lg border p-3">
+            <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
               <p className="text-xs text-muted-foreground">Uploaded</p>
               <p className="text-sm font-medium">{formatDateTime(doc.createdAt)}</p>
             </div>
-            <div className="rounded-lg border p-3">
+            <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">Folder</p>
                 <button onClick={() => setShowFolderPicker(true)} className="text-muted-foreground active:text-foreground p-1">
@@ -288,8 +288,8 @@ export function DetailModal({ documentId, onClose, onUpdate }: DetailModalProps)
                   className="flex-1 rounded border border-input bg-background px-3 py-2 text-sm"
                   autoFocus
                 />
-                <button onClick={saveTags} className="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground">Save</button>
-                <button onClick={() => setEditingTags(false)} className="rounded-md border px-3 py-2 text-sm">Cancel</button>
+                <button onClick={saveTags} className="rounded-lg bg-[#0071e3] px-3 py-2 text-sm text-white hover:opacity-90">Save</button>
+                <button onClick={() => setEditingTags(false)} className="rounded-lg bg-[#f5f5f7] px-3 py-2 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]">Cancel</button>
               </div>
             ) : (
               <div className="flex gap-2 flex-wrap">
@@ -329,8 +329,8 @@ export function DetailModal({ documentId, onClose, onUpdate }: DetailModalProps)
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={handleCreateShare} className="rounded-md bg-primary px-4 py-2.5 sm:py-2 text-sm text-primary-foreground active:bg-primary/90">Create</button>
-                <button onClick={() => setShowShareForm(false)} className="rounded-md border px-4 py-2.5 sm:py-2 text-sm active:bg-muted">Cancel</button>
+                <button onClick={handleCreateShare} className="rounded-lg bg-[#0071e3] px-4 py-2.5 sm:py-2 text-sm text-white hover:opacity-90">Create</button>
+                <button onClick={() => setShowShareForm(false)} className="rounded-lg bg-[#f5f5f7] px-4 py-2.5 sm:py-2 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]">Cancel</button>
               </div>
             </div>
           )}
@@ -341,7 +341,7 @@ export function DetailModal({ documentId, onClose, onUpdate }: DetailModalProps)
               <h3 className="font-medium mb-2">Share Links</h3>
               <div className="space-y-2">
                 {shares.map((share) => (
-                  <div key={share.id} className="flex items-center justify-between gap-2 rounded-lg border p-3">
+                  <div key={share.id} className="flex items-center justify-between gap-2 rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
                     <div className="text-sm min-w-0">
                       <span className="font-mono text-xs">{share.token.slice(0, 16)}...</span>
                       <span className="ml-2 text-muted-foreground text-xs">

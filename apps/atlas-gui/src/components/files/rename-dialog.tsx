@@ -40,8 +40,8 @@ export function RenameDialog({ currentName, onConfirm, onClose }: RenameDialogPr
           autoFocus
         />
         <div className="flex justify-end gap-2 mt-4">
-          <button onClick={onClose} className="rounded-md border px-4 py-2.5 text-sm active:bg-muted">Cancel</button>
-          <button onClick={submit} className="rounded-md bg-primary px-4 py-2.5 text-sm text-primary-foreground active:bg-primary/90">Rename</button>
+          <button onClick={onClose} className="rounded-lg bg-[#f5f5f7] px-4 py-2.5 text-sm text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#2c2c2e] dark:text-white dark:hover:bg-[#3a3a3c]">Cancel</button>
+          <button onClick={submit} className="rounded-lg bg-[#0071e3] px-4 py-2.5 text-sm text-white hover:opacity-90">Rename</button>
         </div>
       </div>
     </div>

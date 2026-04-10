@@ -34,15 +34,15 @@ function AttachmentImageView({ node }: { node: any }) {
 
   return (
     <NodeViewWrapper>
-      <div className="rounded-lg border overflow-hidden my-3">
+      <div className="rounded-lg overflow-hidden my-3">
         {previewUrl ? (
-          <img src={previewUrl} alt={node.attrs.alt || ''} className="max-w-full" />
+          <img src={previewUrl} alt={node.attrs.alt || ''} className="max-w-full rounded-lg" />
         ) : (
-          <div className="h-40 bg-muted/50 flex items-center justify-center text-muted-foreground text-sm">
+          <div className="h-40 bg-[#f5f5f7] dark:bg-[#2c2c2e] flex items-center justify-center text-muted-foreground text-sm rounded-lg">
             Loading preview...
           </div>
         )}
-        <div className="flex items-center gap-2 px-3 py-2 bg-muted/30 border-t text-xs">
+        <div className="flex items-center gap-2 px-3 py-2 bg-[#f5f5f7]/50 dark:bg-[#2c2c2e]/50 border-t border-[rgba(0,0,0,0.08)] dark:border-[rgba(255,255,255,0.1)] text-xs">
           <span className="bg-info/20 text-info px-2 py-0.5 rounded text-[10px] font-medium">
             DMS Attachment
           </span>
