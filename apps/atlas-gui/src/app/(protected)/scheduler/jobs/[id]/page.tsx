@@ -142,13 +142,13 @@ export default function JobDetailPage() {
   return (
     <>{ConfirmDialogElement}<div className="flex h-full flex-col">
       <PageHeader title={job.name}>
-        <button onClick={togglePin} className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted ${pinned ? 'text-primary border-primary' : ''}`}>
+        <button onClick={togglePin} className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06] ${pinned ? 'text-primary border-primary' : ''}`}>
           <BarChart3 className="h-4 w-4" /> {pinned ? 'Unpin' : 'Pin to Dashboard'}
         </button>
-        <Link href={`/scheduler/jobs/${id}/edit`} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted">
+        <Link href={`/scheduler/jobs/${id}/edit`} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
           <Pencil className="h-4 w-4" /> Edit
         </Link>
-        <button onClick={handleRun} className="flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary/90">
+        <button onClick={handleRun} className="flex items-center gap-2 rounded-lg bg-[#0071e3] px-3 py-2 text-sm text-white hover:opacity-90">
           <Play className="h-4 w-4" /> Run Now
         </button>
         <button onClick={handleDelete} className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm text-muted-foreground hover:text-destructive hover:border-destructive">
@@ -174,19 +174,19 @@ export default function JobDetailPage() {
 
       {/* Info Cards */}
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Type</p>
           <p className="font-medium">{job.executionType}</p>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Schedule</p>
           <p className="font-medium font-mono text-sm">{formatSchedule(job.schedule)}</p>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Timeout</p>
           <p className="font-medium">{formatDuration(job.timeoutMs)}</p>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Last Run</p>
           {job.lastRunStatus ? (
             <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export default function JobDetailPage() {
             <p className="text-muted-foreground">Never</p>
           )}
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Next Run</p>
           <p className="font-medium text-sm">{job.nextRunAt ? new Date(job.nextRunAt).toLocaleString() : '-'}</p>
         </div>
@@ -240,7 +240,7 @@ export default function JobDetailPage() {
           <h2 className="text-lg font-semibold mb-3">Notification Rules</h2>
           <div className="space-y-2">
             {job.notifications.map((n) => (
-              <div key={n._id} className="flex items-center gap-3 rounded-lg border p-3 text-sm">
+              <div key={n._id} className="flex items-center gap-3 rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3 text-sm">
                 <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">{n.trigger}</span>
                 <span className="text-muted-foreground">via</span>
                 <span className="font-medium">{n.channel}</span>
@@ -256,7 +256,7 @@ export default function JobDetailPage() {
       {/* Run History */}
       <div>
         <h2 className="text-lg font-semibold mb-3">Run History</h2>
-        <div className="rounded-lg border">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e]">
           <table className="w-full">
             <thead>
               <tr className="border-b text-left text-sm text-muted-foreground">
@@ -270,7 +270,7 @@ export default function JobDetailPage() {
             </thead>
             <tbody>
               {runs.map((run) => (
-                <tr key={run.id} className="border-b last:border-0 hover:bg-muted/50">
+                <tr key={run.id} className="border-b last:border-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]/50">
                   <td className="p-3"><StatusBadge status={run.status} /></td>
                   <td className="p-3 text-sm">{new Date(run.startedAt).toLocaleString()}</td>
                   <td className="p-3 text-sm text-muted-foreground">{run.duration != null ? formatDuration(run.duration) : '-'}</td>

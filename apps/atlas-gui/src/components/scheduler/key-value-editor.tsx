@@ -48,7 +48,7 @@ export function KeyValueEditor({ label, pairs, onChange, keyPlaceholder = 'Key',
               placeholder={valuePlaceholder}
               className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
             />
-            <button type="button" onClick={() => remove(i)} className="rounded p-1 hover:bg-muted text-muted-foreground hover:text-destructive transition-colors">
+            <button type="button" onClick={() => remove(i)} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground hover:text-[#ff3b30] transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>

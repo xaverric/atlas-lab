@@ -70,7 +70,7 @@ export function StorageChart() {
           <span className="text-xs text-muted-foreground">
             {new Date(stats.updatedAt).toLocaleString()}
           </span>
-          <button onClick={load} className="rounded-md border p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors" title="Refresh">
+          <button onClick={load} className="rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors" title="Refresh">
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -103,7 +103,7 @@ export function StorageChart() {
           return (
             <div
               key={item.name}
-              className="flex items-center gap-3 rounded-lg border bg-card p-3 cursor-pointer hover:bg-accent/50 transition-colors"
+              className="flex items-center gap-3 rounded-lg bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3 cursor-pointer hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
               onClick={() => setSelectedSection({ slug: toSlug(item.name), name: item.name, color: item.color })}
             >
               <span

@@ -137,7 +137,7 @@ export function CodeMirrorEditor({
 
   return (
     <div
-      className={cn('rounded-md border border-zinc-700 overflow-hidden', className)}
+      className={cn('rounded-lg bg-[#1c1c1e] overflow-hidden', className)}
       ref={containerRef}
     />
   );

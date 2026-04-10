@@ -130,8 +130,8 @@ export function CodeMirrorViewer({
   };
 
   return (
-    <div className={cn('rounded-md border border-zinc-700 overflow-hidden', className)}>
-      <div className="flex items-center justify-between px-3 py-1.5 bg-zinc-900 border-b border-zinc-700">
+    <div className={cn('rounded-lg bg-[#1c1c1e] overflow-hidden', className)}>
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#1c1c1e] border-b border-white/[0.08]">
         <span className="text-xs text-zinc-400 font-mono">{language}</span>
         <button
           onClick={handleCopy}

@@ -79,8 +79,8 @@ export function CronBuilder({ value, onChange, timezone, onTimezoneChange }: Cro
             key={preset.value}
             type="button"
             onClick={() => onChange(preset.value)}
-            className={`rounded-md border px-2 py-1 text-xs transition-colors ${
-              value === preset.value ? 'border-primary bg-primary/10 text-primary' : 'hover:bg-muted'
+            className={`rounded-md px-2 py-1 text-xs transition-colors ${
+              value === preset.value ? 'bg-[#0071e3] text-white' : 'bg-[#f5f5f7] dark:bg-[#2c2c2e] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
             }`}
           >
             {preset.label}

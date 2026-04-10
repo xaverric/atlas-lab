@@ -76,7 +76,7 @@ export function StorageDetailModal({ section, sectionName, color, onClose }: Pro
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-2xl max-h-[80vh] flex flex-col rounded-xl border bg-card shadow-xl mx-4">
+      <div className="relative z-10 w-full max-w-2xl max-h-[80vh] flex flex-col rounded-xl bg-white dark:bg-[#1c1c1e] shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] mx-4">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-5 py-4">
           <div className="flex items-center gap-3">
@@ -88,7 +88,7 @@ export function StorageDetailModal({ section, sectionName, color, onClose }: Pro
               </span>
             )}
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+          <button onClick={onClose} className="rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -101,7 +101,7 @@ export function StorageDetailModal({ section, sectionName, color, onClose }: Pro
               key={field}
               onClick={() => toggleSort(field)}
               className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                sortBy === field ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent'
+                sortBy === field ? 'bg-[#0071e3] text-white' : 'text-muted-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
               }`}
             >
               {field.charAt(0).toUpperCase() + field.slice(1)}
@@ -137,7 +137,7 @@ export function StorageDetailModal({ section, sectionName, color, onClose }: Pro
               </thead>
               <tbody>
                 {data.items.map((item) => (
-                  <tr key={item.id} className="border-b last:border-0 hover:bg-accent/30 transition-colors">
+                  <tr key={item.id} className="border-b last:border-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
                     <td className="px-5 py-2.5 font-medium truncate max-w-[240px]" title={item.name}>
                       {item.name}
                     </td>

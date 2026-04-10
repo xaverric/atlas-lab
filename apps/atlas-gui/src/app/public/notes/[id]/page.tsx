@@ -122,7 +122,7 @@ export default function PublicNotePage() {
       <div className="mx-auto max-w-3xl px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={cancelEdit} className="rounded-md p-1 hover:bg-accent">
+            <button onClick={cancelEdit} className="rounded-md p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
               <ArrowLeft className="h-5 w-5 text-foreground" />
             </button>
             <h1 className="text-2xl font-bold text-foreground">Edit Note</h1>
@@ -133,19 +133,19 @@ export default function PublicNotePage() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Note title"
-          className="w-full rounded-md border border-border bg-card px-3 py-2 text-lg font-medium dark:border-border dark:bg-card dark:text-foreground"
+          className="w-full rounded-md bg-[#f5f5f7] dark:bg-[#1c1c1e] px-3 py-2 text-lg font-medium  dark:bg-[#1c1c1e] dark:text-foreground"
         />
 
         <TiptapEditor content={html} onChange={setHtml} />
 
         <div className="flex justify-end gap-2">
-          <button onClick={cancelEdit} className="flex items-center gap-1.5 rounded-md border border-border px-4 py-2 text-sm hover:bg-accent dark:border-border">
+          <button onClick={cancelEdit} className="flex items-center gap-1.5 rounded-md border border-border px-4 py-2 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06] ">
             <X className="h-4 w-4" /> Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className="rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save'}
           </button>
@@ -161,7 +161,7 @@ export default function PublicNotePage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {note.folderId && (
-            <Link href={`/public/notes/folders/${note.folderId}`} className="rounded-md p-1 hover:bg-accent">
+            <Link href={`/public/notes/folders/${note.folderId}`} className="rounded-md p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
               <ArrowLeft className="h-5 w-5 text-foreground" />
             </Link>
           )}
@@ -170,14 +170,14 @@ export default function PublicNotePage() {
         {canDo(permission, 'edit') && (
           <button
             onClick={() => setEditing(true)}
-            className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm hover:bg-accent dark:border-border"
+            className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06] "
           >
             <Pencil className="h-4 w-4" /> Edit
           </button>
         )}
       </div>
 
-      <div className="rounded-md border border-border bg-card p-6 dark:border-border dark:bg-card">
+      <div className="rounded-md bg-[#f5f5f7] dark:bg-[#1c1c1e] p-6  dark:bg-[#1c1c1e]">
         <NoteViewer html={html} skipAttachmentResolve />
       </div>
 

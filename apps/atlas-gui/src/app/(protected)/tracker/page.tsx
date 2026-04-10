@@ -69,7 +69,7 @@ export default function TrackerListPage() {
       <PageHeader title="Data Tracker">
         <Link
           href="/tracker/new"
-          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="flex items-center gap-2 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
           Create Endpoint
@@ -77,10 +77,10 @@ export default function TrackerListPage() {
       </PageHeader>
 
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        <div className="rounded-xl border bg-card overflow-hidden">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <tr className="border-b bg-[#f5f5f7]/60 dark:bg-[#2c2c2e]/60 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-3">Name</th>
                 <th className="px-4 py-3">Visibility</th>
                 <th className="px-4 py-3">Schema Fields</th>
@@ -91,7 +91,7 @@ export default function TrackerListPage() {
             </thead>
             <tbody>
               {endpoints.map((ep) => (
-                <tr key={ep.id} className="border-b last:border-b-0 hover:bg-accent/50 transition-colors">
+                <tr key={ep.id} className="border-b last:border-b-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors">
                   <td className="px-4 py-3">
                     <Link href={`/tracker/${ep.name}`} className="font-medium text-primary hover:underline">
                       {ep.displayName}
@@ -129,7 +129,7 @@ export default function TrackerListPage() {
                   <td className="px-4 py-3">
                     <button
                       onClick={() => handleDelete(ep.name)}
-                      className="rounded p-1 hover:bg-muted text-muted-foreground hover:text-destructive"
+                      className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground hover:text-destructive"
                       title="Delete"
                     >
                       <Trash2 className="h-4 w-4" />

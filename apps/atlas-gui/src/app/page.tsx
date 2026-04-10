@@ -16,14 +16,14 @@ export default function LandingPage() {
         {isAuthenticated ? (
           <Link
             href="/dashboard"
-            className="rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            className="rounded-lg bg-[#0071e3] px-6 py-3 text-sm font-medium text-white hover:opacity-90"
           >
             Go to Dashboard
           </Link>
         ) : (
           <Link
             href="/login"
-            className="rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            className="rounded-lg bg-[#0071e3] px-6 py-3 text-sm font-medium text-white hover:opacity-90"
           >
             Sign In
           </Link>

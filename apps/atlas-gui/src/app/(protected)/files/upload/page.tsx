@@ -168,7 +168,7 @@ export default function UploadPage() {
       >
         <Upload className="h-8 w-8 text-muted-foreground" />
         <p className="mt-2 text-sm text-muted-foreground">Drag and drop files, or</p>
-        <label className="mt-2 cursor-pointer rounded-md bg-primary px-4 py-2.5 sm:py-2 text-sm font-medium text-primary-foreground active:bg-primary/90">
+        <label className="mt-2 cursor-pointer rounded-lg bg-[#0071e3] px-4 py-2.5 sm:py-2 text-sm font-medium text-white active:opacity-90">
           Browse Files
           <input
             type="file"
@@ -187,7 +187,7 @@ export default function UploadPage() {
           <button
             type="button"
             onClick={() => setShowFolderPicker(true)}
-            className="mt-1 flex w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2.5 sm:py-2 text-sm text-left active:bg-muted"
+            className="mt-1 flex w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2.5 sm:py-2 text-sm text-left active:bg-black/[0.04] dark:active:bg-white/[0.06]"
           >
             <Folder className="h-4 w-4 text-warning shrink-0" />
             <span className={folderName || folderId ? 'text-foreground' : 'text-muted-foreground'}>
@@ -214,7 +214,7 @@ export default function UploadPage() {
                 <button
                   key={tag}
                   onMouseDown={() => selectTag(tag)}
-                  className="block w-full px-3 py-2.5 sm:py-1.5 text-left text-sm active:bg-muted"
+                  className="block w-full px-3 py-2.5 sm:py-1.5 text-left text-sm active:bg-black/[0.04] dark:active:bg-white/[0.06]"
                 >
                   {tag}
                 </button>
@@ -228,13 +228,13 @@ export default function UploadPage() {
         <button
           onClick={handleSubmit}
           disabled={queue.filter((q) => q.status === 'pending' || q.status === 'error').length === 0 || uploading}
-          className="flex-1 sm:flex-none rounded-md bg-primary px-4 py-2.5 sm:py-2 text-sm font-medium text-primary-foreground active:bg-primary/90 disabled:opacity-50"
+          className="flex-1 sm:flex-none rounded-lg bg-[#0071e3] px-4 py-2.5 sm:py-2 text-sm font-medium text-white active:opacity-90 disabled:opacity-50"
         >
           {uploading ? 'Uploading...' : `Upload ${queue.filter((q) => q.status === 'pending' || q.status === 'error').length} file(s)`}
         </button>
         <button
           onClick={() => router.back()}
-          className="rounded-md border px-4 py-2.5 sm:py-2 text-sm active:bg-muted"
+          className="rounded-lg bg-[#f5f5f7] text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-white px-4 py-2.5 sm:py-2 text-sm hover:bg-[#e8e8ed] dark:hover:bg-[#3a3a3c]"
         >
           Cancel
         </button>

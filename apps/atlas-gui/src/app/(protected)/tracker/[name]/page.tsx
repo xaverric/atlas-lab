@@ -185,14 +185,14 @@ function DataTab({ endpoint }: { endpoint: TrackerEndpoint }) {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="flex items-center gap-1 rounded-md bg-[#0071e3] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
         >
           <Plus className="h-4 w-4" /> Add Entry
         </button>
       </div>
 
       {showAddForm && (
-        <div className="rounded-lg border p-4 space-y-3">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4 space-y-3">
           <p className="text-sm font-medium">New Data Entry</p>
           <p className="text-xs text-muted-foreground">
             Schema fields: {schemaProperties.join(', ') || 'none'}
@@ -206,13 +206,13 @@ function DataTab({ endpoint }: { endpoint: TrackerEndpoint }) {
           <div className="flex gap-2">
             <button
               onClick={handleAddEntry}
-              className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              className="rounded-md bg-[#0071e3] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
             >
               Submit
             </button>
             <button
               onClick={() => setShowAddForm(false)}
-              className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+              className="rounded-md border px-3 py-1.5 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
             >
               Cancel
             </button>
@@ -220,7 +220,7 @@ function DataTab({ endpoint }: { endpoint: TrackerEndpoint }) {
         </div>
       )}
 
-      <div className="rounded-lg border">
+      <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e]">
         <table className="w-full">
           <thead>
             <tr className="border-b text-left text-sm text-muted-foreground">
@@ -233,7 +233,7 @@ function DataTab({ endpoint }: { endpoint: TrackerEndpoint }) {
           </thead>
           <tbody>
             {entries.map((entry) => (
-              <tr key={entry.id} className="border-b last:border-0 hover:bg-muted/50">
+              <tr key={entry.id} className="border-b last:border-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]/50">
                 {schemaProperties.map((prop) => (
                   <td key={prop} className="p-3 text-sm">
                     {formatCellValue(entry.data?.[prop])}
@@ -245,7 +245,7 @@ function DataTab({ endpoint }: { endpoint: TrackerEndpoint }) {
                 <td className="p-3">
                   <button
                     onClick={() => handleDelete(entry.id)}
-                    className="rounded p-1 hover:bg-muted text-muted-foreground hover:text-destructive"
+                    className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground hover:text-destructive"
                     title="Delete entry"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -412,7 +412,7 @@ function SettingsTab({
       <button
         onClick={handleSave}
         disabled={saving}
-        className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+        className="flex items-center gap-2 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
       >
         <Save className="h-4 w-4" />
         {saving ? 'Saving...' : 'Save Settings'}
@@ -465,21 +465,21 @@ function ApiInfoTab({ endpoint }: { endpoint: TrackerEndpoint }) {
         <div>
           <div className="flex items-center justify-between mb-1">
             <p className="text-sm font-medium">Submit Data</p>
-            <button onClick={() => copyToClipboard(curlSubmit)} className="rounded p-1 hover:bg-muted" title="Copy">
+            <button onClick={() => copyToClipboard(curlSubmit)} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]" title="Copy">
               <Copy className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
-          <pre className="rounded-lg border bg-muted p-4 text-sm font-mono overflow-auto whitespace-pre-wrap">{curlSubmit}</pre>
+          <pre className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] bg-muted p-4 text-sm font-mono overflow-auto whitespace-pre-wrap">{curlSubmit}</pre>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
             <p className="text-sm font-medium">Query Data</p>
-            <button onClick={() => copyToClipboard(curlQuery)} className="rounded p-1 hover:bg-muted" title="Copy">
+            <button onClick={() => copyToClipboard(curlQuery)} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]" title="Copy">
               <Copy className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
-          <pre className="rounded-lg border bg-muted p-4 text-sm font-mono overflow-auto whitespace-pre-wrap">{curlQuery}</pre>
+          <pre className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] bg-muted p-4 text-sm font-mono overflow-auto whitespace-pre-wrap">{curlQuery}</pre>
         </div>
       </section>
 
@@ -490,24 +490,24 @@ function ApiInfoTab({ endpoint }: { endpoint: TrackerEndpoint }) {
           <div>
             <div className="flex items-center justify-between mb-1">
               <p className="text-sm font-medium">Submit Data</p>
-              <button onClick={() => copyToClipboard(curlPublicSubmit)} className="rounded p-1 hover:bg-muted" title="Copy">
+              <button onClick={() => copyToClipboard(curlPublicSubmit)} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]" title="Copy">
                 <Copy className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
-            <pre className="rounded-lg border bg-muted p-4 text-sm font-mono overflow-auto whitespace-pre-wrap">{curlPublicSubmit}</pre>
+            <pre className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] bg-muted p-4 text-sm font-mono overflow-auto whitespace-pre-wrap">{curlPublicSubmit}</pre>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
               <p className="text-sm font-medium">Query Data</p>
-              <button onClick={() => copyToClipboard(curlPublicQuery)} className="rounded p-1 hover:bg-muted" title="Copy">
+              <button onClick={() => copyToClipboard(curlPublicQuery)} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]" title="Copy">
                 <Copy className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
-            <pre className="rounded-lg border bg-muted p-4 text-sm font-mono overflow-auto whitespace-pre-wrap">{curlPublicQuery}</pre>
+            <pre className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] bg-muted p-4 text-sm font-mono overflow-auto whitespace-pre-wrap">{curlPublicQuery}</pre>
           </div>
 
-          <div className="rounded-lg border p-4 bg-info/10">
+          <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4 bg-info/10">
             <p className="text-sm">
               Public page: <a href={`/public/tracker/${endpoint.name}`} target="_blank" rel="noopener noreferrer" className="text-primary underline">/public/tracker/{endpoint.name}</a>
             </p>
@@ -517,7 +517,7 @@ function ApiInfoTab({ endpoint }: { endpoint: TrackerEndpoint }) {
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Query Parameters</h2>
-        <div className="rounded-lg border">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left text-muted-foreground">
@@ -547,7 +547,7 @@ function ApiInfoTab({ endpoint }: { endpoint: TrackerEndpoint }) {
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Schema</h2>
-        <pre className="rounded-lg border bg-muted p-4 text-sm font-mono overflow-auto max-h-64">
+        <pre className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] bg-muted p-4 text-sm font-mono overflow-auto max-h-64">
           {JSON.stringify(endpoint.schema, null, 2)}
         </pre>
       </section>

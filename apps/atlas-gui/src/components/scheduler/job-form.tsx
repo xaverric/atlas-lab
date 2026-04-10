@@ -229,7 +229,7 @@ export function JobForm({ initialData, onSubmit, submitLabel, saving }: JobFormP
             <button
               type="button"
               onClick={() => set('enabled', !form.enabled)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.enabled ? 'bg-primary' : 'bg-muted'}`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.enabled ? 'bg-[#0071e3]' : 'bg-black/[0.12] dark:bg-white/[0.16]'}`}
             >
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
@@ -249,8 +249,8 @@ export function JobForm({ initialData, onSubmit, submitLabel, saving }: JobFormP
               key={type}
               type="button"
               onClick={() => set('executionType', type)}
-              className={`rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
-                form.executionType === type ? 'border-primary bg-primary/10 text-primary' : 'hover:bg-muted'
+              className={`rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                form.executionType === type ? 'bg-[#0071e3] text-white' : 'bg-[#f5f5f7] dark:bg-[#2c2c2e] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
               }`}
             >
               {label}
@@ -345,8 +345,8 @@ export function JobForm({ initialData, onSubmit, submitLabel, saving }: JobFormP
               key={type}
               type="button"
               onClick={() => set('scheduleType', type)}
-              className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                form.scheduleType === type ? 'border-primary bg-primary/10 text-primary' : 'hover:bg-muted'
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                form.scheduleType === type ? 'bg-[#0071e3] text-white' : 'bg-[#f5f5f7] dark:bg-[#2c2c2e] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
               }`}
             >
               {type === 'cron' ? 'Cron' : 'Run Once'}
@@ -378,7 +378,7 @@ export function JobForm({ initialData, onSubmit, submitLabel, saving }: JobFormP
                   key={ms}
                   type="button"
                   onClick={() => set('timeoutMs', ms)}
-                  className={`rounded border px-2 py-0.5 text-xs transition-colors ${form.timeoutMs === ms ? 'border-primary bg-primary/10 text-primary' : 'hover:bg-muted'}`}
+                  className={`rounded px-2 py-0.5 text-xs transition-colors ${form.timeoutMs === ms ? 'bg-[#0071e3] text-white' : 'bg-[#f5f5f7] dark:bg-[#2c2c2e] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'}`}
                 >
                   {ms >= 60000 ? `${ms / 60000}m` : `${ms / 1000}s`}
                 </button>
@@ -416,7 +416,7 @@ export function JobForm({ initialData, onSubmit, submitLabel, saving }: JobFormP
         </div>
         <div className="space-y-3">
           {form.notifications.map((n, i) => (
-            <div key={i} className="flex gap-2 items-start rounded-lg border p-3">
+            <div key={i} className="flex gap-2 items-start rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
               <div className="grid flex-1 gap-2 sm:grid-cols-3">
                 <select value={n.trigger} onChange={(e) => updateNotification(i, 'trigger', e.target.value)}
                   className="rounded-md border border-input bg-background px-3 py-1.5 text-sm">
@@ -437,7 +437,7 @@ export function JobForm({ initialData, onSubmit, submitLabel, saving }: JobFormP
                     placeholder="https://webhook.url" className="rounded-md border border-input bg-background px-3 py-1.5 text-sm" />
                 )}
               </div>
-              <button type="button" onClick={() => removeNotification(i)} className="rounded p-1 hover:bg-muted text-muted-foreground hover:text-destructive transition-colors">
+              <button type="button" onClick={() => removeNotification(i)} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground hover:text-[#ff3b30] transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -449,7 +449,7 @@ export function JobForm({ initialData, onSubmit, submitLabel, saving }: JobFormP
       </section>
 
       <button type="submit" disabled={saving}
-        className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors">
+        className="rounded-md bg-[#0071e3] px-6 py-2.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50 transition-opacity">
         {saving ? 'Saving...' : submitLabel}
       </button>
     </form>

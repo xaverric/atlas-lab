@@ -27,7 +27,7 @@ export function ShortcutsHelp() {
             <span className="text-sm text-muted-foreground">{s.description}</span>
             <div className="flex gap-1">
               {s.keys.map((key) => (
-                <kbd key={key} className="rounded-md border bg-muted px-2 py-1 text-xs font-mono font-medium">
+                <kbd key={key} className="rounded-md bg-[#f5f5f7] dark:bg-[#1c1c1e] px-2 py-1 text-xs font-mono font-medium">
                   {key}
                 </kbd>
               ))}

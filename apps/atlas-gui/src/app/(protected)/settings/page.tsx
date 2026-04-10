@@ -81,7 +81,7 @@ function GaugeCard({ label, pct, detail }: {
 }) {
   const level = getGaugeLevel(pct);
   return (
-    <div className="rounded-xl border bg-card p-5 shadow-sm space-y-3">
+    <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-5 shadow-sm space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium">{label}</span>
         <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${badgeColors[level]}`}>
@@ -183,7 +183,7 @@ export default function SettingsPage() {
           </button>
           <button
             onClick={() => { loadResources(); checkServices(); }}
-            className="rounded-md border p-1.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            className="rounded-md border p-1.5 text-muted-foreground hover:text-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
             title="Refresh now"
           >
             <RefreshCw className="h-4 w-4" />
@@ -192,9 +192,9 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile card */}
-      <div className="rounded-xl border bg-card p-6 shadow-sm">
+      <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-6 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground text-xl font-bold">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#0071e3] text-white text-xl font-bold">
             {initials}
           </div>
           <div>
@@ -227,7 +227,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Service Health */}
-      <div className="rounded-xl border bg-card shadow-sm">
+      <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] shadow-sm">
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <span className="text-sm font-medium">Service Health</span>
           <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
@@ -262,7 +262,7 @@ export default function SettingsPage() {
 
       {/* System Info + Storage */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/10 text-warning">
               <Server className="h-5 w-5" />
@@ -292,7 +292,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-card p-6 shadow-sm space-y-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10 text-success">
               <Database className="h-5 w-5" />

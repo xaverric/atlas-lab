@@ -79,23 +79,23 @@ export default function RunDetailPage() {
 
       {/* Overview */}
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Status</p>
           <StatusBadge status={run.status} />
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Started</p>
           <p className="text-sm font-medium">{new Date(run.startedAt).toLocaleString()}</p>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Finished</p>
           <p className="text-sm font-medium">{run.finishedAt ? new Date(run.finishedAt).toLocaleString() : '-'}</p>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Duration</p>
           <p className="font-medium">{run.duration != null ? formatDuration(run.duration) : '-'}</p>
         </div>
-        <div className="rounded-lg border p-4">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
           <p className="text-sm text-muted-foreground">Triggered By</p>
           <p className="font-medium">{run.triggeredBy} (attempt #{run.attempt})</p>
         </div>
@@ -117,14 +117,14 @@ export default function RunDetailPage() {
           <h2 className="text-lg font-semibold">Result</h2>
 
           {result.statusCode != null && (
-            <div className="rounded-lg border p-4">
+            <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
               <p className="text-sm text-muted-foreground mb-1">HTTP Status</p>
               <p className="font-mono font-medium">{result.statusCode}</p>
             </div>
           )}
 
           {result.exitCode != null && (
-            <div className="rounded-lg border p-4">
+            <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
               <p className="text-sm text-muted-foreground mb-1">Exit Code</p>
               <p className={`font-mono font-medium ${result.exitCode !== 0 ? 'text-destructive' : ''}`}>{result.exitCode}</p>
             </div>
@@ -164,7 +164,7 @@ export default function RunDetailPage() {
           {result.evaluationResults && result.evaluationResults.length > 0 && (
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">Evaluation Results</p>
-              <div className="rounded-lg border">
+              <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e]">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b text-left text-sm text-muted-foreground">

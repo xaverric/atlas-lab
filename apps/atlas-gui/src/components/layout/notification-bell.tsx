@@ -38,14 +38,14 @@ export function NotificationBell() {
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground animate-in zoom-in duration-200">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ff3b30] px-1 text-[10px] font-bold text-white animate-in zoom-in duration-200">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border bg-background shadow-lg z-50">
+        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl bg-white dark:bg-[#1c1c1e] shadow-[rgba(0,0,0,0.22)_3px_5px_30px_0px] z-50">
           <div className="flex items-center justify-between border-b px-3 py-2">
             <span className="text-sm font-semibold">Notifications</span>
             {unreadCount > 0 && (
@@ -70,10 +70,10 @@ export function NotificationBell() {
                     const url = n.data?.url;
                     if (url) { setOpen(false); window.location.href = url; }
                   }}
-                  className={`w-full text-left px-3 py-2.5 border-b last:border-0 hover:bg-muted/50 transition-colors ${!n.read ? 'bg-muted/30' : ''} ${n.data?.url ? 'cursor-pointer' : ''}`}
+                  className={`w-full text-left px-3 py-2.5 border-b last:border-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors ${!n.read ? 'bg-black/[0.02] dark:bg-white/[0.04]' : ''} ${n.data?.url ? 'cursor-pointer' : ''}`}
                 >
                   <div className="flex items-start gap-2">
-                    {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-info" />}
+                    {!n.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#0071e3]" />}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1">
                         <p className="truncate text-sm font-medium">{n.title || n.subject || n.event || 'Notification'}</p>

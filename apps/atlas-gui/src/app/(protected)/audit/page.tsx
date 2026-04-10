@@ -129,8 +129,8 @@ export default function AuditPage() {
           onClick={() => setAutoRefresh((v) => !v)}
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
             autoRefresh
-              ? 'bg-primary text-primary-foreground'
-              : 'border bg-background text-muted-foreground hover:bg-muted'
+              ? 'bg-[#0071e3] text-white'
+              : 'border bg-background text-muted-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
           }`}
         >
           <RefreshCw className={`h-3.5 w-3.5 ${autoRefresh ? 'animate-spin' : ''}`} />
@@ -191,22 +191,22 @@ export default function AuditPage() {
 
           <button
             onClick={applyFilters}
-            className="rounded-full bg-primary px-3.5 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="rounded-full bg-[#0071e3] px-3.5 py-1.5 text-xs font-medium text-white hover:opacity-90 transition-colors"
           >
             Apply
           </button>
           <button
             onClick={clearFilters}
-            className="rounded-full border px-3.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+            className="rounded-full border px-3.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
           >
             Clear
           </button>
         </div>
 
-        <div className="rounded-xl border bg-card overflow-hidden">
+        <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <tr className="border-b bg-[#f5f5f7]/60 dark:bg-[#2c2c2e]/60 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 <th className="w-8 px-4 py-3"></th>
                 <th className="px-4 py-3">Timestamp</th>
                 <th className="px-4 py-3">Service</th>
@@ -241,7 +241,7 @@ export default function AuditPage() {
           <button
             onClick={() => load(offset - LIMIT)}
             disabled={offset <= 0}
-            className="rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted disabled:opacity-50"
+            className="rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06] disabled:opacity-50"
           >
             Previous
           </button>
@@ -251,7 +251,7 @@ export default function AuditPage() {
           <button
             onClick={() => load(offset + LIMIT)}
             disabled={offset + LIMIT >= total}
-            className="rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-muted disabled:opacity-50"
+            className="rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06] disabled:opacity-50"
           >
             Next
           </button>
@@ -278,7 +278,7 @@ function EventRow({
     <>
       <tr
         onClick={onToggle}
-        className="border-b last:border-b-0 hover:bg-accent/50 transition-colors cursor-pointer"
+        className="border-b last:border-b-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
       >
         <td className="px-4 py-3">
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}

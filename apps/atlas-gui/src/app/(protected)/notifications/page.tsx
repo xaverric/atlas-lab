@@ -149,7 +149,7 @@ export default function NotificationsPage() {
       <PageHeader title="Notifications">
         <button
           onClick={handleMarkAllRead}
-          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
           title="Mark all read"
         >
           <CheckCheck className="h-4 w-4" />
@@ -158,7 +158,7 @@ export default function NotificationsPage() {
         <button
           onClick={sendTest}
           disabled={sendingTest}
-          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06] disabled:opacity-50"
           title="Send a test notification"
         >
           <Send className="h-4 w-4" />
@@ -166,7 +166,7 @@ export default function NotificationsPage() {
         </button>
         <Link
           href="/notifications/preferences"
-          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-muted"
+          className="flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
         >
           <Settings className="h-4 w-4" />
           Preferences
@@ -181,8 +181,8 @@ export default function NotificationsPage() {
               onClick={() => setFilter(opt.value)}
               className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
                 filter === opt.value
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  ? 'bg-[#0071e3] text-white'
+                  : 'bg-[#f5f5f7] dark:bg-[#2c2c2e] text-muted-foreground hover:bg-[#e8e8ed] dark:hover:bg-[#3a3a3c]'
               }`}
             >
               {opt.label}
@@ -194,7 +194,7 @@ export default function NotificationsPage() {
           {notifications.map((n) => (
             <div
               key={n.id}
-              className={`group flex items-start gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-accent/50 ${
+              className={`group flex items-start gap-3 rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06] ${
                 !n.read ? 'border-l-[3px] border-l-primary' : ''
               }`}
             >
@@ -234,7 +234,7 @@ export default function NotificationsPage() {
               {!n.read && (
                 <button
                   onClick={() => handleMarkRead(n.id)}
-                  className="flex-shrink-0 rounded p-1 opacity-0 transition-opacity hover:bg-muted group-hover:opacity-100"
+                  className="flex-shrink-0 rounded p-1 opacity-0 transition-opacity hover:bg-black/[0.04] dark:hover:bg-white/[0.06] group-hover:opacity-100"
                   title="Mark read"
                 >
                   <Check className="h-4 w-4 text-muted-foreground" />

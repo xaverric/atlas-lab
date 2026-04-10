@@ -120,7 +120,7 @@ export default function PublicNotesFolderPage() {
               <Link
                 key={sf.id}
                 href={`/public/notes/folders/${sf.id}`}
-                className="flex items-center gap-3 rounded-lg border border-border bg-card p-3 hover:bg-accent dark:border-border dark:bg-card"
+                className="flex items-center gap-3 rounded-lg bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]  dark:bg-[#1c1c1e]"
               >
                 <Folder className="h-5 w-5 text-warning shrink-0" />
                 <span className="text-sm font-medium text-foreground truncate">{sf.name}</span>
@@ -143,7 +143,7 @@ export default function PublicNotesFolderPage() {
                 <Link
                   key={note.id}
                   href={`/public/notes/${note.id}`}
-                  className="block rounded-lg border border-border bg-card p-4 hover:bg-accent dark:border-border dark:bg-card"
+                  className="block rounded-lg bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]  dark:bg-[#1c1c1e]"
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <FileText className="h-4 w-4 text-muted-foreground shrink-0" />

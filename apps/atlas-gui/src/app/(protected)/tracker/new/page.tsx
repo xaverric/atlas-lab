@@ -195,7 +195,7 @@ export default function CreateEndpointPage() {
         <button
           type="submit"
           disabled={submitting || !name || !displayName}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
         >
           {submitting ? 'Creating...' : 'Create Endpoint'}
         </button>

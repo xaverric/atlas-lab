@@ -445,8 +445,8 @@ export default function FilesPage() {
             <input value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleCreateFolder(); if (e.key === 'Escape') setShowNewFolder(false); }}
               placeholder="Folder name" autoFocus className="rounded-md border bg-background px-3 py-1.5 text-sm" />
-            <button onClick={handleCreateFolder} className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground">Create</button>
-            <button onClick={() => setShowNewFolder(false)} className="rounded-md border px-3 py-1.5 text-sm">Cancel</button>
+            <button onClick={handleCreateFolder} className="rounded-md bg-[#0071e3] px-3 py-1.5 text-sm text-white hover:opacity-90">Create</button>
+            <button onClick={() => setShowNewFolder(false)} className="rounded-md bg-[#f5f5f7] text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-white px-3 py-1.5 text-sm hover:bg-[#e8e8ed] dark:hover:bg-[#3a3a3c]">Cancel</button>
           </div>
         )}
 
@@ -462,10 +462,10 @@ export default function FilesPage() {
 
         {/* Unified table: folders + files */}
         {hasContent ? (
-          <div className="overflow-x-auto rounded-xl border bg-card overflow-hidden">
+          <div className="overflow-x-auto rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/50 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b bg-[#f5f5f7]/60 dark:bg-[#2c2c2e]/60 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   <th className="px-4 py-3 w-10">
                     <input type="checkbox" checked={docs.length > 0 && docs.every((d) => selectedIds.has(d.id))} onChange={handleSelectAll} className="rounded border-input" />
                   </th>
@@ -492,7 +492,7 @@ export default function FilesPage() {
                   return (
                     <tr
                       key={`folder-${folder.id}`}
-                      className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
+                      className="group border-b last:border-b-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] cursor-pointer transition-colors"
                       onClick={() => navigateToFolder(folder.id)}
                       onContextMenu={(e) => openFolderMenu(e, folder)}
                     >
@@ -514,7 +514,7 @@ export default function FilesPage() {
                             onClick={() => !folder.publicInherited && handleToggleFolderPublic(folder.id, !isFolderPublic)}
                             className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors ${
                               folder.publicInherited ? 'text-amber-500 cursor-default' :
-                              isFolderPublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-muted'
+                              isFolderPublic ? 'text-info hover:bg-info/10' : 'text-muted-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
                             }`}
                             title={folder.publicInherited ? 'Public (inherited from parent)' : isFolderPublic ? 'Make private' : 'Make public'}
                           >
@@ -533,7 +533,7 @@ export default function FilesPage() {
                                 <option value="edit">edit</option>
                                 <option value="full">full</option>
                               </select>
-                              <button onClick={() => copyFolderLink(folder.id)} className="rounded p-0.5 hover:bg-accent text-muted-foreground" title="Copy public link">
+                              <button onClick={() => copyFolderLink(folder.id)} className="rounded p-0.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground" title="Copy public link">
                                 <LinkIcon className="h-3 w-3" />
                               </button>
                             </>
@@ -542,7 +542,7 @@ export default function FilesPage() {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">-</td>
                       <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => setInfoModal({ type: 'folder', id: folder.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
+                        <button onClick={() => setInfoModal({ type: 'folder', id: folder.id })} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground hover:text-foreground" title="Info">
                           <Info className="h-3.5 w-3.5" />
                         </button>
                       </td>
@@ -554,7 +554,7 @@ export default function FilesPage() {
                 {docs.map((doc) => (
                   <tr
                     key={`doc-${doc.id}`}
-                    className="group border-b last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
+                    className="group border-b last:border-b-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] cursor-pointer transition-colors"
                     onClick={() => {
                       setDetailDocId(doc.id);
                       const params = new URLSearchParams(searchParams.toString());
@@ -586,7 +586,7 @@ export default function FilesPage() {
                     <td className="px-4 py-3 text-muted-foreground text-[10px]">inherited</td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDate(doc.createdAt)}</td>
                     <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                      <button onClick={() => setInfoModal({ type: 'document', id: doc.id })} className="rounded p-1 hover:bg-accent text-muted-foreground hover:text-foreground" title="Info">
+                      <button onClick={() => setInfoModal({ type: 'document', id: doc.id })} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground hover:text-foreground" title="Info">
                         <Info className="h-3.5 w-3.5" />
                       </button>
                     </td>

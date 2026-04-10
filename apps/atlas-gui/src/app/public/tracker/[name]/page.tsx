@@ -103,10 +103,10 @@ export default function PublicTrackerPage() {
           </p>
         </header>
 
-        <div className="overflow-hidden rounded-lg border border-border bg-card">
+        <div className="overflow-hidden rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e]">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border text-left text-sm text-muted-foreground">
+              <tr className="border-b text-left text-sm text-muted-foreground">
                 {schemaProperties.map((prop) => (
                   <th key={prop} className="p-3 font-medium">{prop}</th>
                 ))}
@@ -117,7 +117,7 @@ export default function PublicTrackerPage() {
               {entries.map((entry) => (
                 <tr
                   key={entry.id}
-                  className="border-b border-border last:border-0 hover:bg-accent"
+                  className="border-b last:border-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                 >
                   {schemaProperties.map((prop) => (
                     <td key={prop} className="p-3 text-sm text-foreground">
@@ -148,7 +148,7 @@ export default function PublicTrackerPage() {
             <button
               onClick={() => loadData(offset - limit)}
               disabled={offset <= 0}
-              className="rounded border border-border bg-background px-3 py-1 text-sm text-foreground disabled:opacity-50"
+              className="rounded bg-[#f5f5f7] text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-white px-3 py-1 text-sm text-foreground disabled:opacity-50"
             >
               Previous
             </button>
@@ -158,7 +158,7 @@ export default function PublicTrackerPage() {
             <button
               onClick={() => loadData(offset + limit)}
               disabled={offset + limit >= total}
-              className="rounded border border-border bg-background px-3 py-1 text-sm text-foreground disabled:opacity-50"
+              className="rounded bg-[#f5f5f7] text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-white px-3 py-1 text-sm text-foreground disabled:opacity-50"
             >
               Next
             </button>

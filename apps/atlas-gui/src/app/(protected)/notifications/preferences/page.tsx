@@ -155,7 +155,7 @@ export default function NotificationPreferencesPage() {
         <h2 className="text-lg font-semibold">Delivery Channels</h2>
 
         {channels.map((ch) => (
-          <div key={ch.id} className="flex items-center justify-between rounded-lg border p-3">
+          <div key={ch.id} className="flex items-center justify-between rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2">
                 <input type="checkbox" checked={ch.enabled} onChange={(e) => toggleChannel(ch.id, e.target.checked)} className="rounded" />
@@ -194,14 +194,14 @@ export default function NotificationPreferencesPage() {
               className="flex-1 rounded-md border bg-background px-3 py-1.5 text-sm"
             />
           )}
-          <button onClick={addChannel} className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+          <button onClick={addChannel} className="flex items-center gap-1 rounded-md bg-[#0071e3] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">
             <Plus className="h-4 w-4" /> Add
           </button>
         </div>
 
         {/* Web Push */}
         {pushSupported && (
-          <div className="rounded-lg border p-4">
+          <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-medium">Browser Push Notifications</h3>
@@ -211,7 +211,7 @@ export default function NotificationPreferencesPage() {
                 </p>
               </div>
               {!pushEnabled && pushPermission !== 'denied' && (
-                <button onClick={enablePush} className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                <button onClick={enablePush} className="rounded-md bg-[#0071e3] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">
                   Enable
                 </button>
               )}
@@ -226,7 +226,7 @@ export default function NotificationPreferencesPage() {
         <p className="text-sm text-muted-foreground">Define which events get delivered to which channels. Use glob patterns like <code>scheduler.job.*</code> or <code>*</code> for all events.</p>
 
         {rules.map((rule) => (
-          <div key={rule.id} className="flex items-center justify-between rounded-lg border p-3">
+          <div key={rule.id} className="flex items-center justify-between rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
             <div className="flex items-center gap-3">
               <input type="checkbox" checked={rule.enabled} onChange={(e) => toggleRule(rule.id, e.target.checked)} className="rounded" />
               <div>
@@ -244,7 +244,7 @@ export default function NotificationPreferencesPage() {
           </div>
         ))}
 
-        <div className="space-y-2 rounded-lg border p-3">
+        <div className="space-y-2 rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3">
           <div className="flex gap-2">
             <input
               value={newPattern}
@@ -270,7 +270,7 @@ export default function NotificationPreferencesPage() {
               </label>
             ))}
           </div>
-          <button onClick={addRule} className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+          <button onClick={addRule} className="flex items-center gap-1 rounded-md bg-[#0071e3] px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">
             <Plus className="h-4 w-4" /> Add Rule
           </button>
         </div>
@@ -291,7 +291,7 @@ function VerifyInput({ onVerify }: { onVerify: (code: string) => void }) {
         placeholder="Code"
         className="w-20 rounded-md border bg-background px-2 py-1 text-xs"
       />
-      <button onClick={() => onVerify(code)} className="rounded bg-primary px-2 py-1 text-xs text-primary-foreground">
+      <button onClick={() => onVerify(code)} className="rounded bg-[#0071e3] px-2 py-1 text-xs text-white">
         Verify
       </button>
     </div>

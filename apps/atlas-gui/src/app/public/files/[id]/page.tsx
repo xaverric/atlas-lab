@@ -259,11 +259,11 @@ export default function PublicFilesPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowNewFolder(true)}
-            className="flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm hover:bg-accent dark:border-border"
+            className="flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm hover:bg-black/[0.04] dark:hover:bg-white/[0.06] "
           >
             <FolderPlus className="h-4 w-4" /> New Folder
           </button>
-          <label className="flex cursor-pointer items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+          <label className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#0071e3] px-3 py-2 text-sm font-medium text-white hover:opacity-90">
             <Upload className="h-4 w-4" /> Upload
             <input
               type="file"
@@ -286,10 +286,10 @@ export default function PublicFilesPage() {
             }}
             placeholder="Folder name"
             autoFocus
-            className="rounded-md border border-border bg-card px-3 py-1.5 text-sm dark:border-border dark:bg-card"
+            className="rounded-md bg-[#f5f5f7] dark:bg-[#1c1c1e] px-3 py-1.5 text-sm  dark:bg-[#1c1c1e]"
           />
-          <button onClick={handleCreateFolder} className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground">Create</button>
-          <button onClick={() => setShowNewFolder(false)} className="rounded-md border border-border px-3 py-1.5 text-sm dark:border-border">Cancel</button>
+          <button onClick={handleCreateFolder} className="rounded-md bg-[#0071e3] px-3 py-1.5 text-sm text-white hover:opacity-90">Create</button>
+          <button onClick={() => setShowNewFolder(false)} className="rounded-md border px-3 py-1.5 text-sm ">Cancel</button>
         </div>
       )}
 
@@ -298,7 +298,7 @@ export default function PublicFilesPage() {
           <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Folders</h2>
           <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {subfolders.map((sf) => (
-              <div key={sf.id} className="group flex items-center gap-3 rounded-lg border border-border bg-card p-3 hover:bg-accent dark:border-border dark:bg-card hover:bg-accent">
+              <div key={sf.id} className="group flex items-center gap-3 rounded-lg bg-[#f5f5f7] dark:bg-[#1c1c1e] p-3 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]  dark:bg-[#1c1c1e] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
                 {renamingFolder?.id === sf.id ? (
                   <div className="flex flex-1 items-center gap-2">
                     <Folder className="h-5 w-5 text-warning shrink-0" />
@@ -311,7 +311,7 @@ export default function PublicFilesPage() {
                         if (e.key === 'Escape') setRenamingFolder(null);
                       }}
                       autoFocus
-                      className="rounded border border-border px-2 py-0.5 text-sm dark:border-border dark:bg-card"
+                      className="rounded border px-2 py-0.5 text-sm  dark:bg-[#1c1c1e]"
                     />
                   </div>
                 ) : (
@@ -347,10 +347,10 @@ export default function PublicFilesPage() {
       {documents.length > 0 && (
         <div>
           <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Files</h2>
-          <div className="overflow-hidden rounded-lg border border-border bg-card dark:border-border dark:bg-card">
+          <div className="overflow-hidden rounded-lg bg-[#f5f5f7] dark:bg-[#1c1c1e]  dark:bg-[#1c1c1e]">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border text-left text-sm text-muted-foreground dark:border-border dark:text-muted-foreground">
+                <tr className="border-b text-left text-sm text-muted-foreground  dark:text-muted-foreground">
                   <th className="p-3 font-medium">Name</th>
                   <th className="p-3 font-medium hidden sm:table-cell">Type</th>
                   <th className="p-3 font-medium hidden sm:table-cell">Size</th>
@@ -362,7 +362,7 @@ export default function PublicFilesPage() {
                 {documents.map((doc) => (
                   <tr
                     key={doc.id}
-                    className="border-b border-border last:border-0 hover:bg-accent dark:border-border dark:hover:bg-accent"
+                    className="border-b last:border-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]  dark:hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
                   >
                     <td className="p-3">
                       {renamingDoc?.id === doc.id ? (
@@ -377,7 +377,7 @@ export default function PublicFilesPage() {
                               if (e.key === 'Escape') setRenamingDoc(null);
                             }}
                             autoFocus
-                            className="rounded border border-border px-2 py-0.5 text-sm dark:border-border dark:bg-card"
+                            className="rounded border px-2 py-0.5 text-sm  dark:bg-[#1c1c1e]"
                           />
                         </div>
                       ) : (
@@ -447,20 +447,20 @@ export default function PublicFilesPage() {
       {previewDoc && previewUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => { setPreviewDoc(null); setPreviewUrl(null); }}>
           <div
-            className="relative flex max-h-[90vh] w-full max-w-4xl flex-col rounded-lg bg-card shadow-xl dark:bg-card mx-4"
+            className="relative flex max-h-[90vh] w-full max-w-4xl flex-col rounded-lg bg-card shadow-xl dark:bg-[#1c1c1e] mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-border px-4 py-3 dark:border-border">
+            <div className="flex items-center justify-between border-b px-4 py-3 ">
               <div className="flex items-center gap-2 min-w-0">
                 <FileIcon mimeType={previewDoc.mimeType} className="shrink-0" />
                 <span className="font-medium truncate text-foreground">{previewDoc.name}</span>
                 <span className="text-sm text-muted-foreground shrink-0">({formatSize(previewDoc.size)})</span>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <button onClick={() => handleDownload(previewDoc)} className="rounded p-2 hover:bg-accent">
+                <button onClick={() => handleDownload(previewDoc)} className="rounded p-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
                   <Download className="h-4 w-4" />
                 </button>
-                <button onClick={() => { setPreviewDoc(null); setPreviewUrl(null); }} className="rounded p-2 hover:bg-accent">
+                <button onClick={() => { setPreviewDoc(null); setPreviewUrl(null); }} className="rounded p-2 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">
                   <X className="h-4 w-4" />
                 </button>
               </div>

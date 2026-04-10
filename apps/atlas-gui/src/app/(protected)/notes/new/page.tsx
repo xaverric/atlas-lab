@@ -91,7 +91,7 @@ export default function NewNotePage() {
               type="button"
               onClick={() => setIsPublic(!isPublic)}
               className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium cursor-pointer transition-colors ${
-                isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-muted text-muted-foreground hover:bg-accent'
+                isPublic ? 'bg-success/10 text-success hover:bg-success/20' : 'bg-muted text-muted-foreground hover:bg-black/[0.04] dark:hover:bg-white/[0.06]'
               }`}
             >
               {isPublic ? <Globe className="h-3 w-3" /> : <Lock className="h-3 w-3" />}
@@ -107,14 +107,14 @@ export default function NewNotePage() {
         <div className="mx-auto flex max-w-4xl justify-end gap-2">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm hover:bg-accent"
+            className="flex items-center gap-1.5 rounded-lg bg-[#f5f5f7] text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-white px-4 py-2 text-sm hover:bg-[#e8e8ed] dark:hover:bg-[#3a3a3c]"
           >
             <X className="h-4 w-4" /> Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className="rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Create Note'}
           </button>

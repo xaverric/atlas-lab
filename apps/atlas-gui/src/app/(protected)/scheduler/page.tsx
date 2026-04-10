@@ -226,8 +226,8 @@ export default function SchedulerListPage() {
             onClick={() => setSelectedGroups(new Set())}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               !isFiltering
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-muted-foreground hover:text-foreground'
+                ? 'bg-[#0071e3] text-white'
+                : 'bg-[#f5f5f7] dark:bg-[#2c2c2e] text-muted-foreground hover:text-foreground'
             }`}
           >
             All
@@ -252,10 +252,10 @@ export default function SchedulerListPage() {
       )}
 
       {/* Table */}
-      <div className="rounded-xl border bg-card overflow-hidden">
+      <div className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <tr className="border-b bg-[#f5f5f7]/60 dark:bg-[#2c2c2e]/60 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Type</th>
               <th className="px-4 py-3">Schedule</th>
@@ -273,7 +273,7 @@ export default function SchedulerListPage() {
                 <Fragment key={group}>
                   {allGroups.length > 1 && (
                     <tr
-                      className={`cursor-pointer hover:bg-muted/50 ${groupBgColor(group)}`}
+                      className={`cursor-pointer hover:bg-black/[0.04] dark:hover:bg-white/[0.06] ${groupBgColor(group)}`}
                       onClick={() => toggleGroup(group)}
                     >
                       <td colSpan={7} className={`p-2 px-3 border-l-4 ${groupBorderColor(group)}`}>
@@ -290,7 +290,7 @@ export default function SchedulerListPage() {
                     </tr>
                   )}
                   {!isCollapsed && groupJobs.map((job) => (
-                    <tr key={job.id} className={`border-b last:border-b-0 hover:bg-accent/50 transition-colors ${allGroups.length > 1 ? `border-l-4 ${groupBorderColor(group)}` : ''}`}>
+                    <tr key={job.id} className={`border-b last:border-b-0 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors ${allGroups.length > 1 ? `border-l-4 ${groupBorderColor(group)}` : ''}`}>
                       <td className="px-4 py-3">
                         <Link href={`/scheduler/jobs/${job.id}`} className="hover:underline font-medium">
                           {job.name}
@@ -334,10 +334,10 @@ export default function SchedulerListPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1">
-                          <button onClick={() => handleRun(job.id)} className="rounded p-1 hover:bg-muted" title="Run now">
+                          <button onClick={() => handleRun(job.id)} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06]" title="Run now">
                             <Play className="h-4 w-4" />
                           </button>
-                          <button onClick={() => handleDelete(job.id)} className="rounded p-1 hover:bg-muted text-muted-foreground hover:text-destructive" title="Delete">
+                          <button onClick={() => handleDelete(job.id)} className="rounded p-1 hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-muted-foreground hover:text-destructive" title="Delete">
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>

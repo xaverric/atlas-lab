@@ -134,7 +134,7 @@ export default function DashboardPage() {
       <PageHeader title="Dashboard">
         <button
           onClick={() => setDialogOpen(true)}
-          className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="flex items-center gap-2 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
           Add Widget
@@ -149,7 +149,7 @@ export default function DashboardPage() {
             { label: 'Notes', value: stats.notes, icon: StickyNote },
             { label: 'Unread Notifications', value: unreadCount, icon: Bell },
           ].map((card) => (
-            <div key={card.label} className="rounded-xl border bg-card p-5">
+            <div key={card.label} className="rounded-xl bg-[#f5f5f7] dark:bg-[#1c1c1e] p-5">
               <div className="flex items-center justify-between">
                 <p className="text-xs text-muted-foreground">{card.label}</p>
                 <card.icon className="h-4 w-4 text-muted-foreground" />
@@ -179,11 +179,11 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
+          <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-12 text-center">
             <p className="text-muted-foreground mb-3">No widgets yet. Add your first widget.</p>
             <button
               onClick={() => setDialogOpen(true)}
-              className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              className="flex items-center gap-2 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
             >
               <Plus className="h-4 w-4" />
               Add Widget
