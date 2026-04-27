@@ -40,7 +40,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Trivy — vulnerability table
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ inputs.image }}
           format: table
@@ -50,7 +50,7 @@ jobs:
           trivyignores: .trivyignore
 
       - name: Trivy — SARIF
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ inputs.image }}
           format: sarif
@@ -67,14 +67,14 @@ jobs:
           category: trivy-${{ inputs.service_name }}
 
       - name: Trivy — SBOM (CycloneDX)
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ inputs.image }}
           format: cyclonedx
           output: sbom.json
 
       - name: Trivy — JSON
-        uses: aquasecurity/trivy-action@v0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         continue-on-error: true
         with:
           image-ref: ${{ inputs.image }}
