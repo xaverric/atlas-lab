@@ -41,22 +41,22 @@
     "@stryker-mutator/typescript-checker": "^9.6.1",
     "@stryker-mutator/vitest-runner": "^9.6.1",
     "@types/supertest": "^7.2.0",
-    "@vitest/coverage-v8": "^4.1.2",
-    "eslint": "^10.2.1",
+    "@vitest/coverage-v8": "^4.1.6",
+    "eslint": "^10.3.0",
     "eslint-plugin-security": "^4.0.0",
     "husky": "^9.1.7",
-    "jscpd": "^4.0.9",
+    "jscpd": "^4.1.0",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "supertest": "^7.2.2",
-    "typescript-eslint": "^8.58.2",
+    "typescript-eslint": "^8.59.3",
     "vitest": "^4.1.0"
   },
   "overrides": {
     "picomatch@>=4.0.0": ">=4.0.4"
   },
   "dependencies": {
-    "express-rate-limit": "^8.3.2"
+    "express-rate-limit": "^8.5.1"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs}": [
