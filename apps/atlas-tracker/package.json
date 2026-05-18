@@ -13,11 +13,11 @@
   "dependencies": {
     "@atlas/core": "*",
     "@atlas/server-common": "*",
-    "ajv": "^8.17.0",
+    "ajv": "^8.20.0",
     "ajv-formats": "^3.0.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "express-rate-limit": "^8.3.2",
+    "express-rate-limit": "^8.5.2",
     "helmet": "^8.0.0",
     "mongoose": "^8.9.0",
     "zod": "^3.24.0"
@@ -26,7 +26,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.0.0",
-    "tsx": "^4.19.0",
+    "tsx": "^4.22.1",
     "typescript": "~6.0.3"
   }
 }
