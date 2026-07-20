@@ -40,7 +40,7 @@
     "@stryker-mutator/core": "^9.6.1",
     "@stryker-mutator/typescript-checker": "^9.6.1",
     "@stryker-mutator/vitest-runner": "^9.6.1",
-    "@types/supertest": "^7.2.0",
+    "@types/supertest": "^7.2.1",
     "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^10.7.0",
     "eslint-plugin-security": "^4.0.1",
@@ -49,14 +49,14 @@
     "lint-staged": "^16.4.0",
     "prettier": "^3.9.5",
     "supertest": "^7.2.2",
-    "typescript-eslint": "^8.63.0",
+    "typescript-eslint": "^8.64.0",
     "vitest": "^4.1.0"
   },
   "overrides": {
     "picomatch@>=4.0.0": ">=4.0.4"
   },
   "dependencies": {
-    "express-rate-limit": "^8.5.2"
+    "express-rate-limit": "^8.6.0"
   },
   "lint-staged": {
     "*.{ts,tsx,js,mjs}": [
