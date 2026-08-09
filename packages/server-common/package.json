@@ -14,7 +14,7 @@
   "dependencies": {
     "@atlas/core": "*",
     "jose": "^6.2.3",
-    "mongoose": "^8.24.2",
+    "mongoose": "^9.8.1",
     "pino": "^9.0.0",
     "pino-pretty": "^13.0.0",
     "zod": "^3.24.0"
